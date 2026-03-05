@@ -1,27 +1,31 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { COLORS } from '../constants/colors';
+import { useTheme } from '../theme';
+import { ThemeColors } from '../constants/colors';
 
 interface Props {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
 }
 
-export const Card: React.FC<Props> = ({ children, style }) => (
-  <View style={[styles.card, style]}>{children}</View>
-);
+export const Card: React.FC<Props> = ({ children, style }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  return <View style={[styles.card, style]}>{children}</View>;
+};
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 16,
+      marginHorizontal: 16,
+      marginVertical: 6,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+  });

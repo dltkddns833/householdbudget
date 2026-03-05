@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   Dimensions,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { COLORS } from '../../../shared/constants/colors';
+import { useTheme } from '../../../shared/theme';
+import { ThemeColors } from '../../../shared/constants/colors';
 import { Card, CurrencyText, MonthSelector } from '../../../shared/components';
 import { useCurrentOverview, useOverviewRange } from '../hooks/useOverview';
 import { useTransactions } from '../../transactions/hooks/useTransactions';
 import { useUIStore } from '../../../store/uiStore';
-import { formatCurrencyShort } from '../../../shared/utils/currency';
 import { formatYearMonth } from '../../../shared/utils/date';
 
 const screenWidth = Dimensions.get('window').width;
@@ -25,16 +25,25 @@ export const HomeScreen: React.FC = () => {
   const { summary } = useTransactions(currentMonth);
   const overview = overviewQuery.data;
   const overviewRange = rangeQuery.data || [];
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const validRange = overviewRange.filter((o) => typeof o.realAsset === 'number' && !isNaN(o.realAsset));
-  const chartData = validRange.length > 1 ? {
-    labels: validRange.map((o) => o.id.split('-')[1] + '월'),
-    datasets: [{
-      data: validRange.map((o) => (o.realAsset || 0) / 10000),
-      color: () => COLORS.primary,
-      strokeWidth: 2,
-    }],
-  } : null;
+  const validRange = overviewRange.filter(
+    o => typeof o.realAsset === 'number' && !isNaN(o.realAsset),
+  );
+  const chartData =
+    validRange.length > 1
+      ? {
+          labels: validRange.map(o => o.id.split('-')[1] + '월'),
+          datasets: [
+            {
+              data: validRange.map(o => (o.realAsset || 0) / 10000),
+              color: () => colors.primary,
+              strokeWidth: 2,
+            },
+          ],
+        }
+      : null;
 
   return (
     <ScrollView
@@ -42,7 +51,10 @@ export const HomeScreen: React.FC = () => {
       refreshControl={
         <RefreshControl
           refreshing={overviewQuery.isFetching}
-          onRefresh={() => { overviewQuery.refetch(); rangeQuery.refetch(); }}
+          onRefresh={() => {
+            overviewQuery.refetch();
+            rangeQuery.refetch();
+          }}
         />
       }
     >
@@ -71,11 +83,19 @@ export const HomeScreen: React.FC = () => {
               style={styles.changeAmount}
             />
             {overview.realAssetChangeRate != null && (
-              <Text style={[
-                styles.changeRate,
-                { color: overview.realAssetChangeRate >= 0 ? COLORS.income : COLORS.expense },
-              ]}>
-                {(overview.realAssetChangeRate || 0) >= 0 ? '+' : ''}{(overview.realAssetChangeRate || 0).toFixed(2)}%
+              <Text
+                style={[
+                  styles.changeRate,
+                  {
+                    color:
+                      overview.realAssetChangeRate >= 0
+                        ? colors.income
+                        : colors.expense,
+                  },
+                ]}
+              >
+                {(overview.realAssetChangeRate || 0) >= 0 ? '+' : ''}
+                {(overview.realAssetChangeRate || 0).toFixed(2)}%
               </Text>
             )}
           </View>
@@ -88,9 +108,24 @@ export const HomeScreen: React.FC = () => {
           <Text style={styles.metricLabel}>이번달 소비</Text>
           <CurrencyText
             amount={summary?.totalExpense ?? overview?.totalExpense ?? 0}
-            short
             style={styles.metricValue}
           />
+          {overview?.expenseChange != null && (
+            <Text
+              style={[
+                styles.expenseCaption,
+                {
+                  color:
+                    overview.expenseChange >= 0
+                      ? colors.income
+                      : colors.expense,
+                },
+              ]}
+            >
+              전월대비 {overview.expenseChange >= 0 ? '+' : ''}
+              {overview.expenseChange.toFixed(1)}%
+            </Text>
+          )}
         </Card>
         <Card style={styles.metricCard}>
           <Text style={styles.metricLabel}>은퇴자금</Text>
@@ -111,20 +146,20 @@ export const HomeScreen: React.FC = () => {
             width={screenWidth - 64}
             height={200}
             chartConfig={{
-              backgroundColor: COLORS.surface,
-              backgroundGradientFrom: COLORS.surface,
-              backgroundGradientTo: COLORS.surface,
+              backgroundColor: colors.surface,
+              backgroundGradientFrom: colors.surface,
+              backgroundGradientTo: colors.surface,
               decimalPlaces: 0,
               color: (opacity = 1) => `rgba(79, 70, 229, ${opacity})`,
-              labelColor: () => COLORS.textTertiary,
+              labelColor: () => colors.textTertiary,
               propsForDots: {
                 r: '4',
                 strokeWidth: '2',
-                stroke: COLORS.primary,
+                stroke: colors.primary,
               },
               propsForBackgroundLines: {
                 strokeDasharray: '5,5',
-                stroke: COLORS.borderLight,
+                stroke: colors.borderLight,
               },
             }}
             bezier
@@ -136,23 +171,30 @@ export const HomeScreen: React.FC = () => {
       {/* Monthly Overview List */}
       <Card style={styles.overviewListCard}>
         <Text style={styles.chartTitle}>월별 현황</Text>
-        {validRange.slice().reverse().map((o) => (
-          <View key={o.id} style={styles.overviewRow}>
-            <Text style={styles.overviewMonth}>{formatYearMonth(o.id)}</Text>
-            <View style={styles.overviewValues}>
-              <CurrencyText amount={o.realAsset} short style={styles.overviewAsset} />
-              {o.realAssetChange != null && (
+        {validRange
+          .slice()
+          .reverse()
+          .map(o => (
+            <View key={o.id} style={styles.overviewRow}>
+              <Text style={styles.overviewMonth}>{formatYearMonth(o.id)}</Text>
+              <View style={styles.overviewValues}>
                 <CurrencyText
-                  amount={o.realAssetChange}
+                  amount={o.realAsset}
                   short
-                  showSign
-                  colorize
-                  style={styles.overviewChange}
+                  style={styles.overviewAsset}
                 />
-              )}
+                {o.realAssetChange != null && (
+                  <CurrencyText
+                    amount={o.realAssetChange}
+                    short
+                    showSign
+                    colorize
+                    style={styles.overviewChange}
+                  />
+                )}
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
       </Card>
 
       <View style={{ height: 100 }} />
@@ -160,115 +202,119 @@ export const HomeScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 56,
-    paddingBottom: 4,
-    backgroundColor: COLORS.surface,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: COLORS.text,
-  },
-  heroCard: {
-    backgroundColor: COLORS.primary,
-    marginTop: 4,
-  },
-  heroLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.7)',
-  },
-  heroAmount: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: COLORS.white,
-    marginTop: 4,
-  },
-  changeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    gap: 8,
-  },
-  changeAmount: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.white,
-  },
-  changeRate: {
-    fontSize: 14,
-    fontWeight: '700',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    overflow: 'hidden',
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    gap: 0,
-  },
-  metricCard: {
-    flex: 1,
-    marginHorizontal: 6,
-  },
-  metricLabel: {
-    fontSize: 13,
-    color: COLORS.textTertiary,
-    marginBottom: 4,
-  },
-  metricValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  chartCard: {
-    marginTop: 4,
-  },
-  chartTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 12,
-  },
-  chart: {
-    borderRadius: 12,
-    marginLeft: -8,
-  },
-  overviewListCard: {
-    marginTop: 4,
-  },
-  overviewRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
-  },
-  overviewMonth: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  overviewValues: {
-    alignItems: 'flex-end',
-  },
-  overviewAsset: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  overviewChange: {
-    fontSize: 13,
-    marginTop: 2,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 56,
+      paddingBottom: 16,
+      backgroundColor: colors.surface,
+    },
+    headerTitle: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: colors.text,
+    },
+    heroCard: {
+      backgroundColor: colors.surface,
+      marginTop: 4,
+    },
+    heroLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textTertiary,
+    },
+    heroAmount: {
+      fontSize: 28,
+      fontWeight: '800',
+      color: colors.text,
+      marginTop: 4,
+    },
+    changeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
+      gap: 8,
+    },
+    changeAmount: {
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    changeRate: {
+      fontSize: 14,
+      fontWeight: '700',
+      backgroundColor: colors.surfaceSecondary,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 6,
+      overflow: 'hidden',
+    },
+    expenseCaption: {
+      fontSize: 12,
+      marginTop: 4,
+    },
+    metricsRow: {
+      flexDirection: 'row',
+      paddingHorizontal: 10,
+      gap: 0,
+    },
+    metricCard: {
+      flex: 1,
+      marginHorizontal: 6,
+    },
+    metricLabel: {
+      fontSize: 13,
+      color: colors.textTertiary,
+      marginBottom: 4,
+    },
+    metricValue: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    chartCard: {
+      marginTop: 4,
+    },
+    chartTitle: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 12,
+    },
+    chart: {
+      borderRadius: 12,
+      marginLeft: -8,
+    },
+    overviewListCard: {
+      marginTop: 4,
+    },
+    overviewRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    overviewMonth: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    overviewValues: {
+      alignItems: 'flex-end',
+    },
+    overviewAsset: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    overviewChange: {
+      fontSize: 13,
+      marginTop: 2,
+    },
+  });

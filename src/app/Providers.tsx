@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { ThemeProvider } from '../shared/theme';
 
 GoogleSignin.configure({
   webClientId:
@@ -27,7 +28,9 @@ export const Providers: React.FC<Props> = ({ children }) => (
   <GestureHandlerRootView style={styles.flex}>
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   </GestureHandlerRootView>

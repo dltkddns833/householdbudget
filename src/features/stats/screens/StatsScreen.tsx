@@ -8,14 +8,14 @@ import {
   Dimensions,
 } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { COLORS } from '../../../shared/constants/colors';
+import { useTheme } from '../../../shared/theme';
+import { ThemeColors } from '../../../shared/constants/colors';
 import { Card, MonthSelector, CurrencyText } from '../../../shared/components';
 import { getCategoryByKey } from '../../../shared/constants/categories';
 import { useTransactions } from '../../transactions/hooks/useTransactions';
 import { useOverviewRange } from '../../home/hooks/useOverview';
 import { useUIStore } from '../../../store/uiStore';
-import { formatCurrency, formatCurrencyShort } from '../../../shared/utils/currency';
+import { formatCurrency } from '../../../shared/utils/currency';
 import dayjs from 'dayjs';
 
 const screenWidth = Dimensions.get('window').width;
@@ -28,6 +28,8 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
   const { currentMonth, setCurrentMonth } = useUIStore();
   const { summary } = useTransactions(currentMonth);
   const rangeQuery = useOverviewRange(6);
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   // Category ranking sorted by amount
   const categoryRanking = useMemo(() => {
@@ -36,7 +38,8 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
       .map(([key, amount]) => ({
         key,
         amount,
-        percentage: summary.totalExpense > 0 ? (amount / summary.totalExpense) * 100 : 0,
+        percentage:
+          summary.totalExpense > 0 ? (amount / summary.totalExpense) * 100 : 0,
         category: getCategoryByKey(key),
       }))
       .sort((a, b) => b.amount - a.amount);
@@ -47,8 +50,8 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
     const data = rangeQuery.data || [];
     if (data.length === 0) return null;
     return {
-      labels: data.map((o) => o.id.split('-')[1] + '월'),
-      datasets: [{ data: data.map((o) => (o.totalExpense || 0) / 10000) }],
+      labels: data.map(o => o.id.split('-')[1] + '월'),
+      datasets: [{ data: data.map(o => (o.totalExpense || 0) / 10000) }],
     };
   }, [rangeQuery.data]);
 
@@ -81,7 +84,10 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
       {/* Total Expense */}
       <Card>
         <Text style={styles.sectionLabel}>총 지출</Text>
-        <CurrencyText amount={summary?.totalExpense ?? 0} style={styles.totalAmount} />
+        <CurrencyText
+          amount={summary?.totalExpense ?? 0}
+          style={styles.totalAmount}
+        />
       </Card>
 
       {/* Category Breakdown */}
@@ -90,14 +96,14 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Stacked bar */}
         <View style={styles.stackedBar}>
-          {categoryRanking.map((item) => (
+          {categoryRanking.map(item => (
             <View
               key={item.key}
               style={[
                 styles.stackedSegment,
                 {
                   flex: item.percentage,
-                  backgroundColor: item.category?.color || COLORS.textTertiary,
+                  backgroundColor: item.category?.color || colors.textTertiary,
                 },
               ]}
             />
@@ -105,14 +111,24 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         {/* Ranking list */}
-        {categoryRanking.map((item, index) => (
+        {categoryRanking.map(item => (
           <TouchableOpacity
             key={item.key}
             style={styles.rankingRow}
-            onPress={() => navigation.navigate('CategoryDetail', { category: item.key, yearMonth: currentMonth })}
+            onPress={() =>
+              navigation.navigate('CategoryDetail', {
+                category: item.key,
+                yearMonth: currentMonth,
+              })
+            }
           >
             <View style={styles.rankingLeft}>
-              <View style={[styles.rankDot, { backgroundColor: item.category?.color }]} />
+              <View
+                style={[
+                  styles.rankDot,
+                  { backgroundColor: item.category?.color },
+                ]}
+              />
               <Text style={styles.rankCategory}>{item.key}</Text>
             </View>
             <View style={styles.rankingRight}>
@@ -122,13 +138,18 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
                     styles.rankBar,
                     {
                       width: `${item.percentage}%`,
-                      backgroundColor: item.category?.color || COLORS.textTertiary,
+                      backgroundColor:
+                        item.category?.color || colors.textTertiary,
                     },
                   ]}
                 />
               </View>
-              <Text style={styles.rankAmount}>{formatCurrency(item.amount)}</Text>
-              <Text style={styles.rankPercent}>{(item.percentage || 0).toFixed(1)}%</Text>
+              <Text style={styles.rankAmount}>
+                {formatCurrency(item.amount)}
+              </Text>
+              <Text style={styles.rankPercent}>
+                {(item.percentage || 0).toFixed(1)}%
+              </Text>
             </View>
           </TouchableOpacity>
         ))}
@@ -145,16 +166,16 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
             yAxisLabel=""
             yAxisSuffix=""
             chartConfig={{
-              backgroundColor: COLORS.surface,
-              backgroundGradientFrom: COLORS.surface,
-              backgroundGradientTo: COLORS.surface,
+              backgroundColor: colors.surface,
+              backgroundGradientFrom: colors.surface,
+              backgroundGradientTo: colors.surface,
               decimalPlaces: 0,
               color: (opacity = 1) => `rgba(79, 70, 229, ${opacity})`,
-              labelColor: () => COLORS.textTertiary,
+              labelColor: () => colors.textTertiary,
               barPercentage: 0.6,
               propsForBackgroundLines: {
                 strokeDasharray: '5,5',
-                stroke: COLORS.borderLight,
+                stroke: colors.borderLight,
               },
             }}
             style={styles.chart}
@@ -173,16 +194,16 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
             yAxisLabel=""
             yAxisSuffix=""
             chartConfig={{
-              backgroundColor: COLORS.surface,
-              backgroundGradientFrom: COLORS.surface,
-              backgroundGradientTo: COLORS.surface,
+              backgroundColor: colors.surface,
+              backgroundGradientFrom: colors.surface,
+              backgroundGradientTo: colors.surface,
               decimalPlaces: 0,
               color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`,
-              labelColor: () => COLORS.textTertiary,
+              labelColor: () => colors.textTertiary,
               barPercentage: 0.3,
               propsForBackgroundLines: {
                 strokeDasharray: '5,5',
-                stroke: COLORS.borderLight,
+                stroke: colors.borderLight,
               },
             }}
             style={styles.chart}
@@ -195,108 +216,109 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 56,
-    paddingBottom: 4,
-    backgroundColor: COLORS.surface,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: COLORS.text,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    color: COLORS.textTertiary,
-  },
-  totalAmount: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: COLORS.expense,
-    marginTop: 4,
-  },
-  categoryCard: {
-    paddingBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 12,
-  },
-  stackedBar: {
-    flexDirection: 'row',
-    height: 12,
-    borderRadius: 6,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  stackedSegment: {
-    height: '100%',
-  },
-  rankingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
-  },
-  rankingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: 60,
-  },
-  rankDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 8,
-  },
-  rankCategory: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  rankingRight: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  rankBarContainer: {
-    flex: 1,
-    height: 8,
-    backgroundColor: COLORS.surfaceSecondary,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  rankBar: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  rankAmount: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.text,
-    width: 90,
-    textAlign: 'right',
-  },
-  rankPercent: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.textTertiary,
-    width: 45,
-    textAlign: 'right',
-  },
-  chart: {
-    borderRadius: 12,
-    marginLeft: -16,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 56,
+      paddingBottom: 16,
+      backgroundColor: colors.surface,
+    },
+    headerTitle: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: colors.text,
+    },
+    sectionLabel: {
+      fontSize: 13,
+      color: colors.textTertiary,
+    },
+    totalAmount: {
+      fontSize: 26,
+      fontWeight: '800',
+      color: colors.expense,
+      marginTop: 4,
+    },
+    categoryCard: {
+      paddingBottom: 8,
+    },
+    sectionTitle: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 12,
+    },
+    stackedBar: {
+      flexDirection: 'row',
+      height: 12,
+      borderRadius: 6,
+      overflow: 'hidden',
+      marginBottom: 16,
+    },
+    stackedSegment: {
+      height: '100%',
+    },
+    rankingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    rankingLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: 60,
+    },
+    rankDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginRight: 8,
+    },
+    rankCategory: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    rankingRight: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    rankBarContainer: {
+      flex: 1,
+      height: 8,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 4,
+      overflow: 'hidden',
+    },
+    rankBar: {
+      height: '100%',
+      borderRadius: 4,
+    },
+    rankAmount: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+      width: 90,
+      textAlign: 'right',
+    },
+    rankPercent: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textTertiary,
+      width: 45,
+      textAlign: 'right',
+    },
+    chart: {
+      borderRadius: 12,
+      marginLeft: -16,
+    },
+  });

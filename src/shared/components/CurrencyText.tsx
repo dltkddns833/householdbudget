@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, TextStyle, StyleProp } from 'react-native';
 import { formatCurrency, formatCurrencyShort } from '../utils/currency';
+import { useTheme } from '../theme';
 
 interface Props {
   amount: number;
@@ -17,12 +18,13 @@ export const CurrencyText: React.FC<Props> = ({
   showSign = false,
   colorize = false,
 }) => {
+  const { colors } = useTheme();
   const safeAmount = Number.isFinite(amount) ? amount : 0;
   const formatted = short ? formatCurrencyShort(safeAmount) : formatCurrency(safeAmount);
   const display = showSign && amount > 0 ? `+${formatted}` : formatted;
 
   const colorStyle: TextStyle = colorize
-    ? { color: amount > 0 ? '#22C55E' : amount < 0 ? '#EF4444' : '#64748B' }
+    ? { color: amount > 0 ? colors.income : amount < 0 ? colors.expense : colors.textSecondary }
     : {};
 
   return <Text style={[style, colorStyle]}>{display}</Text>;

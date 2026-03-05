@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect, useMemo } from 'react';
+import { NavigationContainer, DefaultTheme, DarkTheme, Theme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import auth from '@react-native-firebase/auth';
 import { useAuthStore } from '../../store/authStore';
@@ -8,11 +8,26 @@ import { LoginScreen } from '../../features/auth/screens/LoginScreen';
 import { FamilySetupScreen } from '../../features/auth/screens/FamilySetupScreen';
 import { MainTabNavigator } from './MainTabNavigator';
 import { LoadingSpinner } from '../../shared/components';
+import { useTheme } from '../../shared/theme';
 
 const Stack = createNativeStackNavigator();
 
 export const RootNavigator: React.FC = () => {
   const { user, family, isLoading, setUser, setFamily, setLoading } = useAuthStore();
+  const { colors, isDark } = useTheme();
+
+  const navigationTheme: Theme = useMemo(() => ({
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.surface,
+      text: colors.text,
+      border: colors.border,
+      notification: colors.primary,
+    },
+  }), [colors, isDark]);
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
@@ -37,7 +52,7 @@ export const RootNavigator: React.FC = () => {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!user ? (
           <Stack.Screen name="Login" component={LoginScreen} />

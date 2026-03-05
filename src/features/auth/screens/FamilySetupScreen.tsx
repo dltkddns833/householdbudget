@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { COLORS } from '../../../shared/constants/colors';
+import { useTheme } from '../../../shared/theme';
+import { ThemeColors } from '../../../shared/constants/colors';
 import { authService } from '../services/authService';
 import { useAuthStore } from '../../../store/authStore';
 
@@ -19,6 +20,8 @@ export const FamilySetupScreen: React.FC = () => {
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [inviteCode, setInviteCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleCreate = async () => {
     if (!displayName.trim()) {
@@ -96,7 +99,7 @@ export const FamilySetupScreen: React.FC = () => {
             value={displayName}
             onChangeText={setDisplayName}
             placeholder="예: 상운"
-            placeholderTextColor={COLORS.textTertiary}
+            placeholderTextColor={colors.textTertiary}
           />
         </View>
 
@@ -108,7 +111,7 @@ export const FamilySetupScreen: React.FC = () => {
               value={inviteCode}
               onChangeText={setInviteCode}
               placeholder="6자리 코드 입력"
-              placeholderTextColor={COLORS.textTertiary}
+              placeholderTextColor={colors.textTertiary}
               autoCapitalize="characters"
               maxLength={6}
             />
@@ -129,90 +132,91 @@ export const FamilySetupScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-  },
-  backButton: {
-    marginBottom: 24,
-  },
-  backText: {
-    fontSize: 16,
-    color: COLORS.primary,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    marginBottom: 32,
-  },
-  optionButton: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  optionTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  optionDesc: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  inputGroup: {
-    marginTop: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: COLORS.text,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  codeInput: {
-    letterSpacing: 4,
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  submitButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 32,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  submitText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 32,
+    },
+    backButton: {
+      marginBottom: 24,
+    },
+    backText: {
+      fontSize: 16,
+      color: colors.primary,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '800',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    subtitle: {
+      fontSize: 15,
+      color: colors.textSecondary,
+      marginBottom: 32,
+    },
+    optionButton: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    optionTitle: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: colors.text,
+      marginBottom: 4,
+    },
+    optionDesc: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    inputGroup: {
+      marginTop: 20,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      marginBottom: 8,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: colors.text,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    codeInput: {
+      letterSpacing: 4,
+      fontSize: 20,
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    submitButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: 'center',
+      marginTop: 32,
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    submitText: {
+      color: colors.white,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+  });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,8 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { COLORS } from '../../../shared/constants/colors';
+import { useTheme } from '../../../shared/theme';
+import { ThemeColors } from '../../../shared/constants/colors';
 import { formatInputNumber, parseInputNumber, formatCurrency } from '../../../shared/utils/currency';
 import { useUpdateAccountAmount } from '../hooks/useAssets';
 
@@ -23,6 +24,8 @@ export const AssetEditScreen: React.FC<Props> = ({ navigation, route }) => {
   const { account, yearMonth } = route.params;
   const [amountText, setAmountText] = useState(formatInputNumber(String(account.amount)));
   const mutation = useUpdateAccountAmount();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleSave = async () => {
     const amount = parseInputNumber(amountText);
@@ -41,7 +44,7 @@ export const AssetEditScreen: React.FC<Props> = ({ navigation, route }) => {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Icon name="arrow-back" size={24} color={COLORS.text} />
+          <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>금액 수정</Text>
         <View style={{ width: 32 }} />
@@ -84,96 +87,97 @@ export const AssetEditScreen: React.FC<Props> = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 56,
-    paddingBottom: 12,
-    backgroundColor: COLORS.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
-  },
-  backBtn: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  content: {
-    padding: 20,
-  },
-  accountInfo: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-  },
-  accountName: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  accountDetail: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  currentAmount: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textTertiary,
-    marginTop: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    marginBottom: 8,
-  },
-  amountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    paddingHorizontal: 16,
-  },
-  currencyPrefix: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginRight: 4,
-  },
-  amountInput: {
-    flex: 1,
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.text,
-    paddingVertical: 14,
-  },
-  saveButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 28,
-  },
-  saveButtonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingTop: 56,
+      paddingBottom: 12,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    backBtn: {
+      padding: 4,
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    content: {
+      padding: 20,
+    },
+    accountInfo: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 24,
+    },
+    accountName: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    accountDetail: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
+    currentAmount: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.textTertiary,
+      marginTop: 8,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      marginBottom: 8,
+    },
+    amountContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 16,
+    },
+    currencyPrefix: {
+      fontSize: 22,
+      fontWeight: '700',
+      color: colors.text,
+      marginRight: 4,
+    },
+    amountInput: {
+      flex: 1,
+      fontSize: 22,
+      fontWeight: '700',
+      color: colors.text,
+      paddingVertical: 14,
+    },
+    saveButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: 'center',
+      marginTop: 28,
+    },
+    saveButtonText: {
+      color: colors.white,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+  });

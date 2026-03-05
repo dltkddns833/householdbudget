@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,15 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  Image,
+  Clipboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { COLORS } from '../../../shared/constants/colors';
+import { useTheme } from '../../../shared/theme';
+import { ThemeColors } from '../../../shared/constants/colors';
 import { useAuthStore } from '../../../store/authStore';
 import { authService } from '../../auth/services/authService';
+import { ThemePreference } from '../../../store/uiStore';
 
 interface Props {
   navigation: any;
@@ -24,8 +28,16 @@ interface MenuItem {
   color?: string;
 }
 
+const THEME_LABELS: Record<ThemePreference, string> = {
+  system: '시스템 설정',
+  light: '라이트 모드',
+  dark: '다크 모드',
+};
+
 export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
   const { user, family, reset } = useAuthStore();
+  const { colors, themePreference, setThemePreference } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleSignOut = () => {
     Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
@@ -41,6 +53,22 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
     ]);
   };
 
+  const handleThemeChange = () => {
+    const options: { text: string; pref: ThemePreference }[] = [
+      { text: '시스템 설정', pref: 'system' },
+      { text: '라이트 모드', pref: 'light' },
+      { text: '다크 모드', pref: 'dark' },
+    ];
+
+    Alert.alert('화면 모드', '테마를 선택해주세요', [
+      ...options.map(opt => ({
+        text: opt.pref === themePreference ? `${opt.text} ✓` : opt.text,
+        onPress: () => setThemePreference(opt.pref),
+      })),
+      { text: '취소', style: 'cancel' as const },
+    ]);
+  };
+
   const menuItems: MenuItem[] = [
     {
       icon: 'account-balance',
@@ -49,26 +77,29 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       onPress: () => navigation.navigate('Assets'),
     },
     {
+      icon: 'brightness-6',
+      label: '화면 모드',
+      subtitle: THEME_LABELS[themePreference],
+      onPress: handleThemeChange,
+    },
+    {
       icon: 'people',
       label: '가족 정보',
       subtitle: family ? `초대 코드: ${family.inviteCode}` : '',
       onPress: () => {
         if (family) {
-          Alert.alert('가족 초대 코드', family.inviteCode, [{ text: '확인' }]);
+          Clipboard.setString(family.inviteCode);
+          Alert.alert('초대 코드', '초대 코드가 복사되었습니다', [
+            { text: '확인' },
+          ]);
         }
       },
-    },
-    {
-      icon: 'person',
-      label: '프로필',
-      subtitle: user?.email || '',
-      onPress: () => {},
     },
     {
       icon: 'logout',
       label: '로그아웃',
       onPress: handleSignOut,
-      color: COLORS.danger,
+      color: colors.danger,
     },
   ];
 
@@ -80,14 +111,20 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Profile Card */}
       <View style={styles.profileCard}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {user?.displayName?.charAt(0) || '?'}
-          </Text>
-        </View>
+        {user?.photoURL ? (
+          <Image source={{ uri: user.photoURL }} style={styles.avatarImage} />
+        ) : (
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {user?.displayName?.charAt(0) || '?'}
+            </Text>
+          </View>
+        )}
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{user?.displayName || '사용자'}</Text>
-          <Text style={styles.profileEmail}>{user?.email}</Text>
+          <Text style={styles.profileName}>
+            {user?.displayName || '사용자'}
+          </Text>
+          <Text style={styles.profileEmail}>Google 연동</Text>
         </View>
       </View>
 
@@ -102,18 +139,20 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
             <Icon
               name={item.icon}
               size={22}
-              color={item.color || COLORS.textSecondary}
+              color={item.color || colors.textSecondary}
               style={styles.menuIcon}
             />
             <View style={styles.menuContent}>
-              <Text style={[styles.menuLabel, item.color && { color: item.color }]}>
+              <Text
+                style={[styles.menuLabel, item.color && { color: item.color }]}
+              >
                 {item.label}
               </Text>
               {item.subtitle && (
                 <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
               )}
             </View>
-            <Icon name="chevron-right" size={20} color={COLORS.textTertiary} />
+            <Icon name="chevron-right" size={20} color={colors.textTertiary} />
           </TouchableOpacity>
         ))}
       </View>
@@ -123,99 +162,105 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 56,
-    paddingBottom: 4,
-    backgroundColor: COLORS.surface,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: COLORS.text,
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    color: COLORS.white,
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  profileInfo: {
-    marginLeft: 14,
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  profileEmail: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  menuSection: {
-    backgroundColor: COLORS.surface,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderLight,
-  },
-  menuIcon: {
-    marginRight: 14,
-  },
-  menuContent: {
-    flex: 1,
-  },
-  menuLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  menuSubtitle: {
-    fontSize: 13,
-    color: COLORS.textTertiary,
-    marginTop: 2,
-  },
-  version: {
-    textAlign: 'center',
-    color: COLORS.textTertiary,
-    fontSize: 13,
-    marginTop: 32,
-    marginBottom: 40,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 56,
+      paddingBottom: 16,
+      backgroundColor: colors.surface,
+    },
+    headerTitle: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: colors.text,
+    },
+    profileCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      marginHorizontal: 16,
+      marginTop: 16,
+      borderRadius: 16,
+      padding: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    avatarImage: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+    },
+    avatarText: {
+      color: colors.white,
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    profileInfo: {
+      marginLeft: 14,
+      flex: 1,
+    },
+    profileName: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    profileEmail: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    menuSection: {
+      backgroundColor: colors.surface,
+      marginHorizontal: 16,
+      marginTop: 16,
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    menuItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    menuIcon: {
+      marginRight: 14,
+    },
+    menuContent: {
+      flex: 1,
+    },
+    menuLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    menuSubtitle: {
+      fontSize: 13,
+      color: colors.textTertiary,
+      marginTop: 2,
+    },
+    version: {
+      textAlign: 'center',
+      color: colors.textTertiary,
+      fontSize: 13,
+      marginTop: 32,
+      marginBottom: 40,
+    },
+  });

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { COLORS } from '../../shared/constants/colors';
+import { useTheme } from '../../shared/theme';
+import { ThemeColors } from '../../shared/constants/colors';
 import { useUIStore } from '../../store/uiStore';
 
 // Home
@@ -34,9 +35,18 @@ const HomeStackScreen = () => (
 
 const TransactionStackScreen = () => (
   <TransactionStack.Navigator screenOptions={{ headerShown: false }}>
-    <TransactionStack.Screen name="TransactionList" component={TransactionListScreen} />
-    <TransactionStack.Screen name="TransactionAdd" component={TransactionAddScreen} />
-    <TransactionStack.Screen name="TransactionEdit" component={TransactionAddScreen} />
+    <TransactionStack.Screen
+      name="TransactionList"
+      component={TransactionListScreen}
+    />
+    <TransactionStack.Screen
+      name="TransactionAdd"
+      component={TransactionAddScreen}
+    />
+    <TransactionStack.Screen
+      name="TransactionEdit"
+      component={TransactionAddScreen}
+    />
   </TransactionStack.Navigator>
 );
 
@@ -58,8 +68,10 @@ const MoreStackScreen = () => (
 const DummyScreen = () => null;
 
 export const MainTabNavigator: React.FC = () => {
-  const showAddModal = useUIStore((s) => s.showAddModal);
+  const showAddModal = useUIStore(s => s.showAddModal);
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <Tab.Navigator
@@ -70,8 +82,8 @@ export const MainTabNavigator: React.FC = () => {
           paddingBottom: insets.bottom + 8,
           height: 64 + insets.bottom,
         },
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.textTertiary,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textTertiary,
         tabBarLabelStyle: styles.tabBarLabel,
       }}
     >
@@ -80,7 +92,9 @@ export const MainTabNavigator: React.FC = () => {
         component={HomeStackScreen}
         options={{
           tabBarLabel: '홈',
-          tabBarIcon: ({ color, size }) => <Icon name="home" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="home" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -88,7 +102,9 @@ export const MainTabNavigator: React.FC = () => {
         component={TransactionStackScreen}
         options={{
           tabBarLabel: '내역',
-          tabBarIcon: ({ color, size }) => <Icon name="receipt-long" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="receipt-long" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -99,13 +115,13 @@ export const MainTabNavigator: React.FC = () => {
           tabBarIcon: () => (
             <View style={styles.fabContainer}>
               <View style={styles.fab}>
-                <Icon name="add" size={28} color={COLORS.white} />
+                <Icon name="add" size={28} color={colors.white} />
               </View>
             </View>
           ),
         }}
         listeners={{
-          tabPress: (e) => {
+          tabPress: e => {
             e.preventDefault();
             showAddModal();
           },
@@ -116,7 +132,9 @@ export const MainTabNavigator: React.FC = () => {
         component={StatsStackScreen}
         options={{
           tabBarLabel: '통계',
-          tabBarIcon: ({ color, size }) => <Icon name="bar-chart" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="bar-chart" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -124,39 +142,42 @@ export const MainTabNavigator: React.FC = () => {
         component={MoreStackScreen}
         options={{
           tabBarLabel: '더보기',
-          tabBarIcon: ({ color, size }) => <Icon name="more-horiz" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="more-horiz" size={size} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>
   );
 };
 
-const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: COLORS.surface,
-    borderTopColor: COLORS.borderLight,
-    paddingTop: 8,
-  },
-  tabBarLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  fabContainer: {
-    position: 'absolute',
-    bottom: 8,
-    alignItems: 'center',
-  },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    tabBar: {
+      backgroundColor: colors.surface,
+      borderTopColor: colors.borderLight,
+      paddingTop: 8,
+    },
+    tabBarLabel: {
+      fontSize: 11,
+      fontWeight: '600',
+    },
+    fabContainer: {
+      position: 'absolute',
+      bottom: 8,
+      alignItems: 'center',
+    },
+    fab: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+  });

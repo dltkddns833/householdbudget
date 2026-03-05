@@ -27,7 +27,11 @@ export const authService = {
       return { uid, ...newUser };
     }
 
-    return { uid, ...userDoc.data() } as User;
+    await firestore().collection('users').doc(uid).update({
+      displayName: displayName || '',
+      photoURL: photoURL || null,
+    });
+    return { uid, ...userDoc.data(), displayName: displayName || '', photoURL: photoURL || null } as User;
   },
 
   async signOut(): Promise<void> {
