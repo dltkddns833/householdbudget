@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper: check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Helper: check if user belongs to the family
+    function isFamilyMember(familyId) {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.familyId == familyId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow update: if isAuth() && request.auth.uid == userId;
+    }
+
+    // Families collection
+    match /families/{familyId} {
+      allow read: if isAuth();
+      allow create: if isAuth();
+      allow update: if isFamilyMember(familyId);
+
+      // Transactions
+      match /transactions/{txId} {
+        allow read: if isFamilyMember(familyId);
+        allow create: if isFamilyMember(familyId);
+        allow update: if isFamilyMember(familyId);
+        allow delete: if isFamilyMember(familyId);
+      }
+
+      // Monthly Summaries
+      match /monthlySummaries/{yearMonth} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+      }
+
+      // Overview
+      match /overview/{yearMonth} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+      }
+
+      // Financial Status
+      match /financialStatus/{yearMonth} {
+        allow read: if isFamilyMember(familyId);
+        allow write: if isFamilyMember(familyId);
+
+        match /accounts/{accountId} {
+          allow read: if isFamilyMember(familyId);
+          allow write: if isFamilyMember(familyId);
+        }
+      }
+    }
+  }
+}

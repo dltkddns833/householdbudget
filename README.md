@@ -1,97 +1,75 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 우리집 가계부 (Household Budget)
 
-# Getting Started
+가족 단위로 수입/지출과 자산을 함께 관리하는 모바일 가계부 앱입니다.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 주요 기능
 
-## Step 1: Start Metro
+- **거래 관리** - 수입/지출 내역 등록, 수정, 삭제
+- **재무상태** - 실자산, 전세 포함 자산, 은퇴자금 월별 추적
+- **통계 분석** - 카테고리별 지출 비율, 월별 추이 차트, 일별 소비 패턴
+- **가족 협업** - 초대 코드 기반 가족 그룹, 멤버별 데이터 관리
+- **자동 복사** - 새 달 진입 시 이전 월 자산 데이터 자동 이월
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 기술 스택
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+| 영역 | 기술 |
+|------|------|
+| Framework | React Native 0.84, React 19 |
+| Language | TypeScript 5.8 |
+| Navigation | React Navigation 7 |
+| State | Zustand, React Query |
+| Backend | Firebase Auth, Firestore |
+| Auth | Google Sign-In |
+| Charts | react-native-chart-kit |
+| Forms | React Hook Form + Zod |
 
-```sh
-# Using npm
-npm start
+## 프로젝트 구조
 
-# OR using Yarn
-yarn start
+```
+src/
+├── app/                  # 앱 진입점, 네비게이션
+│   └── navigation/       # Root/Tab 네비게이터
+├── features/             # 기능별 모듈
+│   ├── auth/             # 로그인, 가족 설정
+│   ├── home/             # 대시보드
+│   ├── transactions/     # 거래 내역
+│   ├── stats/            # 통계/차트
+│   ├── assets/           # 재무상태/자산
+│   └── settings/         # 설정
+├── shared/               # 공통 컴포넌트, 유틸, 타입
+└── store/                # Zustand 글로벌 스토어
 ```
 
-## Step 2: Build and run your app
+## 시작하기
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### 요구사항
 
-### Android
+- Node.js >= 22.11.0
+- pnpm
+- Xcode (iOS) / Android Studio (Android)
 
-```sh
-# Using npm
-npm run android
+### 설치 및 실행
 
-# OR using Yarn
-yarn android
+```bash
+# 의존성 설치
+pnpm install
+
+# iOS 빌드 (최초 1회)
+cd ios && pod install && cd ..
+
+# Metro 번들러 시작
+pnpm start
+
+# iOS 실행
+pnpm run ios
+
+# Android 실행
+pnpm run android
 ```
 
-### iOS
+### Firebase 설정
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. Firebase 프로젝트 생성
+2. `google-services.json`을 `android/app/`에 배치
+3. `GoogleService-Info.plist`를 `ios/`에 배치
+4. Firestore 및 Authentication(Google) 활성화
