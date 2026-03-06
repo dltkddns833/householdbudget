@@ -41,10 +41,10 @@ Each feature follows: **Screen → Hook → Service → Firestore**
 ### Firestore Data Model
 
 All data is scoped under `families/{familyId}/`:
+- `families/{familyId}` root document: `members: string[]`, `memberNames: Record<uid, string>`, `inviteCode: string`
 - `transactions` — individual income/expense records, partitioned by `yearMonth` field ("YYYY-MM")
-- `monthlySummaries` — pre-aggregated monthly totals, recalculated on every transaction write
-- `accounts` — asset accounts per month, keyed by `{yearMonth}` subcollection
-- `financialStatus` — monthly financial snapshots
+- `monthlySummaries/{yearMonth}` — pre-aggregated monthly totals (`totalExpense`, `totalIncome`, `remaining`, `categoryBreakdown`, `dailyTotals`), recalculated on every transaction write
+- `financialStatus/{yearMonth}` — monthly financial snapshots; has `accounts/{accountId}` subcollection for per-account asset data
 
 ### Navigation Structure
 
@@ -66,6 +66,15 @@ TypeScript path alias `@/*` maps to `src/*` (configured in `tsconfig.json`).
 - Icons use `react-native-vector-icons/MaterialIcons`
 - Theme system supports light/dark/system via `ThemeProvider` + `useTheme()` hook
 - Categories are defined in `shared/constants/categories.ts` (expense: 11 categories, income: 5)
+- Forms use `react-hook-form` + `zod` for validation
+- Charts use `react-native-chart-kit` + `react-native-svg`
+- Date picker uses `react-native-date-picker`
+
+### Planning Docs
+
+Feature planning and design decisions are in `docs/planning/`:
+- `docs/planning/README.md` — app overview, current features, Firestore model, UX principles
+- `docs/planning/features.md` — upcoming features with priority and data model changes
 
 ### Scripts Directory
 
