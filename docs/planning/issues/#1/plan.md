@@ -103,8 +103,6 @@ queryKey: `['budget', familyId, yearMonth]`
 Header: "예산 설정"
 MonthSelector (월 이동)
 
-[이전 달에서 복사] 버튼 (해당 월 예산이 없을 때만 표시)
-
 카테고리 목록 (지출 11개):
   각 행:
   - 카테고리 아이콘 + 이름
@@ -118,7 +116,6 @@ MonthSelector (월 이동)
 - 금액 입력: `formatInputNumber` / `parseInputNumber` 유틸 재사용
 - 0원 입력 = 미설정 (저장 시 해당 키 제거)
 - 저장: `upsertBudget` 호출 후 `monthlySummary`, `budget` queryKey 무효화
-- 이전 달 복사: 이전 달 `budget.categories`를 현재 월에 저장
 
 ---
 
@@ -176,7 +173,6 @@ MoreMenuScreen 아이콘: `account-balance-wallet`
 
 - [ ] MoreMenu → "예산 설정" 진입 확인
 - [ ] 카테고리별 금액 저장 → Firestore `budgets/{yearMonth}` 문서 생성 확인
-- [ ] 이전 달 복사 기능 동작
 - [ ] StatsScreen 진행 바 표시 (미설정 카테고리는 미표시)
 - [ ] HomeScreen 예산 요약 카드 표시
 - [ ] 80% / 100% 경계값 색상 변경 확인
