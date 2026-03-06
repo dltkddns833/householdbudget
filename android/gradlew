@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Ensure nvm-managed node is on PATH (fixes Android Studio not finding node)
+NVM_NODE_DIR="$HOME/.nvm/versions/node/v22.22.0/bin"
+if [ -d "$NVM_NODE_DIR" ]; then
+  export PATH="$NVM_NODE_DIR:$PATH"
+fi
+
 #
 # Copyright © 2015 the original authors.
 #

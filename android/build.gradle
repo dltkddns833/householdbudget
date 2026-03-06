@@ -12,11 +12,34 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
+        classpath("com.android.tools.build:gradle:8.11.0")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
         classpath("com.google.gms:google-services:4.4.2")
+        classpath("com.google.firebase:firebase-appdistribution-gradle:5.1.1")
+    }
+    // RN Gradle Plugin bundles AGP 8.12.0; pin to 8.11.0 for Android Studio compatibility
+    configurations.classpath {
+        resolutionStrategy {
+            force("com.android.tools.build:gradle:8.11.0")
+        }
     }
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+// Provide node_modules paths so native libraries skip bare 'node' calls
+// (Gradle 9's native process launcher doesn't search PATH for bare commands)
+allprojects {
+    ext {
+        REACT_NATIVE_NODE_MODULES_DIR = file("$rootDir/../node_modules/react-native")
+        REACT_NATIVE_WORKLETS_NODE_MODULES_DIR = file("$rootDir/../node_modules/react-native-worklets")
+    }
+}
+
+// Disable validation tasks that call bare 'node' (not resolvable in Gradle 9)
+gradle.taskGraph.whenReady { graph ->
+    graph.allTasks.findAll {
+        it.name in ['assertMinimalReactNativeVersionTask', 'assertWorkletsVersionTask']
+    }.each { it.enabled = false }
+}

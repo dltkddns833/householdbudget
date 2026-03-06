@@ -1,6 +1,11 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+extensions.configure(com.facebook.react.ReactSettingsExtension){ ex ->
+    // Use full path to node to avoid Gradle 9 native launcher PATH resolution issue
+    ex.autolinkLibrariesFromCommand(
+        ["${System.getProperty('user.home')}/.nvm/versions/node/v22.22.0/bin/node", "${rootDir}/../node_modules/@react-native-community/cli/build/bin.js", "config"]
+    )
+}
 rootProject.name = 'HouseholdBudget'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
