@@ -74,6 +74,12 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
 
   const menuItems: MenuItem[] = [
     {
+      icon: 'savings',
+      label: '예산 설정',
+      subtitle: '카테고리별 월 예산 관리',
+      onPress: () => navigation.navigate('BudgetSetting'),
+    },
+    {
       icon: 'account-balance',
       label: '재무상태',
       subtitle: '자산 현황 관리',

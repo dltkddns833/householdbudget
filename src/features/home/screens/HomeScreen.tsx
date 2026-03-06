@@ -16,6 +16,7 @@ import { useCurrentOverview, useOverviewRange } from '../hooks/useOverview';
 import { useTransactions } from '../../transactions/hooks/useTransactions';
 import { useUIStore } from '../../../store/uiStore';
 import { formatYearMonth } from '../../../shared/utils/date';
+import { useBudget } from '../../budget/hooks/useBudget';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -26,10 +27,25 @@ export const HomeScreen: React.FC = () => {
   const overviewQuery = useCurrentOverview();
   const rangeQuery = useOverviewRange(7);
   const { summary } = useTransactions(currentMonth);
+  const budgetQuery = useBudget(currentMonth);
   const overview = overviewQuery.data;
   const overviewRange = rangeQuery.data || [];
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+
+  const totalBudget = useMemo(() => {
+    const cats = budgetQuery.data?.categories ?? {};
+    return Object.values(cats).reduce((sum, v) => sum + v, 0);
+  }, [budgetQuery.data]);
+
+  const totalExpense = summary?.totalExpense ?? overview?.totalExpense ?? 0;
+  const budgetRate = totalBudget > 0 ? Math.min((totalExpense / totalBudget) * 100, 100) : 0;
+  const budgetRateColor =
+    budgetRate >= 100
+      ? '#EF4444'
+      : budgetRate >= 80
+      ? '#F59E0B'
+      : colors.primary;
 
   const validRange = overviewRange.filter(
     o => typeof o.realAsset === 'number' && !isNaN(o.realAsset),
@@ -111,7 +127,7 @@ export const HomeScreen: React.FC = () => {
         <Card style={styles.metricCard}>
           <Text style={styles.metricLabel}>이번달 소비</Text>
           <CurrencyText
-            amount={summary?.totalExpense ?? overview?.totalExpense ?? 0}
+            amount={totalExpense}
             style={styles.metricValue}
           />
           {overview?.expenseChange != null && (
@@ -129,6 +145,21 @@ export const HomeScreen: React.FC = () => {
               전월대비 {overview.expenseChange >= 0 ? '+' : ''}
               {overview.expenseChange.toFixed(1)}%
             </Text>
+          )}
+          {totalBudget > 0 && (
+            <View style={styles.budgetBarWrapper}>
+              <View style={styles.budgetBarBg}>
+                <View
+                  style={[
+                    styles.budgetBarFill,
+                    { width: `${budgetRate}%`, backgroundColor: budgetRateColor },
+                  ]}
+                />
+              </View>
+              <Text style={[styles.budgetBarLabel, { color: budgetRateColor }]}>
+                {budgetRate.toFixed(0)}%
+              </Text>
+            </View>
           )}
         </Card>
         <Card style={styles.metricCard}>
@@ -260,6 +291,29 @@ const createStyles = (colors: ThemeColors) =>
     expenseCaption: {
       fontSize: 12,
       marginTop: 4,
+    },
+    budgetBarWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
+      gap: 6,
+    },
+    budgetBarBg: {
+      flex: 1,
+      height: 6,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 3,
+      overflow: 'hidden',
+    },
+    budgetBarFill: {
+      height: '100%',
+      borderRadius: 3,
+    },
+    budgetBarLabel: {
+      fontSize: 11,
+      fontWeight: '600',
+      width: 32,
+      textAlign: 'right',
     },
     metricsRow: {
       flexDirection: 'row',

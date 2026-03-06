@@ -20,6 +20,7 @@ import { CategoryDetailScreen } from '../../features/stats/screens/CategoryDetai
 import { MoreMenuScreen } from '../../features/settings/screens/MoreMenuScreen';
 import { AssetScreen } from '../../features/assets/screens/AssetScreen';
 import { AssetEditScreen } from '../../features/assets/screens/AssetEditScreen';
+import { BudgetSettingScreen } from '../../features/budget/screens/BudgetSettingScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -60,6 +61,7 @@ const StatsStackScreen = () => (
 const MoreStackScreen = () => (
   <MoreStack.Navigator screenOptions={{ headerShown: false }}>
     <MoreStack.Screen name="MoreMenu" component={MoreMenuScreen} />
+    <MoreStack.Screen name="BudgetSetting" component={BudgetSettingScreen} />
     <MoreStack.Screen name="Assets" component={AssetScreen} />
     <MoreStack.Screen name="AssetEdit" component={AssetEditScreen} />
   </MoreStack.Navigator>

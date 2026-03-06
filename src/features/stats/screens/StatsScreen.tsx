@@ -16,7 +16,8 @@ import { getCategoryByKey } from '../../../shared/constants/categories';
 import { useTransactions } from '../../transactions/hooks/useTransactions';
 import { useOverviewRange } from '../../home/hooks/useOverview';
 import { useUIStore } from '../../../store/uiStore';
-import { formatCurrency } from '../../../shared/utils/currency';
+import { formatCurrency, formatCurrencyShort } from '../../../shared/utils/currency';
+import { useBudgetProgress } from '../../budget/hooks/useBudget';
 import dayjs from 'dayjs';
 
 const screenWidth = Dimensions.get('window').width;
@@ -31,6 +32,7 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
   const { currentMonth, setCurrentMonth } = useUIStore();
   const { summary } = useTransactions(currentMonth);
   const rangeQuery = useOverviewRange(6);
+  const budgetProgress = useBudgetProgress(currentMonth);
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -114,48 +116,83 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         {/* Ranking list */}
-        {categoryRanking.map(item => (
-          <TouchableOpacity
-            key={item.key}
-            style={styles.rankingRow}
-            onPress={() =>
-              navigation.navigate('CategoryDetail', {
-                category: item.key,
-                yearMonth: currentMonth,
-              })
-            }
-          >
-            <View style={styles.rankingLeft}>
-              <View
-                style={[
-                  styles.rankDot,
-                  { backgroundColor: item.category?.color },
-                ]}
-              />
-              <Text style={styles.rankCategory}>{item.key}</Text>
-            </View>
-            <View style={styles.rankingRight}>
-              <View style={styles.rankBarContainer}>
+        {categoryRanking.map(item => {
+          const bp = budgetProgress.find(b => b.categoryKey === item.key);
+          const budgetColor =
+            bp?.status === 'over'
+              ? '#EF4444'
+              : bp?.status === 'warning'
+              ? '#F59E0B'
+              : item.category?.color || colors.textTertiary;
+
+          return (
+            <TouchableOpacity
+              key={item.key}
+              style={styles.rankingRow}
+              onPress={() =>
+                navigation.navigate('CategoryDetail', {
+                  category: item.key,
+                  yearMonth: currentMonth,
+                })
+              }
+            >
+              <View style={styles.rankingLeft}>
                 <View
                   style={[
-                    styles.rankBar,
-                    {
-                      width: `${item.percentage}%`,
-                      backgroundColor:
-                        item.category?.color || colors.textTertiary,
-                    },
+                    styles.rankDot,
+                    { backgroundColor: item.category?.color },
                   ]}
                 />
+                <Text style={styles.rankCategory}>{item.key}</Text>
               </View>
-              <Text style={styles.rankAmount}>
-                {formatCurrency(item.amount)}
-              </Text>
-              <Text style={styles.rankPercent}>
-                {(item.percentage || 0).toFixed(1)}%
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+              <View style={styles.rankingRight}>
+                <View style={styles.rankBarsColumn}>
+                  {/* 지출 비율 바 */}
+                  <View style={styles.rankBarContainer}>
+                    <View
+                      style={[
+                        styles.rankBar,
+                        {
+                          width: `${item.percentage}%`,
+                          backgroundColor:
+                            item.category?.color || colors.textTertiary,
+                        },
+                      ]}
+                    />
+                  </View>
+                  {/* 예산 달성률 바 */}
+                  {bp && bp.budgeted > 0 && (
+                    <View style={styles.rankBarContainer}>
+                      <View
+                        style={[
+                          styles.rankBar,
+                          {
+                            width: `${Math.min(bp.rate, 100)}%`,
+                            backgroundColor: budgetColor,
+                            opacity: 0.7,
+                          },
+                        ]}
+                      />
+                    </View>
+                  )}
+                </View>
+                <View style={styles.rankAmountColumn}>
+                  <Text style={styles.rankAmount}>
+                    {formatCurrency(item.amount)}
+                  </Text>
+                  {bp && bp.budgeted > 0 && (
+                    <Text style={[styles.rankBudgetText, { color: budgetColor }]}>
+                      예산 {formatCurrencyShort(bp.budgeted)} 중 {bp.rate.toFixed(0)}%
+                    </Text>
+                  )}
+                </View>
+                <Text style={styles.rankPercent}>
+                  {(item.percentage || 0).toFixed(1)}%
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </Card>
 
       {/* Monthly Trend */}
@@ -295,8 +332,11 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       gap: 8,
     },
-    rankBarContainer: {
+    rankBarsColumn: {
       flex: 1,
+      gap: 4,
+    },
+    rankBarContainer: {
       height: 8,
       backgroundColor: colors.surfaceSecondary,
       borderRadius: 4,
@@ -306,12 +346,21 @@ const createStyles = (colors: ThemeColors) =>
       height: '100%',
       borderRadius: 4,
     },
+    rankAmountColumn: {
+      alignItems: 'flex-end',
+      width: 90,
+    },
     rankAmount: {
       fontSize: 13,
       fontWeight: '600',
       color: colors.text,
-      width: 90,
       textAlign: 'right',
+    },
+    rankBudgetText: {
+      fontSize: 11,
+      fontWeight: '500',
+      textAlign: 'right',
+      marginTop: 2,
     },
     rankPercent: {
       fontSize: 12,
