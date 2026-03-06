@@ -8,8 +8,8 @@ const ROOT = path.resolve(__dirname, '..');
 
 function drawGradientBackground(ctx, size) {
   const gradient = ctx.createLinearGradient(0, 0, size, size);
-  gradient.addColorStop(0, '#4F46E5'); // Indigo
-  gradient.addColorStop(1, '#7C3AED'); // Purple
+  gradient.addColorStop(0, '#0D9488'); // Teal
+  gradient.addColorStop(1, '#0F766E'); // Teal Dark
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, size, size);
 }
@@ -36,7 +36,7 @@ function drawWalletIcon(ctx, size) {
 
   // Main wallet body - rounded rectangle
   const walletX = 220 * s;
-  const walletY = 280 * s;
+  const walletY = 332 * s;
   const walletW = 584 * s;
   const walletH = 420 * s;
   const walletR = 40 * s;
@@ -47,7 +47,7 @@ function drawWalletIcon(ctx, size) {
 
   // Draw wallet flap (top part)
   const flapX = 260 * s;
-  const flapY = 220 * s;
+  const flapY = 272 * s;
   const flapW = 504 * s;
   const flapH = 120 * s;
   const flapR = 36 * s;
@@ -55,10 +55,10 @@ function drawWalletIcon(ctx, size) {
   drawRoundedRect(ctx, flapX, flapY, flapW, flapH, flapR);
   ctx.fill();
 
-  // Card slot detail - dark indigo rectangle inside wallet
-  ctx.fillStyle = '#6D5FED'; // slightly lighter for contrast
+  // Card slot detail - slightly lighter teal for contrast
+  ctx.fillStyle = '#14B8A6';
   const slotX = 560 * s;
-  const slotY = 430 * s;
+  const slotY = 482 * s;
   const slotW = 220 * s;
   const slotH = 100 * s;
   const slotR = 20 * s;
@@ -69,16 +69,16 @@ function drawWalletIcon(ctx, size) {
   // Small circle on the card slot (button/clasp)
   ctx.fillStyle = 'white';
   ctx.beginPath();
-  ctx.arc(610 * s, 480 * s, 16 * s, 0, Math.PI * 2);
+  ctx.arc(610 * s, 532 * s, 16 * s, 0, Math.PI * 2);
   ctx.fill();
 
   // Coin symbols at bottom-left to add visual interest
   ctx.fillStyle = 'rgba(255,255,255,0.3)';
   ctx.beginPath();
-  ctx.arc(340 * s, 600 * s, 36 * s, 0, Math.PI * 2);
+  ctx.arc(340 * s, 652 * s, 36 * s, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(400 * s, 620 * s, 28 * s, 0, Math.PI * 2);
+  ctx.arc(400 * s, 672 * s, 28 * s, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
@@ -92,7 +92,7 @@ function drawWalletIconOnly(ctx, size) {
 
   // Main wallet body
   const walletX = 220 * s;
-  const walletY = 280 * s;
+  const walletY = 332 * s;
   const walletW = 584 * s;
   const walletH = 420 * s;
   const walletR = 40 * s;
@@ -101,7 +101,7 @@ function drawWalletIconOnly(ctx, size) {
 
   // Wallet flap
   const flapX = 260 * s;
-  const flapY = 220 * s;
+  const flapY = 272 * s;
   const flapW = 504 * s;
   const flapH = 120 * s;
   const flapR = 36 * s;
@@ -111,7 +111,7 @@ function drawWalletIconOnly(ctx, size) {
   // Card slot detail - slightly transparent white for subtle contrast
   ctx.fillStyle = 'rgba(255,255,255,0.5)';
   const slotX = 560 * s;
-  const slotY = 430 * s;
+  const slotY = 482 * s;
   const slotW = 220 * s;
   const slotH = 100 * s;
   const slotR = 20 * s;
@@ -121,7 +121,7 @@ function drawWalletIconOnly(ctx, size) {
   // Small circle on card slot
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.beginPath();
-  ctx.arc(610 * s, 480 * s, 16 * s, 0, Math.PI * 2);
+  ctx.arc(610 * s, 532 * s, 16 * s, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
