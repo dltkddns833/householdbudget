@@ -385,7 +385,7 @@ async function main() {
   await migrateOverview();
 
   // 2. Migrate monthly transactions
-  const months = ['2026-01', '2026-02', '2026-03'];
+  const months = ['2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03'];
   for (const month of months) {
     await migrateMonthlyTransactions(month);
   }
