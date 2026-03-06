@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme, Theme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import auth from '@react-native-firebase/auth';
@@ -7,7 +7,7 @@ import { authService } from '../../features/auth/services/authService';
 import { LoginScreen } from '../../features/auth/screens/LoginScreen';
 import { FamilySetupScreen } from '../../features/auth/screens/FamilySetupScreen';
 import { MainTabNavigator } from './MainTabNavigator';
-import { LoadingSpinner } from '../../shared/components';
+import { AnimatedSplash } from '../../shared/components/AnimatedSplash';
 import { useTheme } from '../../shared/theme';
 
 const Stack = createNativeStackNavigator();
@@ -15,6 +15,7 @@ const Stack = createNativeStackNavigator();
 export const RootNavigator: React.FC = () => {
   const { user, family, isLoading, setUser, setFamily, setLoading } = useAuthStore();
   const { colors, isDark } = useTheme();
+  const [splashDone, setSplashDone] = useState(false);
 
   const navigationTheme: Theme = useMemo(() => ({
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -49,7 +50,14 @@ export const RootNavigator: React.FC = () => {
     return unsubscribe;
   }, []);
 
-  if (isLoading) return <LoadingSpinner />;
+  if (!splashDone) {
+    return (
+      <AnimatedSplash
+        isReady={!isLoading}
+        onAnimationComplete={() => setSplashDone(true)}
+      />
+    );
+  }
 
   return (
     <NavigationContainer theme={navigationTheme}>
