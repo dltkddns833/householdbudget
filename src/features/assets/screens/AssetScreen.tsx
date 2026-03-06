@@ -125,6 +125,7 @@ export const AssetScreen: React.FC<Props> = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         renderSectionHeader={renderSectionHeader}
+        stickySectionHeadersEnabled={false}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <EmptyState
