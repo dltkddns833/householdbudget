@@ -9,9 +9,10 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import DatePicker from 'react-native-date-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import {
@@ -53,6 +54,7 @@ export const TransactionAddScreen: React.FC<Props> = ({
   const [date, setDate] = useState(editTx ? editTx.date.toDate() : new Date());
   const [memo, setMemo] = useState(editTx?.memo || '');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempDate, setTempDate] = useState(date);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const addMutation = useAddTransaction();
@@ -291,25 +293,42 @@ export const TransactionAddScreen: React.FC<Props> = ({
         <Text style={styles.sectionLabel}>날짜</Text>
         <TouchableOpacity
           style={styles.input}
-          onPress={() => setShowDatePicker(true)}
+          onPress={() => { setTempDate(date); setShowDatePicker(true); }}
         >
           <Text style={styles.dateText}>{formatDateFull(date)}</Text>
         </TouchableOpacity>
-        <DatePicker
-          modal
-          open={showDatePicker}
-          date={date}
-          mode="date"
-          locale="ko"
-          title="날짜 선택"
-          confirmText="확인"
-          cancelText="취소"
-          onConfirm={d => {
-            setDate(d);
-            setShowDatePicker(false);
-          }}
-          onCancel={() => setShowDatePicker(false)}
-        />
+        <Modal
+          visible={showDatePicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View style={styles.datePickerOverlay}>
+            <View style={styles.datePickerContainer}>
+              <View style={styles.datePickerHeader}>
+                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                  <Text style={styles.datePickerCancel}>취소</Text>
+                </TouchableOpacity>
+                <Text style={styles.datePickerTitle}>날짜 선택</Text>
+                <TouchableOpacity onPress={() => {
+                  setDate(tempDate);
+                  setShowDatePicker(false);
+                }}>
+                  <Text style={styles.datePickerConfirm}>확인</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={tempDate}
+                mode="date"
+                display="spinner"
+                locale="ko-KR"
+                onChange={(_, selected) => {
+                  if (selected) setTempDate(selected);
+                }}
+              />
+            </View>
+          </View>
+        </Modal>
 
         {/* Memo */}
         <Text style={styles.sectionLabel}>비고</Text>
@@ -551,5 +570,38 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.danger,
       fontSize: 15,
       fontWeight: '600',
+    },
+    datePickerOverlay: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0,0,0,0.4)',
+    },
+    datePickerContainer: {
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+    },
+    datePickerHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderLight,
+    },
+    datePickerTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    datePickerCancel: {
+      fontSize: 16,
+      color: colors.textSecondary,
+    },
+    datePickerConfirm: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.primary,
     },
   });
