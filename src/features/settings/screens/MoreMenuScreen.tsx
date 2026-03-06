@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Image,
   Clipboard,
 } from 'react-native';
+import { useScrollToTop } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
@@ -35,6 +36,8 @@ const THEME_LABELS: Record<ThemePreference, string> = {
 };
 
 export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   const { user, family, reset } = useAuthStore();
   const { colors, themePreference, setThemePreference } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -104,7 +107,7 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView ref={scrollRef} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>더보기</Text>
       </View>

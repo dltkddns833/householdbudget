@@ -136,6 +136,12 @@ export const MainTabNavigator: React.FC = () => {
             <Icon name="bar-chart" size={size} color={color} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            e.preventDefault();
+            navigation.navigate('Stats', { screen: 'StatsMain' });
+          },
+        })}
       />
       <Tab.Screen
         name="More"
@@ -146,6 +152,12 @@ export const MainTabNavigator: React.FC = () => {
             <Icon name="more-horiz" size={size} color={color} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            e.preventDefault();
+            navigation.navigate('More', { screen: 'MoreMenu' });
+          },
+        })}
       />
     </Tab.Navigator>
   );

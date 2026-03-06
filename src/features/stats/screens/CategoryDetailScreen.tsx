@@ -117,7 +117,7 @@ const createStyles = (colors: ThemeColors) =>
     totalAmount: {
       fontSize: 22,
       fontWeight: '800',
-      color: colors.expense,
+      color: colors.text,
       marginTop: 2,
     },
     listContent: {

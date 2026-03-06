@@ -1,12 +1,12 @@
 export type ThemeColors = typeof lightColors;
 
 export const lightColors = {
-  primary: '#4F46E5',        // Indigo
-  primaryLight: '#818CF8',
-  primaryDark: '#3730A3',
+  primary: '#0D9488',        // Teal
+  primaryLight: '#2DD4BF',
+  primaryDark: '#0F766E',
 
-  secondary: '#10B981',      // Emerald
-  secondaryLight: '#34D399',
+  secondary: '#F59E0B',      // Amber
+  secondaryLight: '#FCD34D',
 
   expense: '#3B82F6',        // Blue (감소)
   expenseLight: '#DBEAFE',
@@ -40,12 +40,12 @@ export const lightColors = {
 };
 
 export const darkColors: ThemeColors = {
-  primary: '#818CF8',
-  primaryLight: '#A5B4FC',
-  primaryDark: '#6366F1',
+  primary: '#2DD4BF',
+  primaryLight: '#5EEAD4',
+  primaryDark: '#0F766E',
 
-  secondary: '#34D399',
-  secondaryLight: '#6EE7B7',
+  secondary: '#FBBF24',
+  secondaryLight: '#FDE68A',
 
   expense: '#60A5FA',
   expenseLight: '#1E3A5F',

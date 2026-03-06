@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Dimensions,
 } from 'react-native';
+import { useScrollToTop } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
@@ -19,6 +20,8 @@ import { formatYearMonth } from '../../../shared/utils/date';
 const screenWidth = Dimensions.get('window').width;
 
 export const HomeScreen: React.FC = () => {
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   const { currentMonth, setCurrentMonth } = useUIStore();
   const overviewQuery = useCurrentOverview();
   const rangeQuery = useOverviewRange(7);
@@ -47,6 +50,7 @@ export const HomeScreen: React.FC = () => {
 
   return (
     <ScrollView
+      ref={scrollRef}
       style={styles.container}
       refreshControl={
         <RefreshControl

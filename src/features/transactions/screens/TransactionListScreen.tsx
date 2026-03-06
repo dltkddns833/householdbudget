@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import { useScrollToTop } from '@react-navigation/native';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import {
@@ -33,6 +34,8 @@ interface Props {
 }
 
 export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
+  const listRef = useRef<SectionList>(null);
+  useScrollToTop(listRef);
   const { currentMonth, setCurrentMonth } = useUIStore();
   const { transactions, summary } = useTransactions(currentMonth);
   const deleteMutation = useDeleteTransaction();
@@ -101,10 +104,7 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
         </View>
         <Text
-          style={[
-            styles.txAmount,
-            tx.type === 'income' && { color: colors.income },
-          ]}
+          style={styles.txAmount}
         >
           {tx.type === 'income' ? '+' : '-'}
           {formatCurrency(tx.amount)}
@@ -140,7 +140,7 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.summaryLabel}>지출</Text>
               <CurrencyText
                 amount={summary.totalExpense}
-                style={[styles.summaryValue, { color: colors.expense }]}
+                style={styles.summaryValue}
               />
             </View>
             <View style={styles.summaryDivider} />
@@ -148,7 +148,7 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.summaryLabel}>수입</Text>
               <CurrencyText
                 amount={summary.totalIncome}
-                style={[styles.summaryValue, { color: colors.income }]}
+                style={styles.summaryValue}
               />
             </View>
             <View style={styles.summaryDivider} />
@@ -210,6 +210,7 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Transaction List */}
       <SectionList
+        ref={listRef}
         sections={sections}
         keyExtractor={item => item.id}
         renderItem={renderItem}
@@ -317,7 +318,7 @@ const createStyles = (colors: ThemeColors) =>
     sectionTotal: {
       fontSize: 13,
       fontWeight: '600',
-      color: colors.expense,
+      color: colors.textSecondary,
     },
     txRow: {
       flexDirection: 'row',

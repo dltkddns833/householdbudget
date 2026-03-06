@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { useScrollToTop } from '@react-navigation/native';
 import { BarChart } from 'react-native-chart-kit';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
@@ -25,6 +26,8 @@ interface Props {
 }
 
 export const StatsScreen: React.FC<Props> = ({ navigation }) => {
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   const { currentMonth, setCurrentMonth } = useUIStore();
   const { summary } = useTransactions(currentMonth);
   const rangeQuery = useOverviewRange(6);
@@ -74,7 +77,7 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
   }, [summary, currentMonth]);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView ref={scrollRef} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>통계</Text>
       </View>
@@ -240,7 +243,7 @@ const createStyles = (colors: ThemeColors) =>
     totalAmount: {
       fontSize: 26,
       fontWeight: '800',
-      color: colors.expense,
+      color: colors.text,
       marginTop: 4,
     },
     categoryCard: {
