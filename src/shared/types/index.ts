@@ -150,6 +150,18 @@ export interface MonthlyBudget {
   updatedBy: string;
 }
 
+export interface NotificationSettings {
+  budgetAlert: boolean;
+  recurringAlert: boolean;
+  monthlySetup: boolean;
+}
+
+export interface UserProfile {
+  uid: string;
+  fcmToken?: string;
+  notificationSettings: NotificationSettings;
+}
+
 export interface AssetGoal {
   id: string;
   title: string;

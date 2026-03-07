@@ -86,6 +86,12 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       onPress: () => navigation.navigate('RecurringList'),
     },
     {
+      icon: 'notifications',
+      label: '알림 설정',
+      subtitle: '예산·고정비·월초 알림 관리',
+      onPress: () => navigation.navigate('NotificationSetting'),
+    },
+    {
       icon: 'flag',
       label: '자산 목표 설정',
       subtitle: '목표 금액 달성률 확인',
