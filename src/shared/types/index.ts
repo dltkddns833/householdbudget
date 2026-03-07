@@ -86,6 +86,23 @@ export interface LeaseInfo {
   net: number;
 }
 
+export interface MonthlyDataPoint {
+  month: number; // 1~12
+  income: number;
+  expense: number;
+  saving: number;
+}
+
+export interface YearlySummary {
+  year: number;
+  totalIncome: number;
+  totalExpense: number;
+  totalSaving: number;
+  savingRate: number;
+  monthlyData: MonthlyDataPoint[]; // 항상 12개, 없는 달 = 0
+  topCategories: { category: string; label: string; amount: number }[];
+}
+
 export type InsightType = 'saving' | 'warning' | 'info' | 'achievement';
 
 export interface InsightMessage {

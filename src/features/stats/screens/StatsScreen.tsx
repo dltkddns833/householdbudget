@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import { formatCurrency, formatCurrencyShort } from '../../../shared/utils/curre
 import { useBudgetProgress } from '../../budget/hooks/useBudget';
 import { useInsights } from '../hooks/useInsights';
 import { InsightCard } from '../components/InsightCard';
+import { YearlyStatsView } from '../components/YearlyStatsView';
 import dayjs from 'dayjs';
 
 const screenWidth = Dimensions.get('window').width;
@@ -36,6 +37,8 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
   const rangeQuery = useOverviewRange(6);
   const budgetProgress = useBudgetProgress(currentMonth);
   const insights = useInsights(currentMonth);
+  const [activeTab, setActiveTab] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedYear, setSelectedYear] = useState(dayjs().year());
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -87,6 +90,34 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.headerTitle}>통계</Text>
       </View>
 
+      {/* 월간 / 연간 탭 */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'monthly' && styles.tabActive]}
+          onPress={() => setActiveTab('monthly')}
+        >
+          <Text style={[styles.tabText, activeTab === 'monthly' && styles.tabTextActive]}>
+            월간
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'yearly' && styles.tabActive]}
+          onPress={() => setActiveTab('yearly')}
+        >
+          <Text style={[styles.tabText, activeTab === 'yearly' && styles.tabTextActive]}>
+            연간
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 연간 뷰 */}
+      {activeTab === 'yearly' && (
+        <YearlyStatsView year={selectedYear} onYearChange={setSelectedYear} />
+      )}
+
+      {/* 월간 뷰 */}
+      {activeTab === 'monthly' && (
+        <>
       <MonthSelector yearMonth={currentMonth} onChangeMonth={setCurrentMonth} />
 
       <InsightCard insights={insights} />
@@ -257,6 +288,8 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
       )}
 
       <View style={{ height: 100 }} />
+        </>
+      )}
     </ScrollView>
   );
 };
@@ -266,6 +299,36 @@ const createStyles = (colors: ThemeColors) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+    tabContainer: {
+      flexDirection: 'row',
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 12,
+      padding: 4,
+      marginHorizontal: 16,
+      marginTop: 12,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 8,
+      alignItems: 'center',
+      borderRadius: 10,
+    },
+    tabActive: {
+      backgroundColor: colors.surface,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    tabText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    tabTextActive: {
+      color: colors.primary,
     },
     header: {
       paddingHorizontal: 20,
