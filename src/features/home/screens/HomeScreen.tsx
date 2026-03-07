@@ -22,6 +22,8 @@ import { useBudget } from '../../budget/hooks/useBudget';
 import { usePendingRecurring } from '../../recurring/hooks/useRecurring';
 import { useSavingRate } from '../hooks/useSavingRate';
 import { SavingRateCard } from '../components/SavingRateCard';
+import { useGoalProgress } from '../../goals/hooks/useGoals';
+import { AssetGoalCard } from '../components/AssetGoalCard';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -39,6 +41,7 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const budgetQuery = useBudget(currentMonth);
   const { data: pendingRecurring = [] } = usePendingRecurring(currentMonth);
   const savingRateSummary = useSavingRate(currentMonth);
+  const goalProgress = useGoalProgress();
   const overview = overviewQuery.data;
   const overviewRange = rangeQuery.data || [];
   const { colors, isDark } = useTheme();
@@ -200,6 +203,13 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       {savingRateSummary && <SavingRateCard summary={savingRateSummary} />}
+
+      {goalProgress && (
+        <AssetGoalCard
+          progress={goalProgress}
+          onPress={() => navigation.navigate('More', { screen: 'GoalSetting' })}
+        />
+      )}
 
       {/* 6-Month Trend Chart */}
       {chartData && (

@@ -150,6 +150,23 @@ export interface MonthlyBudget {
   updatedBy: string;
 }
 
+export interface AssetGoal {
+  id: string;
+  title: string;
+  targetAmount: number;
+  createdAt: Date;
+  createdBy: string;
+  isActive: boolean;
+}
+
+export interface AssetGoalProgress {
+  goal: AssetGoal;
+  currentAmount: number;
+  remaining: number;
+  percentage: number; // min(currentAmount / targetAmount * 100, 100)
+  isAchieved: boolean;
+}
+
 export interface CategoryBudgetProgress {
   categoryKey: string;
   label: string;

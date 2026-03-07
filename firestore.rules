@@ -53,6 +53,14 @@ service cloud.firestore {
         allow write: if isFamilyMember(familyId);
       }
 
+      // Goals
+      match /goals/{goalId} {
+        allow read: if isFamilyMember(familyId);
+        allow create: if isFamilyMember(familyId);
+        allow update: if isFamilyMember(familyId);
+        allow delete: if isFamilyMember(familyId);
+      }
+
       // Financial Status
       match /financialStatus/{yearMonth} {
         allow read: if isFamilyMember(familyId);
