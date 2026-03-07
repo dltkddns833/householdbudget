@@ -80,7 +80,12 @@ export const AssetScreen: React.FC<Props> = ({ navigation }) => {
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>재무상태</Text>
-        <View style={styles.headerPlaceholder} />
+        <TouchableOpacity
+          onPress={() => navigation.navigate('AssetAdd', { yearMonth })}
+          style={styles.addBtn}
+        >
+          <Icon name="add" size={26} color={colors.text} />
+        </TouchableOpacity>
       </View>
 
       <MonthSelector yearMonth={yearMonth} onChangeMonth={setYearMonth} />
@@ -162,8 +167,8 @@ const createStyles = (colors: ThemeColors) =>
       fontWeight: '700',
       color: colors.text,
     },
-    headerPlaceholder: {
-      width: 32,
+    addBtn: {
+      padding: 4,
     },
     summaryRow: {
       flexDirection: 'row',

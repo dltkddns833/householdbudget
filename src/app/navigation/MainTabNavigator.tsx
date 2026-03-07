@@ -20,6 +20,7 @@ import { CategoryDetailScreen } from '../../features/stats/screens/CategoryDetai
 import { MoreMenuScreen } from '../../features/settings/screens/MoreMenuScreen';
 import { AssetScreen } from '../../features/assets/screens/AssetScreen';
 import { AssetEditScreen } from '../../features/assets/screens/AssetEditScreen';
+import { AssetAddScreen } from '../../features/assets/screens/AssetAddScreen';
 import { BudgetSettingScreen } from '../../features/budget/screens/BudgetSettingScreen';
 import { RecurringListScreen } from '../../features/recurring/screens/RecurringListScreen';
 import { RecurringFormScreen } from '../../features/recurring/screens/RecurringFormScreen';
@@ -69,6 +70,7 @@ const MoreStackScreen = () => (
     <MoreStack.Screen name="BudgetSetting" component={BudgetSettingScreen} />
     <MoreStack.Screen name="Assets" component={AssetScreen} />
     <MoreStack.Screen name="AssetEdit" component={AssetEditScreen} />
+    <MoreStack.Screen name="AssetAdd" component={AssetAddScreen} />
     <MoreStack.Screen name="RecurringList" component={RecurringListScreen} />
     <MoreStack.Screen name="RecurringForm" component={RecurringFormScreen} />
     <MoreStack.Screen name="SavingRateGoal" component={SavingRateGoalScreen} />
@@ -148,12 +150,6 @@ export const MainTabNavigator: React.FC = () => {
             <Icon name="bar-chart" size={size} color={color} />
           ),
         }}
-        listeners={({ navigation }) => ({
-          tabPress: e => {
-            e.preventDefault();
-            navigation.navigate('Stats', { screen: 'StatsMain' });
-          },
-        })}
       />
       <Tab.Screen
         name="More"
@@ -164,12 +160,6 @@ export const MainTabNavigator: React.FC = () => {
             <Icon name="more-horiz" size={size} color={color} />
           ),
         }}
-        listeners={({ navigation }) => ({
-          tabPress: e => {
-            e.preventDefault();
-            navigation.navigate('More', { screen: 'MoreMenu' });
-          },
-        })}
       />
     </Tab.Navigator>
   );

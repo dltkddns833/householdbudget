@@ -3,6 +3,7 @@ import { NavigationContainer, DefaultTheme, DarkTheme, Theme } from '@react-navi
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import auth from '@react-native-firebase/auth';
 import { useAuthStore } from '../../store/authStore';
+import { useUIStore } from '../../store/uiStore';
 import { authService } from '../../features/auth/services/authService';
 import { LoginScreen } from '../../features/auth/screens/LoginScreen';
 import { FamilySetupScreen } from '../../features/auth/screens/FamilySetupScreen';
@@ -16,6 +17,15 @@ export const RootNavigator: React.FC = () => {
   const { user, family, isLoading, setUser, setFamily, setLoading } = useAuthStore();
   const { colors, isDark } = useTheme();
   const [splashDone, setSplashDone] = useState(false);
+  const [storeHydrated, setStoreHydrated] = useState(() => useUIStore.persist.hasHydrated());
+
+  useEffect(() => {
+    if (useUIStore.persist.hasHydrated()) {
+      setStoreHydrated(true);
+      return;
+    }
+    return useUIStore.persist.onFinishHydration(() => setStoreHydrated(true));
+  }, []);
 
   const navigationTheme: Theme = useMemo(() => ({
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -53,7 +63,7 @@ export const RootNavigator: React.FC = () => {
   if (!splashDone) {
     return (
       <AnimatedSplash
-        isReady={!isLoading}
+        isReady={!isLoading && storeHydrated}
         onAnimationComplete={() => setSplashDone(true)}
       />
     );

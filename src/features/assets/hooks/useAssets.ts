@@ -44,6 +44,44 @@ export const useUpdateAccountAmount = () => {
   });
 };
 
+export const useAddAccount = () => {
+  const { family } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      yearMonth,
+      account,
+    }: {
+      yearMonth: string;
+      account: Omit<Account, 'id'>;
+    }) => assetService.addAccount(family!.id, yearMonth, account),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financialStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    },
+  });
+};
+
+export const useDeleteAccount = () => {
+  const { family } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      yearMonth,
+      accountId,
+    }: {
+      yearMonth: string;
+      accountId: string;
+    }) => assetService.deleteAccount(family!.id, yearMonth, accountId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financialStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    },
+  });
+};
+
 export const useAutoInitMonth = (yearMonth: string) => {
   const statusQuery = useFinancialStatus(yearMonth);
   const copyMutation = useCopyFromPreviousMonth();

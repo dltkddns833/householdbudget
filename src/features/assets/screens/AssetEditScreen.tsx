@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import { formatInputNumber, parseInputNumber, formatCurrency } from '../../../shared/utils/currency';
-import { useUpdateAccountAmount } from '../hooks/useAssets';
+import { useUpdateAccountAmount, useDeleteAccount } from '../hooks/useAssets';
 
 interface Props {
   navigation: any;
@@ -24,8 +24,27 @@ export const AssetEditScreen: React.FC<Props> = ({ navigation, route }) => {
   const { account, yearMonth } = route.params;
   const [amountText, setAmountText] = useState(formatInputNumber(String(account.amount)));
   const mutation = useUpdateAccountAmount();
+  const deleteMutation = useDeleteAccount();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+
+  const handleDelete = () => {
+    Alert.alert('계좌 삭제', `${account.accountName}을(를) 삭제하시겠습니까?`, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteMutation.mutateAsync({ yearMonth, accountId: account.id });
+            navigation.goBack();
+          } catch (error: any) {
+            Alert.alert('오류', error.message);
+          }
+        },
+      },
+    ]);
+  };
 
   const handleSave = async () => {
     const amount = parseInputNumber(amountText);
@@ -47,7 +66,9 @@ export const AssetEditScreen: React.FC<Props> = ({ navigation, route }) => {
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>금액 수정</Text>
-        <View style={{ width: 32 }} />
+        <TouchableOpacity onPress={handleDelete} style={styles.backBtn}>
+          <Icon name="delete" size={22} color={colors.danger} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
