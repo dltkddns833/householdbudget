@@ -13,6 +13,15 @@ export interface Family {
   members: string[];
   memberNames: Record<string, string>;
   inviteCode: string;
+  savingRateGoal?: number; // 0~100 정수, undefined = 미설정
+}
+
+export interface SavingRateSummary {
+  savingRate: number;      // 소수점 1자리 (음수 가능)
+  savingAmount: number;    // 원 단위 (음수 가능)
+  goalRate: number;        // 목표 저축률 (0이면 미설정)
+  isGoalAchieved: boolean;
+  status: 'positive' | 'negative' | 'zero';
 }
 
 export type TransactionType = 'expense' | 'income';

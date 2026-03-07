@@ -68,6 +68,10 @@ export const authService = {
     return { id: familyRef.id, ...family };
   },
 
+  async updateSavingRateGoal(familyId: string, goal: number): Promise<void> {
+    await firestore().collection('families').doc(familyId).update({ savingRateGoal: goal });
+  },
+
   async joinFamily(uid: string, userName: string, inviteCode: string): Promise<Family> {
     const snapshot = await firestore()
       .collection('families')

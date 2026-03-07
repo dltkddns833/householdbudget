@@ -23,6 +23,7 @@ import { AssetEditScreen } from '../../features/assets/screens/AssetEditScreen';
 import { BudgetSettingScreen } from '../../features/budget/screens/BudgetSettingScreen';
 import { RecurringListScreen } from '../../features/recurring/screens/RecurringListScreen';
 import { RecurringFormScreen } from '../../features/recurring/screens/RecurringFormScreen';
+import { SavingRateGoalScreen } from '../../features/settings/screens/SavingRateGoalScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -68,6 +69,7 @@ const MoreStackScreen = () => (
     <MoreStack.Screen name="AssetEdit" component={AssetEditScreen} />
     <MoreStack.Screen name="RecurringList" component={RecurringListScreen} />
     <MoreStack.Screen name="RecurringForm" component={RecurringFormScreen} />
+    <MoreStack.Screen name="SavingRateGoal" component={SavingRateGoalScreen} />
   </MoreStack.Navigator>
 );
 

@@ -20,6 +20,8 @@ import { useUIStore } from '../../../store/uiStore';
 import { formatYearMonth } from '../../../shared/utils/date';
 import { useBudget } from '../../budget/hooks/useBudget';
 import { usePendingRecurring } from '../../recurring/hooks/useRecurring';
+import { useSavingRate } from '../hooks/useSavingRate';
+import { SavingRateCard } from '../components/SavingRateCard';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -36,6 +38,7 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { summary } = useTransactions(currentMonth);
   const budgetQuery = useBudget(currentMonth);
   const { data: pendingRecurring = [] } = usePendingRecurring(currentMonth);
+  const savingRateSummary = useSavingRate(currentMonth);
   const overview = overviewQuery.data;
   const overviewRange = rangeQuery.data || [];
   const { colors, isDark } = useTheme();
@@ -195,6 +198,8 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
           />
         </Card>
       </View>
+
+      {savingRateSummary && <SavingRateCard summary={savingRateSummary} />}
 
       {/* 6-Month Trend Chart */}
       {chartData && (

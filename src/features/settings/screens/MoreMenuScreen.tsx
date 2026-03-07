@@ -86,6 +86,12 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       onPress: () => navigation.navigate('RecurringList'),
     },
     {
+      icon: 'trending-up',
+      label: '저축률 목표 설정',
+      subtitle: family?.savingRateGoal ? `목표: ${family.savingRateGoal}%` : '목표 없음',
+      onPress: () => navigation.navigate('SavingRateGoal'),
+    },
+    {
       icon: 'account-balance',
       label: '재무상태',
       subtitle: '자산 현황 관리',
