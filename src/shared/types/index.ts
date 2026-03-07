@@ -36,6 +36,7 @@ export interface Transaction {
   amount: number; // 원 단위 정수
   memo: string;
   createdBy: string;
+  receiptUrl?: string; // Firebase Storage URL, 없으면 미첨부
 }
 
 export interface TransactionInput {
