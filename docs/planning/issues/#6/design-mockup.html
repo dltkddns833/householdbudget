@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#6 저축률 트래킹 — 디자인 목업</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0D9488;--primary-light:#2DD4BF;--primary-dark:#0F766E;
+  --expense:#3B82F6;--income:#EF4444;--success:#22C55E;--danger:#EF4444;
+  --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;
+  --text:#0F172A;--text-2:#64748B;--text-3:#94A3B8;--border:#E2E8F0;--border-light:#F1F5F9;
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);
+}
+body{background:#E8ECF0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding:48px 32px;}
+h1{text-align:center;font-size:22px;font-weight:700;color:#1E293B;margin-bottom:6px;}
+.subtitle{text-align:center;font-size:13px;color:var(--text-2);margin-bottom:40px;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:var(--text-2);max-width:375px;text-align:center;}
+.phone{width:375px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.35);position:relative;}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;}
+.phone-inner{padding-top:48px;overflow:hidden;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 24px;font-size:12px;font-weight:600;color:var(--text);}
+.nav-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);}
+.nav-title{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center;}
+.nav-icon{font-size:20px;color:var(--text-2);}
+.content{background:var(--bg);padding:0 0 80px;}
+.section-title{font-size:15px;font-weight:700;color:var(--text);padding:14px 16px 8px;}
+.tab-bar{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-icon-a{font-size:22px;color:var(--primary);}
+.tab-icon-i{font-size:22px;color:var(--text-3);}
+.tab-label-a{font-size:10px;color:var(--primary);font-weight:600;}
+.tab-label-i{font-size:10px;color:var(--text-3);}
+.tab-fab{width:44px;height:44px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:22px;box-shadow:0 4px 14px rgba(13,148,136,0.4);margin-top:-6px;}
+
+.hero-card{background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 60%,var(--primary-light) 100%);border-radius:20px;padding:20px;margin:0 16px 12px;color:white;}
+.hero-label{font-size:12px;opacity:.8;margin-bottom:6px;}
+.hero-amount{font-size:28px;font-weight:800;margin-bottom:14px;}
+.hero-row{display:flex;gap:20px;}
+.hero-sub-label{font-size:11px;opacity:.75;margin-bottom:2px;}
+.hero-sub-amount{font-size:14px;font-weight:600;}
+.month-sel{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 16px;}
+.month-sel-arrow{font-size:20px;color:var(--text-2);}
+.month-sel-text{font-size:17px;font-weight:700;color:var(--text);}
+.item-card{background:var(--surface);border-radius:12px;padding:14px;margin:0 16px 8px;box-shadow:var(--shadow-sm);}
+
+/* ★ SavingRateCard */
+.saving-card{background:var(--surface);border-radius:16px;padding:16px;margin:0 16px 8px;box-shadow:var(--shadow-sm);}
+.saving-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.saving-card-label{font-size:12px;color:var(--text-2);margin-bottom:4px;}
+.saving-rate-big{font-size:28px;font-weight:800;}
+.saving-rate-big.positive{color:var(--success);}
+.saving-rate-big.negative{color:var(--danger);}
+.saving-amount{font-size:13px;font-weight:500;color:var(--text-2);}
+.goal-tag{font-size:11px;font-weight:600;border-radius:6px;padding:4px 8px;}
+.goal-tag.achieved{background:rgba(34,197,94,.12);color:#15803D;}
+.goal-tag.pending{background:rgba(13,148,136,.1);color:var(--primary);}
+.goal-tag.none{background:var(--surface-2);color:var(--text-3);}
+
+/* 진행 바 */
+.gauge-wrap{margin-top:6px;}
+.gauge-label{display:flex;justify-content:space-between;margin-bottom:4px;}
+.gauge-label-text{font-size:11px;color:var(--text-2);}
+.gauge-bg{height:8px;background:var(--surface-2);border-radius:4px;position:relative;}
+.gauge-fill{height:8px;border-radius:4px;position:absolute;left:0;top:0;}
+.gauge-fill.positive{background:var(--primary);}
+.gauge-fill.achieved{background:var(--success);}
+.gauge-fill.negative{background:var(--danger);width:0%!important;}
+.gauge-goal-mark{position:absolute;top:-3px;width:2px;height:14px;background:var(--text-3);border-radius:1px;}
+.gauge-status{font-size:11px;margin-top:6px;font-weight:500;}
+.gauge-status.achieved{color:var(--success);}
+.gauge-status.pending{color:var(--primary);}
+.gauge-status.negative{color:var(--danger);}
+
+/* 더보기 메뉴 */
+.more-item{background:var(--surface);padding:16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border-light);}
+.more-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.more-icon.teal{background:rgba(13,148,136,0.12);}
+.more-icon.amber{background:rgba(245,158,11,0.12);}
+.more-icon.green{background:rgba(34,197,94,0.12);}
+.more-item-text{flex:1;}
+.more-item-title{font-size:15px;font-weight:500;color:var(--text);}
+.more-item-sub{font-size:12px;color:var(--text-2);margin-top:2px;}
+.more-chevron{font-size:16px;color:var(--text-3);}
+
+/* 목표 설정 화면 */
+.form-field{padding:0 16px;margin-bottom:20px;}
+.field-label{font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px;}
+.text-input{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:13px 14px;font-size:15px;color:var(--text);display:flex;align-items:center;justify-content:space-between;}
+.text-input.focused{border-color:var(--primary);}
+.input-suffix{font-size:13px;color:var(--text-2);}
+
+/* 슬라이더 */
+.slider-wrap{padding:0 16px;margin-bottom:4px;}
+.slider-track{height:6px;background:var(--surface-2);border-radius:3px;position:relative;}
+.slider-fill{position:absolute;left:0;top:0;height:6px;background:var(--primary);border-radius:3px;}
+.slider-thumb{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;background:white;border:2px solid var(--primary);border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+.slider-labels{display:flex;justify-content:space-between;padding:6px 0;font-size:11px;color:var(--text-3);}
+.slider-value{text-align:center;font-size:18px;font-weight:700;color:var(--primary);padding:4px 0;}
+.hint-text{font-size:12px;color:var(--text-3);padding:0 16px;text-align:center;margin-bottom:20px;}
+.save-btn{background:var(--primary);margin:0 16px;border-radius:999px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;box-shadow:0 4px 14px rgba(13,148,136,.35);}
+</style>
+</head>
+<body>
+<h1>#6 저축률 트래킹</h1>
+<p class="subtitle">HomeScreen SavingRateCard 3가지 상태 · 저축률 목표 설정 화면</p>
+<div class="screens">
+
+<!-- 화면 1: 홈 — 목표 설정 + 달성 전 -->
+<div class="screen-wrap">
+  <div class="screen-label">1. HomeScreen — 저축률 35%, 목표 30% 달성</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);">
+        <span style="font-size:17px;font-weight:700;">우리집 가계부</span><span style="font-size:20px;">🔔</span>
+      </div>
+      <div class="content">
+        <div class="month-sel"><span class="month-sel-arrow">‹</span><span class="month-sel-text">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+        <div class="hero-card">
+          <div class="hero-label">이번달 실자산</div><div class="hero-amount">₩358,420,000</div>
+          <div class="hero-row">
+            <div><div class="hero-sub-label">수입</div><div class="hero-sub-amount">+5,200,000</div></div>
+            <div><div class="hero-sub-label">지출</div><div class="hero-sub-amount">-1,820,000</div></div>
+          </div>
+        </div>
+
+        <!-- ★ SavingRateCard: 목표 달성 -->
+        <div class="saving-card">
+          <div class="saving-card-header">
+            <div>
+              <div class="saving-card-label">이번달 저축률</div>
+              <div class="saving-rate-big positive">35.0%</div>
+              <div class="saving-amount">저축액 +3,380,000원</div>
+            </div>
+            <div class="goal-tag achieved">목표 달성!</div>
+          </div>
+          <div class="gauge-wrap">
+            <div class="gauge-label">
+              <span class="gauge-label-text">0%</span>
+              <span class="gauge-label-text">목표 30%</span>
+              <span class="gauge-label-text">100%</span>
+            </div>
+            <div class="gauge-bg">
+              <div class="gauge-fill achieved" style="width:100%;"></div>
+              <div class="gauge-goal-mark" style="left:30%;"></div>
+            </div>
+            <div class="gauge-status achieved">✓ 목표 달성! (목표 30%, 현재 35.0%)</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-a">🏠</div><div class="tab-label-a">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 2: 홈 — 목표 미달 / 음수 저축률 -->
+<div class="screen-wrap">
+  <div class="screen-label">2. HomeScreen — 왼쪽: 목표 미달 · 오른쪽: 음수 저축률</div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;">
+    <!-- 목표 미달 -->
+    <div class="phone" style="width:320px;">
+      <div class="phone-inner">
+        <div class="status-bar" style="padding:6px 18px;"><span>9:41</span><span>●●●</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:48px;background:var(--surface);border-bottom:1px solid var(--border);">
+          <span style="font-size:15px;font-weight:700;">우리집 가계부</span><span style="font-size:18px;">🔔</span>
+        </div>
+        <div class="content">
+          <div class="month-sel" style="padding:10px 14px;"><span class="month-sel-arrow">‹</span><span class="month-sel-text" style="font-size:15px;">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+          <div class="hero-card" style="padding:14px;margin:0 14px 10px;border-radius:16px;">
+            <div class="hero-label">이번달 실자산</div><div class="hero-amount" style="font-size:22px;">₩358,420,000</div>
+          </div>
+          <div class="saving-card" style="margin:0 14px 8px;padding:14px;">
+            <div class="saving-card-header" style="margin-bottom:10px;">
+              <div>
+                <div class="saving-card-label">이번달 저축률</div>
+                <div class="saving-rate-big positive" style="font-size:24px;">18.5%</div>
+                <div class="saving-amount">저축액 +962,000원</div>
+              </div>
+              <div class="goal-tag pending">목표까지 11.5%p</div>
+            </div>
+            <div class="gauge-wrap">
+              <div class="gauge-bg">
+                <div class="gauge-fill positive" style="width:62%;"></div>
+                <div class="gauge-goal-mark" style="left:100%;"></div>
+              </div>
+              <div class="gauge-status pending" style="font-size:10px;">목표 30%까지 11.5%p 남음</div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon-a" style="font-size:18px;">🏠</div><div class="tab-label-a">홈</div></div>
+          <div class="tab-item"><div class="tab-icon-i" style="font-size:18px;">📋</div><div class="tab-label-i">거래</div></div>
+          <div class="tab-item"><div class="tab-fab" style="width:38px;height:38px;font-size:18px;margin-top:-4px;">+</div></div>
+          <div class="tab-item"><div class="tab-icon-i" style="font-size:18px;">📊</div><div class="tab-label-i">통계</div></div>
+          <div class="tab-item"><div class="tab-icon-i" style="font-size:18px;">☰</div><div class="tab-label-i">더보기</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- 음수 저축률 -->
+    <div class="phone" style="width:320px;">
+      <div class="phone-inner">
+        <div class="status-bar" style="padding:6px 18px;"><span>9:41</span><span>●●●</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:48px;background:var(--surface);border-bottom:1px solid var(--border);">
+          <span style="font-size:15px;font-weight:700;">우리집 가계부</span><span style="font-size:18px;">🔔</span>
+        </div>
+        <div class="content">
+          <div class="month-sel" style="padding:10px 14px;"><span class="month-sel-arrow">‹</span><span class="month-sel-text" style="font-size:15px;">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+          <div class="hero-card" style="padding:14px;margin:0 14px 10px;border-radius:16px;">
+            <div class="hero-label">이번달 실자산</div><div class="hero-amount" style="font-size:22px;">₩358,420,000</div>
+          </div>
+          <div class="saving-card" style="margin:0 14px 8px;padding:14px;">
+            <div class="saving-card-header" style="margin-bottom:10px;">
+              <div>
+                <div class="saving-card-label">이번달 저축률</div>
+                <div class="saving-rate-big negative" style="font-size:24px;">-12.3%</div>
+                <div class="saving-amount" style="color:var(--danger);">지출 초과 -640,000원</div>
+              </div>
+              <div class="goal-tag none">미달</div>
+            </div>
+            <div class="gauge-wrap">
+              <div class="gauge-bg">
+                <div class="gauge-fill negative" style="width:0%;"></div>
+              </div>
+              <div class="gauge-status negative" style="font-size:10px;">⚠ 지출이 수입을 64만원 초과했어요</div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon-a" style="font-size:18px;">🏠</div><div class="tab-label-a">홈</div></div>
+          <div class="tab-item"><div class="tab-icon-i" style="font-size:18px;">📋</div><div class="tab-label-i">거래</div></div>
+          <div class="tab-item"><div class="tab-fab" style="width:38px;height:38px;font-size:18px;margin-top:-4px;">+</div></div>
+          <div class="tab-item"><div class="tab-icon-i" style="font-size:18px;">📊</div><div class="tab-label-i">통계</div></div>
+          <div class="tab-item"><div class="tab-icon-i" style="font-size:18px;">☰</div><div class="tab-label-i">더보기</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 3: SavingRateGoalScreen -->
+<div class="screen-wrap">
+  <div class="screen-label">3. SavingRateGoalScreen — 목표 저축률 설정</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header">
+        <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;"><span class="nav-icon">‹</span></div>
+        <div class="nav-title">저축률 목표 설정</div>
+        <div style="width:44px;"></div>
+      </div>
+      <div class="content" style="padding:24px 0 0;">
+        <!-- 현재 저축률 현황 -->
+        <div class="item-card" style="margin:0 16px 24px;">
+          <div style="font-size:12px;color:var(--text-2);margin-bottom:4px;">현재 이번달 저축률</div>
+          <div style="font-size:24px;font-weight:800;color:var(--success);">35.0%</div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">저축액 +3,380,000원</div>
+        </div>
+
+        <!-- 슬라이더 -->
+        <div class="form-field">
+          <span class="field-label">목표 저축률</span>
+          <div class="slider-value">30%</div>
+          <div class="slider-wrap" style="padding:0;">
+            <div class="slider-track">
+              <div class="slider-fill" style="width:30%;"></div>
+              <div class="slider-thumb" style="left:calc(30% - 11px);"></div>
+            </div>
+            <div class="slider-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+          </div>
+        </div>
+        <div class="hint-text">목표 저축률 30%를 설정합니다.<br>홈 화면에서 달성 여부를 확인하세요.</div>
+
+        <!-- 0% 안내 -->
+        <div style="margin:0 16px 20px;padding:10px 12px;background:var(--surface-2);border-radius:8px;font-size:12px;color:var(--text-3);">
+          💡 0%로 설정하면 목표 없음으로 처리됩니다
+        </div>
+
+        <div class="save-btn">저장하기</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

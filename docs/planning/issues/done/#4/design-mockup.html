@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#4 전월 비교 인사이트 — 디자인 목업</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0D9488;--primary-light:#2DD4BF;--primary-dark:#0F766E;
+  --expense:#3B82F6;--expense-light:#DBEAFE;--income:#EF4444;
+  --danger:#EF4444;--warning:#F59E0B;--success:#22C55E;
+  --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;
+  --text:#0F172A;--text-2:#64748B;--text-3:#94A3B8;--border:#E2E8F0;--border-light:#F1F5F9;
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);
+}
+body{background:#E8ECF0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding:48px 32px;}
+h1{text-align:center;font-size:22px;font-weight:700;color:#1E293B;margin-bottom:6px;}
+.subtitle{text-align:center;font-size:13px;color:var(--text-2);margin-bottom:40px;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:var(--text-2);}
+.phone{width:375px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.35);position:relative;}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;}
+.phone-inner{padding-top:48px;overflow:hidden;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 24px;font-size:12px;font-weight:600;color:var(--text);}
+.nav-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);}
+.nav-title{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center;}
+.content{background:var(--bg);padding:0 0 80px;}
+.month-sel{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 16px;}
+.month-sel-arrow{font-size:20px;color:var(--text-2);}
+.month-sel-text{font-size:17px;font-weight:700;color:var(--text);}
+.section-title{font-size:15px;font-weight:700;color:var(--text);padding:4px 16px 8px;}
+.item-card{background:var(--surface);border-radius:12px;padding:14px;margin:0 16px 6px;box-shadow:var(--shadow-sm);}
+.tab-bar{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-icon-a{font-size:22px;color:var(--primary);}
+.tab-icon-i{font-size:22px;color:var(--text-3);}
+.tab-label-a{font-size:10px;color:var(--primary);font-weight:600;}
+.tab-label-i{font-size:10px;color:var(--text-3);}
+.tab-fab{width:44px;height:44px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:22px;box-shadow:0 4px 14px rgba(13,148,136,0.4);margin-top:-6px;}
+
+/* InsightCard */
+.insight-card{border-radius:12px;padding:14px;margin:0 16px 6px;}
+.insight-card.warning{background:#FEF3C7;border:1px solid #FDE68A;}
+.insight-card.saving{background:#D1FAE5;border:1px solid #A7F3D0;}
+.insight-card.achievement{background:#DBEAFE;border:1px solid #BFDBFE;}
+.insight-card.info{background:var(--surface-2);border:1px solid var(--border);}
+.insight-row{display:flex;align-items:flex-start;gap:10px;}
+.insight-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.insight-text{font-size:14px;font-weight:500;line-height:1.5;}
+.insight-text.warning{color:#92400E;}
+.insight-text.saving{color:#065F46;}
+.insight-text.achievement{color:#1E40AF;}
+.insight-text.info{color:var(--text-2);}
+
+/* 카테고리 차트 */
+.cat-bar-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border-light);}
+.cat-bar-row:last-child{border-bottom:none;}
+.cat-name{font-size:13px;font-weight:600;color:var(--text);width:44px;flex-shrink:0;}
+.cat-bar-wrap{flex:1;}
+.cat-bar-bg{height:8px;background:var(--surface-2);border-radius:4px;position:relative;}
+.cat-bar-fill{height:8px;border-radius:4px;position:absolute;left:0;top:0;}
+.cat-amount{font-size:12px;font-weight:600;color:var(--expense);width:70px;text-align:right;flex-shrink:0;}
+</style>
+</head>
+<body>
+<h1>#4 전월 비교 인사이트</h1>
+<p class="subtitle">StatsScreen 월 선택기 아래 InsightCard — 4가지 type 모두 표현</p>
+<div class="screens">
+
+<!-- 화면 1: warning + saving + achievement 복합 -->
+<div class="screen-wrap">
+  <div class="screen-label">1. StatsScreen — 인사이트 3개 (warning · saving · achievement)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header"><div></div><div class="nav-title">통계</div><div></div></div>
+      <div class="content">
+        <div class="month-sel"><span class="month-sel-arrow">‹</span><span class="month-sel-text">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+
+        <!-- ★ InsightCard: warning -->
+        <div class="insight-card warning">
+          <div class="insight-row">
+            <span class="insight-icon">⚠️</span>
+            <span class="insight-text warning">지난달보다 <strong>15만원</strong> 더 지출했어요</span>
+          </div>
+        </div>
+
+        <!-- ★ InsightCard: warning (카테고리 급증) -->
+        <div class="insight-card warning" style="margin-top:6px;">
+          <div class="insight-row">
+            <span class="insight-icon">🍽</span>
+            <span class="insight-text warning">이번달 <strong>식비</strong>가 지난달보다 8만원 늘었어요</span>
+          </div>
+        </div>
+
+        <!-- ★ InsightCard: achievement -->
+        <div class="insight-card achievement" style="margin-top:6px;">
+          <div class="insight-row">
+            <span class="insight-icon">🏆</span>
+            <span class="insight-text achievement">이번달 저축률 <strong>35%</strong>를 달성했어요!</span>
+          </div>
+        </div>
+
+        <!-- 카테고리 차트 (기존) -->
+        <div class="section-title" style="margin-top:8px;">카테고리별 지출</div>
+        <div class="item-card">
+          <div class="cat-bar-row">
+            <span class="cat-name">🍽 식비</span>
+            <div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:65%;background:var(--expense);"></div></div></div>
+            <span class="cat-amount">-420,000</span>
+          </div>
+          <div class="cat-bar-row">
+            <span class="cat-name">☕ 카페</span>
+            <div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:13%;background:var(--expense);"></div></div></div>
+            <span class="cat-amount">-85,000</span>
+          </div>
+          <div class="cat-bar-row">
+            <span class="cat-name">🛍 쇼핑</span>
+            <div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:20%;background:var(--expense);"></div></div></div>
+            <span class="cat-amount">-130,000</span>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📊</div><div class="tab-label-a">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 2: saving + info -->
+<div class="screen-wrap">
+  <div class="screen-label">2. StatsScreen — saving + info (절약 달)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header"><div></div><div class="nav-title">통계</div><div></div></div>
+      <div class="content">
+        <div class="month-sel"><span class="month-sel-arrow">‹</span><span class="month-sel-text">2026년 2월</span><span class="month-sel-arrow">›</span></div>
+
+        <!-- ★ InsightCard: saving -->
+        <div class="insight-card saving">
+          <div class="insight-row">
+            <span class="insight-icon">💚</span>
+            <span class="insight-text saving">지난달보다 <strong>22만원</strong> 절약했어요!</span>
+          </div>
+        </div>
+
+        <!-- ★ InsightCard: info -->
+        <div class="insight-card info" style="margin-top:6px;">
+          <div class="insight-row">
+            <span class="insight-icon">ℹ️</span>
+            <span class="insight-text info">이번달 <strong>182만원</strong>을 모았어요</span>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:8px;">카테고리별 지출</div>
+        <div class="item-card">
+          <div class="cat-bar-row">
+            <span class="cat-name">🍽 식비</span>
+            <div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:50%;background:var(--expense);"></div></div></div>
+            <span class="cat-amount">-320,000</span>
+          </div>
+          <div class="cat-bar-row">
+            <span class="cat-name">☕ 카페</span>
+            <div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:10%;background:var(--expense);"></div></div></div>
+            <span class="cat-amount">-64,000</span>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📊</div><div class="tab-label-a">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 3: 전월 데이터 없음 (첫 달) -->
+<div class="screen-wrap">
+  <div class="screen-label">3. StatsScreen — 전월 데이터 없음 (첫 달)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header"><div></div><div class="nav-title">통계</div><div></div></div>
+      <div class="content">
+        <div class="month-sel"><span class="month-sel-arrow" style="opacity:.3;">‹</span><span class="month-sel-text">2025년 1월</span><span class="month-sel-arrow" style="opacity:.3;">›</span></div>
+
+        <!-- ★ InsightCard: info (단순 요약) -->
+        <div class="insight-card info">
+          <div class="insight-row">
+            <span class="insight-icon">📊</span>
+            <span class="insight-text info">이번달 수입 <strong>500만원</strong>, 지출 <strong>180만원</strong>, 저축 <strong>320만원</strong></span>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:8px;">카테고리별 지출</div>
+        <div class="item-card">
+          <div class="cat-bar-row">
+            <span class="cat-name">🍽 식비</span>
+            <div class="cat-bar-wrap"><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:55%;background:var(--expense);"></div></div></div>
+            <span class="cat-amount">-99,000</span>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📊</div><div class="tab-label-a">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- 색상 범례 -->
+<div style="background:white;border-radius:14px;padding:20px;max-width:700px;margin:40px auto 0;box-shadow:var(--shadow-sm);">
+  <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;">InsightCard 색상 체계</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+    <div style="display:flex;gap:10px;align-items:center;"><div style="width:40px;height:24px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:4px;"></div><span style="font-size:13px;color:var(--text-2);"><strong>warning</strong> — 지출 증가, 카테고리 급증, 지출>수입</span></div>
+    <div style="display:flex;gap:10px;align-items:center;"><div style="width:40px;height:24px;background:#D1FAE5;border:1px solid #A7F3D0;border-radius:4px;"></div><span style="font-size:13px;color:var(--text-2);"><strong>saving</strong> — 지출 감소, 절약 달성</span></div>
+    <div style="display:flex;gap:10px;align-items:center;"><div style="width:40px;height:24px;background:#DBEAFE;border:1px solid #BFDBFE;border-radius:4px;"></div><span style="font-size:13px;color:var(--text-2);"><strong>achievement</strong> — 저축률 목표, 카테고리 0원</span></div>
+    <div style="display:flex;gap:10px;align-items:center;"><div style="width:40px;height:24px;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:4px;"></div><span style="font-size:13px;color:var(--text-2);"><strong>info</strong> — 저축 양수, 일반 사실, 전월 없을 때</span></div>
+  </div>
+</div>
+
+</body>
+</html>

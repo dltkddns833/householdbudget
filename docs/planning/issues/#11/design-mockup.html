@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#11 거래 사진 첨부 (영수증) — 디자인 목업</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0D9488;--expense:#3B82F6;--income:#EF4444;--danger:#EF4444;
+  --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;
+  --text:#0F172A;--text-2:#64748B;--text-3:#94A3B8;--border:#E2E8F0;--border-light:#F1F5F9;
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);--shadow-md:0 2px 8px rgba(0,0,0,.10);
+}
+body{background:#E8ECF0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding:48px 32px;}
+h1{text-align:center;font-size:22px;font-weight:700;color:#1E293B;margin-bottom:6px;}
+.subtitle{text-align:center;font-size:13px;color:var(--text-2);margin-bottom:40px;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:var(--text-2);max-width:375px;text-align:center;}
+.phone{width:375px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.35);position:relative;}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;}
+.phone-inner{padding-top:48px;overflow:hidden;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 24px;font-size:12px;font-weight:600;color:var(--text);}
+.nav-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);}
+.nav-title{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center;}
+.nav-icon{font-size:20px;color:var(--text-2);}
+.content{background:var(--bg);}
+.tab-bar{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-icon-a{font-size:22px;color:var(--primary);}
+.tab-icon-i{font-size:22px;color:var(--text-3);}
+.tab-label-a{font-size:10px;color:var(--primary);font-weight:600;}
+.tab-label-i{font-size:10px;color:var(--text-3);}
+.tab-fab{width:44px;height:44px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:22px;box-shadow:0 4px 14px rgba(13,148,136,0.4);margin-top:-6px;}
+
+/* 폼 */
+.modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:0 0 32px;}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;}
+.modal-title{font-size:17px;font-weight:700;color:var(--text);text-align:center;padding:14px 16px 0;}
+.field-row{padding:0 16px;margin-bottom:16px;}
+.field-label{font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px;}
+.text-input{background:var(--surface-2);border:1.5px solid var(--border);border-radius:8px;padding:13px 14px;font-size:15px;color:var(--text);display:flex;align-items:center;justify-content:space-between;}
+.segment{background:var(--surface-2);border-radius:8px;padding:3px;display:flex;gap:2px;margin:0 16px 16px;}
+.seg-exp{flex:1;height:38px;border-radius:6px;background:var(--surface);color:var(--expense);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);}
+.seg-inactive{flex:1;height:38px;border-radius:6px;color:var(--text-2);font-size:14px;display:flex;align-items:center;justify-content:center;}
+.save-btn{background:var(--primary);margin:0 16px;border-radius:999px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;box-shadow:0 4px 14px rgba(13,148,136,.35);}
+
+/* ★ ReceiptPicker — 첨부 전 */
+.receipt-picker-empty{margin:0 16px 16px;border:2px dashed var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.receipt-picker-icon{font-size:28px;opacity:.35;}
+.receipt-picker-label{font-size:13px;font-weight:500;color:var(--text-2);}
+.receipt-picker-sub{font-size:11px;color:var(--text-3);}
+
+/* ★ ReceiptPicker — 첨부 후 */
+.receipt-picker-filled{margin:0 16px 16px;border-radius:12px;overflow:hidden;position:relative;box-shadow:var(--shadow-md);}
+.receipt-thumb{width:100%;height:120px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:48px;}
+.receipt-delete-btn{position:absolute;top:8px;right:8px;width:28px;height:28px;background:rgba(0,0,0,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:white;}
+.receipt-info{padding:8px 12px;background:var(--surface);display:flex;align-items:center;gap:8px;}
+.receipt-info-name{font-size:12px;color:var(--text-2);flex:1;}
+.receipt-change-btn{font-size:12px;font-weight:600;color:var(--primary);}
+
+/* ActionSheet */
+.action-sheet-backdrop{position:relative;background:rgba(0,0,0,.4);}
+.action-sheet{background:var(--surface);border-radius:16px;margin:0 16px;overflow:hidden;}
+.action-sheet-title{padding:14px 16px;text-align:center;font-size:13px;color:var(--text-3);border-bottom:1px solid var(--border);}
+.action-sheet-btn{padding:16px;text-align:center;font-size:16px;font-weight:500;color:var(--text);border-bottom:1px solid var(--border-light);}
+.action-sheet-cancel{margin:8px 16px;background:var(--surface);border-radius:12px;padding:16px;text-align:center;font-size:16px;font-weight:600;color:var(--text);}
+
+/* 상세 화면 */
+.detail-row{padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--border-light);}
+.detail-label{font-size:13px;color:var(--text-2);}
+.detail-value{font-size:14px;font-weight:500;color:var(--text);text-align:right;}
+.detail-value.expense{color:var(--expense);font-weight:700;}
+
+/* ★ ReceiptViewer */
+.receipt-section{padding:14px 16px;}
+.receipt-section-title{font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px;}
+.receipt-viewer-thumb{width:100%;height:140px;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:48px;box-shadow:var(--shadow-md);cursor:pointer;position:relative;}
+.receipt-viewer-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.35));padding:8px 12px;border-radius:0 0 12px 12px;}
+.receipt-viewer-hint{font-size:11px;color:white;opacity:.8;}
+
+/* 전체화면 모달 */
+.fullscreen-modal{position:relative;background:#000;padding:0;}
+.fullscreen-close{position:absolute;top:12px;right:14px;width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;z-index:10;}
+.fullscreen-img{width:100%;height:380px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:72px;}
+</style>
+</head>
+<body>
+<h1>#11 거래 사진 첨부 (영수증)</h1>
+<p class="subtitle">ReceiptPicker · ActionSheet · ReceiptViewer · 전체화면 모달</p>
+<div class="screens">
+
+<!-- 화면 1: TransactionAddModal — 첨부 전 -->
+<div class="screen-wrap">
+  <div class="screen-label">1. TransactionAddModal — ReceiptPicker (첨부 전)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="background:var(--bg);padding:14px 0 0;opacity:.25;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 16px;">
+          <span style="font-size:17px;font-weight:700;">2026년 3월</span>
+        </div>
+      </div>
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">거래 추가</div>
+        <div style="height:14px;"></div>
+        <div class="segment"><div class="seg-exp">지출</div><div class="seg-inactive">수입</div></div>
+        <div class="field-row">
+          <span class="field-label">거래명</span>
+          <div class="text-input"><span>스타벅스</span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">금액</span>
+          <div class="text-input"><span>6,500</span><span style="font-size:13px;color:var(--text-2);">원</span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">카테고리</span>
+          <div class="text-input"><span>☕ 카페</span><span style="color:var(--text-3);">▾</span></div>
+        </div>
+        <!-- ★ ReceiptPicker (첨부 전) -->
+        <span class="field-label" style="padding:0 16px;display:block;margin-bottom:8px;">영수증</span>
+        <div class="receipt-picker-empty">
+          <div class="receipt-picker-icon">📷</div>
+          <div class="receipt-picker-label">영수증 첨부</div>
+          <div class="receipt-picker-sub">카메라 촬영 또는 갤러리에서 선택</div>
+        </div>
+        <div class="save-btn">저장하기</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 2: ActionSheet (카메라 / 갤러리 선택) -->
+<div class="screen-wrap">
+  <div class="screen-label">2. TransactionAddModal — ActionSheet (사진 소스 선택)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="height:200px;background:linear-gradient(to bottom,var(--bg),rgba(0,0,0,.2));"></div>
+      <!-- 모달 배경 위 ActionSheet -->
+      <div style="background:rgba(0,0,0,.4);padding:12px 0 0;">
+        <div class="action-sheet">
+          <div class="action-sheet-title">영수증 첨부 방법 선택</div>
+          <div class="action-sheet-btn" style="color:var(--primary);font-weight:600;">📷 카메라로 촬영</div>
+          <div class="action-sheet-btn">🖼 갤러리에서 선택</div>
+        </div>
+        <div class="action-sheet-cancel" style="margin-top:8px;">취소</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 3: TransactionAddModal — 첨부 후 썸네일 -->
+<div class="screen-wrap">
+  <div class="screen-label">3. TransactionAddModal — ReceiptPicker (첨부 후 썸네일)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="background:var(--bg);padding:14px 0 0;opacity:.25;height:50px;"></div>
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">거래 추가</div>
+        <div style="height:14px;"></div>
+        <div class="segment"><div class="seg-exp">지출</div><div class="seg-inactive">수입</div></div>
+        <div class="field-row">
+          <span class="field-label">거래명</span>
+          <div class="text-input"><span>스타벅스</span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">금액</span>
+          <div class="text-input"><span>6,500</span><span style="font-size:13px;color:var(--text-2);">원</span></div>
+        </div>
+        <!-- ★ ReceiptPicker (첨부 후) -->
+        <span class="field-label" style="padding:0 16px;display:block;margin-bottom:8px;">영수증</span>
+        <div class="receipt-picker-filled">
+          <div class="receipt-thumb">🧾</div>
+          <div class="receipt-delete-btn">✕</div>
+          <div class="receipt-info">
+            <span class="receipt-info-name">IMG_20260307_094126.jpg</span>
+            <span class="receipt-change-btn">변경</span>
+          </div>
+        </div>
+        <div class="save-btn">저장하기</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 4: TransactionDetailScreen — ReceiptViewer -->
+<div class="screen-wrap">
+  <div class="screen-label">4. TransactionDetailScreen — ReceiptViewer 섹션</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header">
+        <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;"><span class="nav-icon">‹</span></div>
+        <div class="nav-title">거래 상세</div>
+        <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-2);">✏️</div>
+      </div>
+      <div class="content" style="padding-bottom:80px;">
+        <!-- 상세 정보 -->
+        <div style="background:var(--surface);margin-bottom:12px;">
+          <div class="detail-row">
+            <span class="detail-label">거래명</span>
+            <span class="detail-value">스타벅스</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">금액</span>
+            <span class="detail-value expense">-6,500원</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">카테고리</span>
+            <span class="detail-value">☕ 카페</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">날짜</span>
+            <span class="detail-value">2026년 3월 7일</span>
+          </div>
+          <div class="detail-row" style="border-bottom:none;">
+            <span class="detail-label">메모</span>
+            <span class="detail-value">아이스 아메리카노</span>
+          </div>
+        </div>
+        <!-- ★ ReceiptViewer -->
+        <div style="background:var(--surface);">
+          <div class="receipt-section">
+            <div class="receipt-section-title">영수증</div>
+            <div class="receipt-viewer-thumb">
+              🧾
+              <div class="receipt-viewer-overlay">
+                <div class="receipt-viewer-hint">탭하여 확대 보기</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📋</div><div class="tab-label-a">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 5: 전체화면 영수증 모달 -->
+<div class="screen-wrap">
+  <div class="screen-label">5. ReceiptViewer — 전체화면 모달 (탭 시)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar" style="color:white;background:#000;"><span>9:41</span><span>●●●</span></div>
+      <div class="fullscreen-modal">
+        <div class="fullscreen-close">✕</div>
+        <div class="fullscreen-img">🧾</div>
+        <div style="background:#000;padding:14px 16px;color:white;">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">스타벅스</div>
+          <div style="font-size:12px;opacity:.6;">2026년 3월 7일 · 카페 · -6,500원</div>
+          <div style="font-size:11px;opacity:.4;margin-top:8px;">핀치로 확대/축소 가능</div>
+        </div>
+        <!-- 하단 여백 -->
+        <div style="background:#000;height:200px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:32px;">
+          <div style="font-size:11px;color:rgba(255,255,255,.3);">탭하여 닫기</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

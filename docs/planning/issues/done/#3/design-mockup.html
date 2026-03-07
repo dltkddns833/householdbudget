@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#3 가족 멤버별 지출 분리 — 디자인 목업</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0D9488;--primary-light:#2DD4BF;--primary-dark:#0F766E;
+  --expense:#3B82F6;--expense-light:#DBEAFE;--income:#EF4444;--income-light:#FEE2E2;
+  --danger:#EF4444;--warning:#F59E0B;--success:#22C55E;
+  --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;
+  --text:#0F172A;--text-2:#64748B;--text-3:#94A3B8;--border:#E2E8F0;--border-light:#F1F5F9;
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);--shadow-md:0 2px 8px rgba(0,0,0,0.10);
+}
+body{background:#E8ECF0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding:48px 32px;}
+h1{text-align:center;font-size:22px;font-weight:700;color:#1E293B;margin-bottom:6px;}
+.subtitle{text-align:center;font-size:13px;color:var(--text-2);margin-bottom:40px;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:var(--text-2);}
+.phone{width:375px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.35);position:relative;}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;}
+.phone-inner{padding-top:48px;overflow:hidden;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 24px;font-size:12px;font-weight:600;color:var(--text);}
+.nav-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 4px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);}
+.nav-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;}
+.nav-title{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center;}
+.nav-icon{font-size:20px;color:var(--text-2);}
+.content{background:var(--bg);padding:12px 0 80px;}
+.section-header{font-size:11px;font-weight:600;color:var(--text-2);padding:14px 16px 6px;text-transform:uppercase;letter-spacing:.5px;}
+.cat-icon{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.tab-bar{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-icon-a{font-size:22px;color:var(--primary);}
+.tab-icon-i{font-size:22px;color:var(--text-3);}
+.tab-label-a{font-size:10px;color:var(--primary);font-weight:600;}
+.tab-label-i{font-size:10px;color:var(--text-3);}
+.tab-fab{width:44px;height:44px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:22px;box-shadow:0 4px 14px rgba(13,148,136,0.4);margin-top:-6px;}
+
+/* 거래 추가 모달 */
+.modal-backdrop{background:rgba(0,0,0,0.4);padding:0;}
+.modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:0 0 32px;}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;}
+.modal-title{font-size:17px;font-weight:700;color:var(--text);text-align:center;padding:14px 0 0;}
+.field-label{font-size:12px;font-weight:600;color:var(--text-2);padding:0 16px;margin-bottom:6px;display:block;}
+.field-row{padding:0 16px;margin-bottom:16px;}
+.text-input{background:var(--surface-2);border:1.5px solid var(--border);border-radius:8px;padding:13px 14px;font-size:15px;color:var(--text);display:flex;align-items:center;justify-content:space-between;}
+.segment{background:var(--surface-2);border-radius:8px;padding:3px;display:flex;gap:2px;margin:0 16px 16px;}
+.seg-active-exp{flex:1;height:38px;border-radius:6px;background:var(--surface);color:var(--expense);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);}
+.seg-active-inc{flex:1;height:38px;border-radius:6px;background:var(--surface);color:var(--income);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);}
+.seg-inactive{flex:1;height:38px;border-radius:6px;color:var(--text-2);font-size:14px;display:flex;align-items:center;justify-content:center;}
+
+/* ★ 멤버 선택 칩 영역 */
+.member-row{padding:0 16px;margin-bottom:16px;}
+.member-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+.chip{height:34px;border-radius:999px;padding:0 14px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;white-space:nowrap;border:1.5px solid transparent;}
+.chip-selected{background:rgba(13,148,136,0.1);border-color:var(--primary);color:var(--primary);}
+.chip-default{background:var(--surface-2);color:var(--text-2);}
+.chip-avatar{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+
+.save-btn{background:var(--primary);margin:0 16px;border-radius:999px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;box-shadow:0 4px 14px rgba(13,148,136,0.35);}
+
+/* Stats 멤버 breakdown */
+.item-card{background:var(--surface);border-radius:12px;padding:13px 14px;margin:0 16px 6px;box-shadow:var(--shadow-sm);}
+
+.member-breakdown-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-light);}
+.member-breakdown-row:last-child{border-bottom:none;}
+.member-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;}
+.member-breakdown-info{flex:1;}
+.member-breakdown-name{font-size:14px;font-weight:600;color:var(--text);}
+.member-breakdown-pct{font-size:11px;color:var(--text-2);}
+.member-breakdown-bar-bg{height:6px;background:var(--surface-2);border-radius:3px;margin-top:4px;}
+.member-breakdown-bar{height:6px;border-radius:3px;}
+.member-breakdown-amount{font-size:14px;font-weight:700;color:var(--expense);flex-shrink:0;}
+
+/* 홈 멤버 소비 그리드 */
+.member-grid{display:flex;gap:10px;padding:0 16px;margin-bottom:12px;}
+.member-card{flex:1;background:var(--surface);border-radius:12px;padding:13px;box-shadow:var(--shadow-sm);}
+.member-card-name{font-size:12px;color:var(--text-2);margin-bottom:4px;}
+.member-card-amount{font-size:15px;font-weight:700;color:var(--expense);}
+.member-card-pct{font-size:11px;color:var(--text-3);margin-top:2px;}
+.member-card.joint .member-card-amount{color:var(--text-2);}
+
+/* 인라인 히어로 */
+.hero-card{background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 60%,var(--primary-light) 100%);border-radius:20px;padding:20px;margin:0 16px 12px;color:white;}
+.hero-label{font-size:12px;opacity:.8;margin-bottom:6px;}
+.hero-amount{font-size:28px;font-weight:800;margin-bottom:14px;}
+.hero-row{display:flex;gap:20px;}
+.hero-sub-label{font-size:11px;opacity:.75;margin-bottom:2px;}
+.hero-sub-amount{font-size:14px;font-weight:600;}
+.month-sel{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 16px;}
+.month-sel-arrow{font-size:20px;color:var(--text-2);}
+.month-sel-text{font-size:17px;font-weight:700;color:var(--text);}
+.section-title{font-size:15px;font-weight:700;color:var(--text);padding:4px 16px 8px;}
+</style>
+</head>
+<body>
+<h1>#3 가족 멤버별 지출 분리</h1>
+<p class="subtitle">거래 추가 멤버 선택 · StatsScreen 멤버 breakdown · HomeScreen 멤버 소비 카드</p>
+<div class="screens">
+
+<!-- 화면 1: 거래 추가 모달 — 멤버 선택 -->
+<div class="screen-wrap">
+  <div class="screen-label">1. TransactionAddModal — 멤버 선택 칩 추가</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <!-- 홈 화면 배경 흐림 처리 -->
+      <div style="padding:12px 0 0;">
+        <div class="month-sel"><span class="month-sel-arrow">‹</span><span class="month-sel-text">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+        <div class="hero-card" style="opacity:.3;">
+          <div class="hero-label">이번달 실자산</div><div class="hero-amount">₩358,420,000</div>
+        </div>
+      </div>
+      <!-- 모달 시트 -->
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">거래 추가</div>
+        <div style="height:16px;"></div>
+        <!-- 유형 세그먼트 -->
+        <div class="segment">
+          <div class="seg-active-exp">지출</div>
+          <div class="seg-inactive">수입</div>
+        </div>
+        <!-- 거래명 -->
+        <div class="field-row">
+          <span class="field-label" style="padding:0;display:block;margin-bottom:6px;">거래명</span>
+          <div class="text-input"><span>스타벅스</span></div>
+        </div>
+        <!-- 금액 -->
+        <div class="field-row">
+          <span class="field-label" style="padding:0;display:block;margin-bottom:6px;">금액</span>
+          <div class="text-input"><span>6,500</span><span style="font-size:13px;color:var(--text-2);">원</span></div>
+        </div>
+        <!-- ★ 멤버 선택 -->
+        <div class="member-row">
+          <span style="font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:8px;">지출한 사람</span>
+          <div class="member-chips">
+            <div class="chip chip-selected">
+              <div class="chip-avatar" style="background:var(--primary);">상</div>
+              상운 (나)
+            </div>
+            <div class="chip chip-default">
+              <div class="chip-avatar" style="background:#8B5CF6;">채</div>
+              채원
+            </div>
+            <div class="chip chip-default">
+              <div class="chip-avatar" style="background:var(--text-3);">공</div>
+              공동
+            </div>
+          </div>
+        </div>
+        <!-- 카테고리 -->
+        <div class="field-row">
+          <span class="field-label" style="padding:0;display:block;margin-bottom:6px;">카테고리</span>
+          <div class="text-input"><span>☕  카페</span><span style="color:var(--text-3);">▾</span></div>
+        </div>
+        <div class="save-btn">저장하기</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 2: StatsScreen — 멤버별 breakdown -->
+<div class="screen-wrap">
+  <div class="screen-label">2. StatsScreen — 멤버별 지출 섹션</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header">
+        <div class="nav-btn"></div>
+        <div class="nav-title">통계</div>
+        <div class="nav-btn"></div>
+      </div>
+      <div class="content">
+        <div class="month-sel"><span class="month-sel-arrow">‹</span><span class="month-sel-text">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+        <!-- 카테고리 섹션 (기존) -->
+        <div class="section-title">카테고리별 지출</div>
+        <div class="item-card" style="margin-bottom:12px;">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:15px;">🍽</span>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:13px;font-weight:600;color:var(--text);">식비</span><span style="font-size:13px;font-weight:600;color:var(--expense);">-420,000</span></div>
+                <div style="height:6px;background:var(--surface-2);border-radius:3px;"><div style="width:65%;height:6px;background:var(--expense);border-radius:3px;"></div></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:15px;">☕</span>
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:13px;font-weight:600;color:var(--text);">카페</span><span style="font-size:13px;font-weight:600;color:var(--expense);">-85,000</span></div>
+                <div style="height:6px;background:var(--surface-2);border-radius:3px;"><div style="width:13%;height:6px;background:var(--expense);border-radius:3px;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ★ 멤버별 지출 섹션 -->
+        <div class="section-title">멤버별 지출</div>
+        <div class="item-card">
+          <!-- 상운 -->
+          <div class="member-breakdown-row">
+            <div class="member-avatar" style="background:var(--primary);">상</div>
+            <div class="member-breakdown-info">
+              <div style="display:flex;justify-content:space-between;">
+                <span class="member-breakdown-name">상운</span>
+                <span class="member-breakdown-amount">-980,000</span>
+              </div>
+              <div class="member-breakdown-pct">53.8% · 본인</div>
+              <div class="member-breakdown-bar-bg"><div class="member-breakdown-bar" style="width:54%;background:var(--primary);"></div></div>
+            </div>
+          </div>
+          <!-- 채원 -->
+          <div class="member-breakdown-row">
+            <div class="member-avatar" style="background:#8B5CF6;">채</div>
+            <div class="member-breakdown-info">
+              <div style="display:flex;justify-content:space-between;">
+                <span class="member-breakdown-name">채원</span>
+                <span class="member-breakdown-amount">-650,000</span>
+              </div>
+              <div class="member-breakdown-pct">35.7%</div>
+              <div class="member-breakdown-bar-bg"><div class="member-breakdown-bar" style="width:36%;background:#8B5CF6;"></div></div>
+            </div>
+          </div>
+          <!-- 공동 -->
+          <div class="member-breakdown-row">
+            <div class="member-avatar" style="background:var(--text-3);">공</div>
+            <div class="member-breakdown-info">
+              <div style="display:flex;justify-content:space-between;">
+                <span class="member-breakdown-name" style="color:var(--text-2);">공동</span>
+                <span style="font-size:14px;font-weight:700;color:var(--text-2);">-190,000</span>
+              </div>
+              <div class="member-breakdown-pct">10.4%</div>
+              <div class="member-breakdown-bar-bg"><div class="member-breakdown-bar" style="width:10%;background:var(--text-3);"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📊</div><div class="tab-label-a">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 3: HomeScreen — 멤버별 소비 카드 -->
+<div class="screen-wrap">
+  <div class="screen-label">3. HomeScreen — 멤버별 소비 카드 (2인 이상)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);">
+        <span style="font-size:17px;font-weight:700;color:var(--text);">우리집 가계부</span>
+        <span style="font-size:20px;">🔔</span>
+      </div>
+      <div class="content" style="padding:0 0 80px;">
+        <div class="month-sel"><span class="month-sel-arrow">‹</span><span class="month-sel-text">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+        <div class="hero-card">
+          <div class="hero-label">이번달 실자산</div><div class="hero-amount">₩358,420,000</div>
+          <div class="hero-row">
+            <div><div class="hero-sub-label">수입</div><div class="hero-sub-amount">+5,200,000</div></div>
+            <div><div class="hero-sub-label">지출</div><div class="hero-sub-amount">-1,820,000</div></div>
+            <div><div class="hero-sub-label">남은 금액</div><div class="hero-sub-amount">+3,380,000</div></div>
+          </div>
+        </div>
+        <!-- ★ 멤버별 소비 카드 -->
+        <div class="section-title">멤버별 이번달 소비</div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">상</div>
+              <div class="member-card-name" style="margin:0;">상운</div>
+            </div>
+            <div class="member-card-amount">-980,000</div>
+            <div class="member-card-pct">53.8%</div>
+          </div>
+          <div class="member-card">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:#8B5CF6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">채</div>
+              <div class="member-card-name" style="margin:0;">채원</div>
+            </div>
+            <div class="member-card-amount" style="color:#8B5CF6;">-650,000</div>
+            <div class="member-card-pct">35.7%</div>
+          </div>
+          <div class="member-card joint">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--text-3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">공</div>
+              <div class="member-card-name" style="margin:0;">공동</div>
+            </div>
+            <div class="member-card-amount">-190,000</div>
+            <div class="member-card-pct">10.4%</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-a">🏠</div><div class="tab-label-a">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#14 자산 목표 설정 — 디자인 목업</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0D9488;--primary-light:#2DD4BF;--primary-dark:#0F766E;
+  --expense:#3B82F6;--income:#EF4444;--success:#22C55E;--danger:#EF4444;
+  --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;
+  --text:#0F172A;--text-2:#64748B;--text-3:#94A3B8;--border:#E2E8F0;--border-light:#F1F5F9;
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);--shadow-md:0 2px 8px rgba(0,0,0,.10);
+}
+body{background:#E8ECF0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding:48px 32px;}
+h1{text-align:center;font-size:22px;font-weight:700;color:#1E293B;margin-bottom:6px;}
+.subtitle{text-align:center;font-size:13px;color:var(--text-2);margin-bottom:40px;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:var(--text-2);max-width:375px;text-align:center;}
+.phone{width:375px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.35);position:relative;}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;}
+.phone-inner{padding-top:48px;overflow:hidden;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 24px;font-size:12px;font-weight:600;color:var(--text);}
+.nav-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);}
+.nav-title{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center;}
+.nav-icon{font-size:20px;color:var(--text-2);}
+.content{background:var(--bg);}
+.tab-bar{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-icon-a{font-size:22px;color:var(--primary);}
+.tab-icon-i{font-size:22px;color:var(--text-3);}
+.tab-label-a{font-size:10px;color:var(--primary);font-weight:600;}
+.tab-label-i{font-size:10px;color:var(--text-3);}
+.tab-fab{width:44px;height:44px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:22px;box-shadow:0 4px 14px rgba(13,148,136,0.4);margin-top:-6px;}
+
+.hero-card{background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 60%,var(--primary-light) 100%);border-radius:20px;padding:20px;margin:0 16px 12px;color:white;}
+.hero-label{font-size:12px;opacity:.8;margin-bottom:6px;}
+.hero-amount{font-size:28px;font-weight:800;margin-bottom:14px;}
+.hero-row{display:flex;gap:20px;}
+.hero-sub-label{font-size:11px;opacity:.75;margin-bottom:2px;}
+.hero-sub-amount{font-size:14px;font-weight:600;}
+.month-sel{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 16px;}
+.month-sel-arrow{font-size:20px;color:var(--text-2);}
+.month-sel-text{font-size:17px;font-weight:700;color:var(--text);}
+
+/* ★ AssetGoalCard */
+.goal-card{background:var(--surface);border-radius:16px;padding:16px;margin:0 16px 8px;box-shadow:var(--shadow-sm);}
+.goal-card.achieved{background:linear-gradient(135deg,#052e16,#14532d);color:white;}
+.goal-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.goal-card-title{font-size:15px;font-weight:700;color:var(--text);}
+.goal-card-title.achieved{color:white;}
+.goal-pct{font-size:24px;font-weight:800;color:var(--primary);}
+.goal-pct.achieved{color:#4ADE80;}
+.goal-amounts{display:flex;gap:16px;margin-bottom:12px;}
+.goal-amount-item{flex:1;}
+.goal-amount-label{font-size:11px;color:var(--text-2);margin-bottom:2px;}
+.goal-amount-label.achieved{color:rgba(255,255,255,.6);}
+.goal-amount-val{font-size:14px;font-weight:700;color:var(--text);}
+.goal-amount-val.achieved{color:white;}
+.goal-amount-val.remaining{color:var(--primary);}
+.gauge-bg{height:10px;background:var(--surface-2);border-radius:5px;position:relative;}
+.gauge-bg.achieved{background:rgba(255,255,255,.15);}
+.gauge-fill{height:10px;border-radius:5px;background:var(--primary);position:absolute;left:0;top:0;}
+.gauge-fill.achieved{background:linear-gradient(90deg,#4ADE80,#22C55E);}
+.achieved-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.4);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;color:#4ADE80;margin-top:8px;}
+
+/* 폼 */
+.form-content{background:var(--bg);padding:20px 16px 100px;display:flex;flex-direction:column;gap:20px;}
+.field-label{font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px;}
+.text-input{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:13px 14px;font-size:15px;color:var(--text);display:flex;align-items:center;justify-content:space-between;}
+.text-input.focused{border-color:var(--primary);}
+.save-btn{background:var(--primary);border-radius:999px;height:52px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;box-shadow:0 4px 14px rgba(13,148,136,.35);}
+.delete-btn{border:1.5px solid var(--danger);border-radius:999px;height:48px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:var(--danger);}
+
+/* 현재 목표 카드 (설정 화면 내) -->
+.current-goal{background:var(--surface);border-radius:12px;padding:14px;margin-bottom:20px;border:1px solid var(--border);}
+.current-goal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.current-goal-title{font-size:14px;font-weight:700;color:var(--text);}
+.current-goal-pct{font-size:16px;font-weight:700;color:var(--primary);}
+.form-footer{background:var(--surface);padding:12px 16px 28px;border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+<h1>#14 자산 목표 설정</h1>
+<p class="subtitle">HomeScreen AssetGoalCard (진행 중 / 달성) · GoalSettingScreen</p>
+<div class="screens">
+
+<!-- 화면 1: HomeScreen — 목표 진행 중 -->
+<div class="screen-wrap">
+  <div class="screen-label">1. HomeScreen — AssetGoalCard (진행 중)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);">
+        <span style="font-size:17px;font-weight:700;">우리집 가계부</span><span style="font-size:20px;">🔔</span>
+      </div>
+      <div class="content" style="padding-bottom:80px;">
+        <div class="month-sel"><span class="month-sel-arrow">‹</span><span class="month-sel-text">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+        <div class="hero-card">
+          <div class="hero-label">이번달 실자산</div><div class="hero-amount">₩358,420,000</div>
+          <div class="hero-row">
+            <div><div class="hero-sub-label">수입</div><div class="hero-sub-amount">+5,200,000</div></div>
+            <div><div class="hero-sub-label">지출</div><div class="hero-sub-amount">-1,820,000</div></div>
+          </div>
+        </div>
+
+        <!-- ★ AssetGoalCard: 진행 중 -->
+        <div class="goal-card">
+          <div class="goal-card-header">
+            <div>
+              <div style="font-size:11px;color:var(--text-2);margin-bottom:4px;">🎯 자산 목표</div>
+              <div class="goal-card-title">1억 모으기</div>
+            </div>
+            <div class="goal-pct">35.8%</div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-amount-item">
+              <div class="goal-amount-label">현재 자산</div>
+              <div class="goal-amount-val">358,420,000원</div>
+            </div>
+            <div class="goal-amount-item">
+              <div class="goal-amount-label">목표까지 남음</div>
+              <div class="goal-amount-val remaining">641,580,000원</div>
+            </div>
+          </div>
+          <div class="gauge-bg">
+            <div class="gauge-fill" style="width:35.8%;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:5px;">
+            <span style="font-size:10px;color:var(--text-3);">0</span>
+            <span style="font-size:10px;color:var(--text-2);">목표 1,000,000,000원</span>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-a">🏠</div><div class="tab-label-a">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 2: HomeScreen — 목표 달성 -->
+<div class="screen-wrap">
+  <div class="screen-label">2. HomeScreen — AssetGoalCard (목표 달성!)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);">
+        <span style="font-size:17px;font-weight:700;">우리집 가계부</span><span style="font-size:20px;">🔔</span>
+      </div>
+      <div class="content" style="padding-bottom:80px;">
+        <div class="month-sel"><span class="month-sel-arrow">‹</span><span class="month-sel-text">2026년 3월</span><span class="month-sel-arrow">›</span></div>
+        <div class="hero-card">
+          <div class="hero-label">이번달 실자산</div><div class="hero-amount">₩1,032,800,000</div>
+          <div class="hero-row">
+            <div><div class="hero-sub-label">수입</div><div class="hero-sub-amount">+5,200,000</div></div>
+            <div><div class="hero-sub-label">지출</div><div class="hero-sub-amount">-1,820,000</div></div>
+          </div>
+        </div>
+
+        <!-- ★ AssetGoalCard: 달성 -->
+        <div class="goal-card achieved">
+          <div class="goal-card-header" style="margin-bottom:10px;">
+            <div>
+              <div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:4px;">🎯 자산 목표</div>
+              <div class="goal-card-title achieved">1억 모으기</div>
+            </div>
+            <div class="goal-pct achieved">103.3%</div>
+          </div>
+          <div class="goal-amounts" style="margin-bottom:10px;">
+            <div class="goal-amount-item">
+              <div class="goal-amount-label achieved">현재 자산</div>
+              <div class="goal-amount-val achieved">1,032,800,000원</div>
+            </div>
+            <div class="goal-amount-item">
+              <div class="goal-amount-label achieved">초과 달성</div>
+              <div class="goal-amount-val" style="color:#4ADE80;">+32,800,000원</div>
+            </div>
+          </div>
+          <div class="gauge-bg achieved">
+            <div class="gauge-fill achieved" style="width:100%;"></div>
+          </div>
+          <div class="achieved-badge">🎉 목표 달성!</div>
+          <!-- 펄스 애니메이션 표현 -->
+          <div style="margin-top:10px;padding:8px 10px;background:rgba(74,222,128,.1);border-radius:8px;text-align:center;font-size:12px;color:rgba(255,255,255,.7);">
+            축하합니다! 새 목표를 설정해보세요 →
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-a">🏠</div><div class="tab-label-a">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 3: GoalSettingScreen -->
+<div class="screen-wrap">
+  <div class="screen-label">3. GoalSettingScreen — 목표 설정 (기존 목표 있음)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header">
+        <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;"><span class="nav-icon">‹</span></div>
+        <div class="nav-title">자산 목표 설정</div>
+        <div style="width:44px;"></div>
+      </div>
+      <div class="form-content">
+        <!-- 현재 목표 카드 -->
+        <div class="current-goal">
+          <div class="current-goal-header">
+            <span style="font-size:11px;color:var(--text-2);">현재 목표</span>
+            <span class="current-goal-pct">35.8%</span>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">1억 모으기</div>
+          <div style="height:6px;background:var(--surface-2);border-radius:3px;">
+            <div style="width:35.8%;height:6px;background:var(--primary);border-radius:3px;"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:6px;">358,420,000 / 1,000,000,000원</div>
+        </div>
+
+        <!-- 목표명 입력 -->
+        <div>
+          <span class="field-label">목표명</span>
+          <div class="text-input focused"><span>1억 모으기</span></div>
+        </div>
+
+        <!-- 목표 금액 입력 -->
+        <div>
+          <span class="field-label">목표 금액</span>
+          <div class="text-input">
+            <span>1,000,000,000</span>
+            <span style="font-size:13px;color:var(--text-2);">원</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px;">= 10억원</div>
+        </div>
+
+        <!-- 저장 버튼 -->
+        <div class="save-btn">수정하기</div>
+
+        <!-- 삭제 버튼 -->
+        <div class="delete-btn">목표 삭제</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 4: GoalSettingScreen — 신규 (목표 없음) -->
+<div class="screen-wrap">
+  <div class="screen-label">4. GoalSettingScreen — 신규 목표 설정</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header">
+        <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;"><span class="nav-icon">‹</span></div>
+        <div class="nav-title">자산 목표 설정</div>
+        <div style="width:44px;"></div>
+      </div>
+      <div class="form-content">
+        <!-- 안내 메시지 -->
+        <div style="padding:20px 0 4px;text-align:center;">
+          <div style="font-size:44px;margin-bottom:10px;">🎯</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;">자산 목표를 설정해보세요</div>
+          <div style="font-size:13px;color:var(--text-2);">홈 화면에서 달성률을 확인할 수 있어요</div>
+        </div>
+        <div>
+          <span class="field-label">목표명</span>
+          <div class="text-input" style="color:var(--text-3);"><span>예) 1억 모으기, 내집 마련</span></div>
+        </div>
+        <div>
+          <span class="field-label">목표 금액</span>
+          <div class="text-input">
+            <span style="color:var(--text-3);">0</span>
+            <span style="font-size:13px;color:var(--text-2);">원</span>
+          </div>
+        </div>
+        <div class="save-btn" style="opacity:.5;">저장하기</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#17 푸시 알림 — 디자인 목업</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0D9488;--primary-dark:#0F766E;
+  --expense:#3B82F6;--income:#EF4444;--warning:#F59E0B;--success:#22C55E;
+  --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;
+  --text:#0F172A;--text-2:#64748B;--text-3:#94A3B8;--border:#E2E8F0;--border-light:#F1F5F9;
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);--shadow-md:0 2px 8px rgba(0,0,0,.10);
+}
+body{background:#E8ECF0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding:48px 32px;}
+h1{text-align:center;font-size:22px;font-weight:700;color:#1E293B;margin-bottom:6px;}
+.subtitle{text-align:center;font-size:13px;color:var(--text-2);margin-bottom:40px;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:var(--text-2);max-width:375px;text-align:center;}
+.phone{width:375px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.35);position:relative;}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;}
+.phone-inner{padding-top:48px;overflow:hidden;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 24px;font-size:12px;font-weight:600;color:var(--text);}
+.nav-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);}
+.nav-title{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center;}
+.nav-icon{font-size:20px;color:var(--text-2);}
+.content{background:var(--bg);}
+.tab-bar{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-icon-a{font-size:22px;color:var(--primary);}
+.tab-icon-i{font-size:22px;color:var(--text-3);}
+.tab-label-a{font-size:10px;color:var(--primary);font-weight:600;}
+.tab-label-i{font-size:10px;color:var(--text-3);}
+.tab-fab{width:44px;height:44px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:22px;box-shadow:0 4px 14px rgba(13,148,136,0.4);margin-top:-6px;}
+
+/* 더보기 메뉴 */
+.section-header{font-size:11px;font-weight:600;color:var(--text-2);padding:14px 16px 6px;text-transform:uppercase;letter-spacing:.5px;}
+.more-item{background:var(--surface);padding:16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border-light);}
+.more-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.more-icon.teal{background:rgba(13,148,136,0.12);}
+.more-icon.amber{background:rgba(245,158,11,0.12);}
+.more-icon.blue{background:rgba(59,130,246,0.12);}
+.more-icon.purple{background:rgba(139,92,246,0.12);}
+.more-icon.red{background:rgba(239,68,68,0.12);}
+.more-icon.green{background:rgba(34,197,94,.12);}
+.more-item-text{flex:1;}
+.more-item-title{font-size:15px;font-weight:500;color:var(--text);}
+.more-item-sub{font-size:12px;color:var(--text-2);margin-top:2px;}
+.more-chevron{font-size:16px;color:var(--text-3);}
+.more-item.highlight .more-item-title{color:var(--primary);font-weight:600;}
+.more-item.highlight{background:rgba(13,148,136,.04);}
+
+/* 알림 설정 화면 */
+.notif-item{background:var(--surface);padding:16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border-light);}
+.notif-item-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.notif-item-icon.warning{background:#FEF3C7;}
+.notif-item-icon.teal{background:rgba(13,148,136,.1);}
+.notif-item-icon.blue{background:#DBEAFE;}
+.notif-item-body{flex:1;}
+.notif-item-title{font-size:15px;font-weight:600;color:var(--text);}
+.notif-item-desc{font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.4;}
+.toggle{width:48px;height:28px;border-radius:14px;display:flex;align-items:center;padding:2px 3px;flex-shrink:0;}
+.toggle.on{background:var(--primary);justify-content:flex-end;}
+.toggle.off{background:var(--text-3);justify-content:flex-start;}
+.toggle-knob{width:24px;height:24px;background:white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.sys-settings-btn{margin:16px;background:var(--surface-2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.sys-settings-text{flex:1;font-size:14px;color:var(--text-2);}
+.sys-settings-icon{font-size:16px;color:var(--text-3);}
+
+/* iOS 권한 요청 다이얼로그 */
+.ios-dialog-bg{position:relative;background:rgba(0,0,0,.45);}
+.ios-dialog{background:rgba(242,242,247,.97);backdrop-filter:blur(20px);border-radius:14px;margin:0 24px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.35);}
+.ios-dialog-header{padding:18px 16px 12px;text-align:center;border-bottom:1px solid rgba(0,0,0,.1);}
+.ios-dialog-icon{font-size:32px;margin-bottom:8px;}
+.ios-dialog-title{font-size:17px;font-weight:700;color:#000;margin-bottom:6px;}
+.ios-dialog-body{font-size:13px;color:#3C3C43CC;line-height:1.5;}
+.ios-dialog-btn-row{display:flex;}
+.ios-dialog-btn{flex:1;padding:14px;text-align:center;font-size:17px;border-top:1px solid rgba(0,0,0,.1);}
+.ios-dialog-btn.cancel{color:#007AFF;border-right:1px solid rgba(0,0,0,.1);}
+.ios-dialog-btn.allow{color:#007AFF;font-weight:700;}
+
+/* 인앱 알림 배너 (포그라운드) */
+.inapp-banner{background:var(--surface);border-radius:14px;margin:8px 16px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 4px 20px rgba(0,0,0,.12);border:1px solid var(--border);}
+.inapp-banner-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.inapp-banner-body{flex:1;}
+.inapp-banner-title{font-size:14px;font-weight:700;color:var(--text);}
+.inapp-banner-desc{font-size:12px;color:var(--text-2);margin-top:2px;line-height:1.4;}
+.inapp-banner-time{font-size:11px;color:var(--text-3);align-self:flex-start;white-space:nowrap;}
+
+/* iOS 잠금화면 알림 */
+.lockscreen{background:linear-gradient(160deg,#1a1a2e,#16213e,#0f3460);padding-top:0;min-height:100%;}
+.ls-time{text-align:center;padding:20px 0 8px;color:white;}
+.ls-time-clock{font-size:52px;font-weight:200;line-height:1.1;}
+.ls-time-date{font-size:14px;opacity:.8;}
+.ls-notif{margin:12px 14px 6px;background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border-radius:16px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;}
+.ls-notif-app{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.ls-notif-app-icon{width:18px;height:18px;border-radius:4px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.ls-notif-app-name{font-size:12px;color:rgba(255,255,255,.7);font-weight:500;}
+.ls-notif-app-time{font-size:11px;color:rgba(255,255,255,.5);margin-left:auto;}
+.ls-notif-title{font-size:14px;font-weight:700;color:white;margin-bottom:3px;}
+.ls-notif-body{font-size:13px;color:rgba(255,255,255,.8);line-height:1.4;}
+</style>
+</head>
+<body>
+<h1>#17 푸시 알림</h1>
+<p class="subtitle">알림 설정 화면 · iOS 권한 요청 · 잠금화면 알림 · 인앱 배너</p>
+<div class="screens">
+
+<!-- 화면 1: MoreMenuScreen — 알림 설정 항목 추가 -->
+<div class="screen-wrap">
+  <div class="screen-label">1. MoreMenuScreen — 알림 설정 메뉴 추가</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header"><div></div><div class="nav-title">더보기</div><div></div></div>
+      <div class="content" style="padding-bottom:80px;">
+        <div class="section-header">관리</div>
+        <div class="more-item"><div class="more-icon teal">📊</div><div class="more-item-text"><div class="more-item-title">재무 상태</div><div class="more-item-sub">자산 및 계좌 관리</div></div><div class="more-chevron">›</div></div>
+        <div class="more-item"><div class="more-icon amber">🎯</div><div class="more-item-text"><div class="more-item-title">예산 설정</div><div class="more-item-sub">카테고리별 월 예산</div></div><div class="more-chevron">›</div></div>
+        <div class="more-item"><div class="more-icon teal">🔁</div><div class="more-item-text"><div class="more-item-title">정기 지출 관리</div><div class="more-item-sub">월세, 구독, 보험 등 고정비</div></div><div class="more-chevron">›</div></div>
+        <div class="section-header">설정</div>
+        <!-- ★ 신규 알림 설정 항목 -->
+        <div class="more-item highlight"><div class="more-icon green">🔔</div><div class="more-item-text"><div class="more-item-title">알림 설정</div><div class="more-item-sub">예산 초과, 고정비, 월 초 안내</div></div><div class="more-chevron" style="color:var(--primary);">›</div></div>
+        <div class="more-item"><div class="more-icon blue">🌙</div><div class="more-item-text"><div class="more-item-title">화면 모드</div><div class="more-item-sub">라이트 모드</div></div><div class="more-chevron">›</div></div>
+        <div class="more-item"><div class="more-icon purple">👥</div><div class="more-item-text"><div class="more-item-title">가족 초대 코드</div><div class="more-item-sub">A3F9K2 · 탭해서 복사</div></div><div class="more-chevron">›</div></div>
+        <div class="more-item"><div class="more-icon red">🚪</div><div class="more-item-text"><div class="more-item-title">로그아웃</div></div><div class="more-chevron">›</div></div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-a">☰</div><div class="tab-label-a">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 2: NotificationSettingScreen -->
+<div class="screen-wrap">
+  <div class="screen-label">2. NotificationSettingScreen — 알림 종류별 토글</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header">
+        <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;"><span class="nav-icon">‹</span></div>
+        <div class="nav-title">알림 설정</div>
+        <div style="width:44px;"></div>
+      </div>
+      <div class="content" style="padding-bottom:80px;">
+        <div class="section-header">알림 종류</div>
+        <!-- 예산 초과 알림 -->
+        <div class="notif-item">
+          <div class="notif-item-icon warning">📊</div>
+          <div class="notif-item-body">
+            <div class="notif-item-title">예산 초과 알림</div>
+            <div class="notif-item-desc">카테고리 예산의 80%를 넘으면 알림을 보내드려요</div>
+          </div>
+          <div class="toggle on"><div class="toggle-knob"></div></div>
+        </div>
+        <!-- 고정비 납부일 알림 -->
+        <div class="notif-item">
+          <div class="notif-item-icon teal">🔁</div>
+          <div class="notif-item-body">
+            <div class="notif-item-title">고정비 납부일 알림</div>
+            <div class="notif-item-desc">등록된 정기 지출 납부일 당일 오전 9시에 알려드려요</div>
+          </div>
+          <div class="toggle on"><div class="toggle-knob"></div></div>
+        </div>
+        <!-- 월 초 예산 설정 -->
+        <div class="notif-item">
+          <div class="notif-item-icon blue">📅</div>
+          <div class="notif-item-body">
+            <div class="notif-item-title">월 초 예산 설정 안내</div>
+            <div class="notif-item-desc">매월 1일에 이번 달 예산 설정을 안내해드려요</div>
+          </div>
+          <div class="toggle off"><div class="toggle-knob"></div></div>
+        </div>
+
+        <!-- 알림 권한 상태 (꺼진 경우) -->
+        <div style="margin:16px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:18px;">⚠️</span>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:#92400E;margin-bottom:3px;">알림 권한이 꺼져 있어요</div>
+            <div style="font-size:12px;color:#B45309;line-height:1.4;">시스템 설정에서 알림을 켜야 알림을 받을 수 있어요</div>
+          </div>
+        </div>
+
+        <!-- 시스템 설정 이동 -->
+        <div class="sys-settings-btn">
+          <span style="font-size:18px;">⚙️</span>
+          <span class="sys-settings-text">시스템 알림 설정으로 이동</span>
+          <span class="sys-settings-icon">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 3: iOS 알림 권한 요청 -->
+<div class="screen-wrap">
+  <div class="screen-label">3. iOS 알림 권한 요청 다이얼로그</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <!-- 앱 배경 (흐리게) -->
+      <div style="padding:12px 16px;opacity:.3;">
+        <div style="font-size:17px;font-weight:700;margin-bottom:12px;">우리집 가계부</div>
+        <div style="height:80px;background:linear-gradient(135deg,#0F766E,#0D9488);border-radius:16px;"></div>
+      </div>
+      <!-- iOS 다이얼로그 -->
+      <div style="padding:20px 0;">
+        <div class="ios-dialog">
+          <div class="ios-dialog-header">
+            <div class="ios-dialog-icon">🔔</div>
+            <div class="ios-dialog-title">"우리집 가계부"이(가)<br>알림을 보내도록 허용하겠습니까?</div>
+            <div class="ios-dialog-body">예산 초과, 고정비 납부일, 월 초 안내 알림을 받을 수 있어요</div>
+          </div>
+          <div class="ios-dialog-btn-row">
+            <div class="ios-dialog-btn cancel">허용 안 함</div>
+            <div class="ios-dialog-btn allow">허용</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 4: 잠금화면 알림 3종 -->
+<div class="screen-wrap">
+  <div class="screen-label">4. 잠금화면 알림 — 3가지 알림 유형</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar" style="color:white;background:transparent;position:relative;z-index:10;"><span>9:41</span><span>●●●</span></div>
+      <div class="lockscreen">
+        <div class="ls-time">
+          <div class="ls-time-clock">9:41</div>
+          <div class="ls-time-date">2026년 3월 7일 금요일</div>
+        </div>
+        <!-- 알림 1: 예산 초과 -->
+        <div class="ls-notif">
+          <div style="flex:1;">
+            <div class="ls-notif-app">
+              <div class="ls-notif-app-icon">💰</div>
+              <span class="ls-notif-app-name">우리집 가계부</span>
+              <span class="ls-notif-app-time">지금</span>
+            </div>
+            <div class="ls-notif-title">예산 초과 경고</div>
+            <div class="ls-notif-body">식비 예산의 80%를 사용했어요 (420,000 / 500,000원)</div>
+          </div>
+        </div>
+        <!-- 알림 2: 고정비 납부일 -->
+        <div class="ls-notif" style="margin-top:6px;">
+          <div style="flex:1;">
+            <div class="ls-notif-app">
+              <div class="ls-notif-app-icon">💰</div>
+              <span class="ls-notif-app-name">우리집 가계부</span>
+              <span class="ls-notif-app-time">오전 9:00</span>
+            </div>
+            <div class="ls-notif-title">고정비 납부일</div>
+            <div class="ls-notif-body">월세 납부일이에요 (550,000원)</div>
+          </div>
+        </div>
+        <!-- 알림 3: 월 초 예산 안내 -->
+        <div class="ls-notif" style="margin-top:6px;">
+          <div style="flex:1;">
+            <div class="ls-notif-app">
+              <div class="ls-notif-app-icon">💰</div>
+              <span class="ls-notif-app-name">우리집 가계부</span>
+              <span class="ls-notif-app-time">오전 8:00</span>
+            </div>
+            <div class="ls-notif-title">3월 예산을 설정해보세요</div>
+            <div class="ls-notif-body">이번 달 카테고리별 예산을 설정하면 더 쉽게 관리할 수 있어요</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 5: 인앱 알림 배너 (포그라운드) -->
+<div class="screen-wrap">
+  <div class="screen-label">5. 인앱 알림 배너 — 포그라운드 수신 시</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);">
+        <span style="font-size:17px;font-weight:700;">우리집 가계부</span><span style="font-size:20px;">🔔</span>
+      </div>
+      <div class="content" style="padding-bottom:80px;">
+        <!-- ★ 인앱 배너 (앱 최상단에 슬라이드 다운) -->
+        <div style="background:var(--bg);padding:8px 0 0;">
+          <!-- 예산 초과 배너 -->
+          <div class="inapp-banner">
+            <div class="inapp-banner-icon" style="background:#FEF3C7;">📊</div>
+            <div class="inapp-banner-body">
+              <div class="inapp-banner-title">예산 초과 경고</div>
+              <div class="inapp-banner-desc">식비 예산의 80%를 사용했어요<br>(420,000 / 500,000원)</div>
+            </div>
+            <div class="inapp-banner-time">지금</div>
+          </div>
+        </div>
+        <!-- 홈 화면 본문 (흐리게) -->
+        <div style="opacity:.4;padding:12px 16px;">
+          <div style="height:120px;background:linear-gradient(135deg,#0F766E,#0D9488);border-radius:20px;margin-bottom:12px;"></div>
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;height:60px;background:var(--surface);border-radius:12px;"></div>
+            <div style="flex:1;height:60px;background:var(--surface);border-radius:12px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-a">🏠</div><div class="tab-label-a">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- 딥링크 표 -->
+<div style="background:white;border-radius:14px;padding:20px;max-width:700px;margin:40px auto 0;box-shadow:var(--shadow-sm);">
+  <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;">알림 탭 시 딥링크 이동</div>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr style="background:var(--surface-2);"><th style="padding:8px 12px;text-align:left;color:var(--text-2);font-weight:600;border-radius:6px 0 0 0;">알림 type</th><th style="padding:8px 12px;text-align:left;color:var(--text-2);font-weight:600;">이동 화면</th><th style="padding:8px 12px;text-align:left;color:var(--text-2);font-weight:600;border-radius:0 6px 0 0;">상황</th></tr></thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:8px 12px;color:var(--text);">budget</td><td style="padding:8px 12px;color:var(--primary);font-weight:600;">StatsScreen</td><td style="padding:8px 12px;color:var(--text-2);">예산 초과 알림 탭</td></tr>
+      <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:8px 12px;color:var(--text);">recurring</td><td style="padding:8px 12px;color:var(--primary);font-weight:600;">RecurringListScreen</td><td style="padding:8px 12px;color:var(--text-2);">고정비 납부일 알림 탭</td></tr>
+      <tr><td style="padding:8px 12px;color:var(--text);">monthly_setup</td><td style="padding:8px 12px;color:var(--primary);font-weight:600;">BudgetSettingScreen</td><td style="padding:8px 12px;color:var(--text-2);">월 초 예산 안내 알림 탭</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

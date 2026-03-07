@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#7 거래 검색 & 필터 — 디자인 목업</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0D9488;--primary-dark:#0F766E;
+  --expense:#3B82F6;--income:#EF4444;--danger:#EF4444;
+  --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;
+  --text:#0F172A;--text-2:#64748B;--text-3:#94A3B8;--border:#E2E8F0;--border-light:#F1F5F9;
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);--shadow-md:0 2px 8px rgba(0,0,0,.10);
+}
+body{background:#E8ECF0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding:48px 32px;}
+h1{text-align:center;font-size:22px;font-weight:700;color:#1E293B;margin-bottom:6px;}
+.subtitle{text-align:center;font-size:13px;color:var(--text-2);margin-bottom:40px;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:var(--text-2);max-width:375px;text-align:center;}
+.phone{width:375px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.35);position:relative;}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;}
+.phone-inner{padding-top:48px;overflow:hidden;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 24px;font-size:12px;font-weight:600;color:var(--text);}
+.nav-header{display:flex;align-items:center;justify-content:space-between;padding:0 8px;height:52px;background:var(--surface);border-bottom:1px solid var(--border);}
+.nav-title{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center;}
+.content{background:var(--bg);}
+.tab-bar{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-icon-a{font-size:22px;color:var(--primary);}
+.tab-icon-i{font-size:22px;color:var(--text-3);}
+.tab-label-a{font-size:10px;color:var(--primary);font-weight:600;}
+.tab-label-i{font-size:10px;color:var(--text-3);}
+.tab-fab{width:44px;height:44px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:22px;box-shadow:0 4px 14px rgba(13,148,136,0.4);margin-top:-6px;}
+
+/* ★ SearchBar */
+.search-bar-wrap{padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+.search-row{display:flex;gap:8px;align-items:center;}
+.search-input{flex:1;height:40px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:999px;padding:0 14px 0 36px;font-size:14px;color:var(--text);display:flex;align-items:center;position:relative;}
+.search-input-focused{border-color:var(--primary);}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text-3);}
+.search-clear{font-size:16px;color:var(--text-3);margin-left:auto;padding:0 8px;}
+.filter-btn{height:40px;border-radius:999px;padding:0 14px;background:var(--surface-2);border:1.5px solid var(--border);display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-2);white-space:nowrap;flex-shrink:0;}
+.filter-btn.active{background:rgba(13,148,136,.1);border-color:var(--primary);color:var(--primary);}
+.filter-badge{background:var(--primary);color:white;border-radius:999px;padding:1px 6px;font-size:10px;font-weight:700;}
+
+/* 월 선택 (검색 비활성) */
+.month-sel{display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+.month-sel-arrow{font-size:20px;color:var(--text-2);}
+.month-sel-text{font-size:15px;font-weight:700;color:var(--text);}
+
+/* ★ FilterPanel */
+.filter-panel{background:var(--surface);border-bottom:2px solid var(--border);padding:14px 16px;}
+.fp-label{font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.chip{height:32px;border-radius:999px;padding:0 12px;font-size:13px;font-weight:500;display:flex;align-items:center;border:1.5px solid var(--border);background:var(--surface);color:var(--text-2);}
+.chip.selected{background:rgba(13,148,136,.1);border-color:var(--primary);color:var(--primary);font-weight:600;}
+.amount-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;}
+.amount-input{flex:1;height:38px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-size:13px;color:var(--text);display:flex;align-items:center;justify-content:space-between;}
+.amount-dash{font-size:14px;color:var(--text-3);}
+.fp-footer{display:flex;gap:8px;}
+.fp-reset-btn{flex:1;height:40px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-weight:500;color:var(--text-2);display:flex;align-items:center;justify-content:center;}
+.fp-apply-btn{flex:2;height:40px;border-radius:999px;background:var(--primary);font-size:14px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;}
+
+/* 거래 목록 */
+.tx-date-header{padding:10px 16px 4px;font-size:12px;font-weight:600;color:var(--text-2);}
+.tx-item{background:var(--surface);padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border-light);}
+.cat-icon{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.tx-info{flex:1;}
+.tx-name{font-size:14px;font-weight:500;color:var(--text);}
+.tx-meta{font-size:11px;color:var(--text-2);margin-top:2px;}
+.tx-name strong{color:var(--primary);}
+
+/* 빈 상태 */
+.empty-state{display:flex;flex-direction:column;align-items:center;padding:52px 32px;text-align:center;gap:8px;}
+.empty-icon{font-size:52px;opacity:.2;margin-bottom:4px;}
+.empty-title{font-size:16px;font-weight:600;color:var(--text-2);}
+.empty-sub{font-size:13px;color:var(--text-3);}
+.empty-reset-btn{margin-top:8px;height:38px;padding:0 20px;border-radius:999px;background:rgba(13,148,136,.1);color:var(--primary);font-size:13px;font-weight:600;display:flex;align-items:center;}
+
+/* 검색 결과 하이라이트 */
+.highlight{background:rgba(13,148,136,.15);border-radius:2px;padding:0 2px;font-weight:600;color:var(--primary-dark);}
+</style>
+</head>
+<body>
+<h1>#7 거래 검색 & 필터</h1>
+<p class="subtitle">SearchBar · FilterPanel · 검색 결과 하이라이트 · 빈 상태</p>
+<div class="screens">
+
+<!-- 화면 1: 기본 상태 (검색 비활성) -->
+<div class="screen-wrap">
+  <div class="screen-label">1. TransactionListScreen — 기본 (검색 비활성)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header"><div></div><div class="nav-title">거래 내역</div><div></div></div>
+      <div class="content">
+        <!-- SearchBar (비활성) -->
+        <div class="search-bar-wrap">
+          <div class="search-row">
+            <div class="search-input" style="position:relative;">
+              <span class="search-icon">🔍</span>
+              <span style="margin-left:20px;font-size:14px;color:var(--text-3);">거래명 또는 메모 검색</span>
+            </div>
+            <div class="filter-btn">필터 ▾</div>
+          </div>
+        </div>
+        <!-- 월 선택기 (검색 비활성 시 표시) -->
+        <div class="month-sel">
+          <span class="month-sel-arrow">‹</span>
+          <span class="month-sel-text">2026년 3월</span>
+          <span class="month-sel-arrow">›</span>
+        </div>
+        <!-- 거래 목록 -->
+        <div style="background:var(--bg);padding-bottom:80px;">
+          <div class="tx-date-header">3월 7일 금요일</div>
+          <div class="tx-item"><div class="cat-icon">🍽</div><div class="tx-info"><div class="tx-name">점심 식사</div><div class="tx-meta">식비</div></div><span style="font-size:14px;font-weight:600;color:var(--expense);">-12,000</span></div>
+          <div class="tx-item"><div class="cat-icon">☕</div><div class="tx-info"><div class="tx-name">스타벅스</div><div class="tx-meta">카페</div></div><span style="font-size:14px;font-weight:600;color:var(--expense);">-6,500</span></div>
+          <div class="tx-date-header">3월 6일 목요일</div>
+          <div class="tx-item"><div class="cat-icon">🛍</div><div class="tx-info"><div class="tx-name">쿠팡 주문</div><div class="tx-meta">쇼핑</div></div><span style="font-size:14px;font-weight:600;color:var(--expense);">-34,900</span></div>
+          <div class="tx-item"><div class="cat-icon">💰</div><div class="tx-info"><div class="tx-name">스타벅스 아메리카노</div><div class="tx-meta">카페</div></div><span style="font-size:14px;font-weight:600;color:var(--expense);">-5,000</span></div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📋</div><div class="tab-label-a">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 2: 텍스트 검색 활성 + 결과 하이라이트 -->
+<div class="screen-wrap">
+  <div class="screen-label">2. TransactionListScreen — 텍스트 검색 활성 (월 선택기 숨김)</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header"><div></div><div class="nav-title">거래 내역</div><div></div></div>
+      <div class="content">
+        <!-- SearchBar (활성: 포커스, 검색어 입력됨) -->
+        <div class="search-bar-wrap">
+          <div class="search-row">
+            <div class="search-input search-input-focused" style="position:relative;">
+              <span class="search-icon">🔍</span>
+              <span style="margin-left:20px;font-size:14px;color:var(--text);">스타벅스</span>
+              <span class="search-clear">✕</span>
+            </div>
+            <div class="filter-btn">필터 ▾</div>
+          </div>
+        </div>
+        <!-- 월 선택기 숨김 (검색 활성 시) -->
+        <!-- 검색 결과 -->
+        <div style="background:var(--bg);padding-bottom:80px;">
+          <div style="padding:8px 16px;font-size:12px;color:var(--text-2);">2건의 결과</div>
+          <div class="tx-item">
+            <div class="cat-icon">☕</div>
+            <div class="tx-info">
+              <div class="tx-name"><span class="highlight">스타벅스</span></div>
+              <div class="tx-meta">카페 · 3월 7일</div>
+            </div>
+            <span style="font-size:14px;font-weight:600;color:var(--expense);">-6,500</span>
+          </div>
+          <div class="tx-item">
+            <div class="cat-icon">☕</div>
+            <div class="tx-info">
+              <div class="tx-name"><span class="highlight">스타벅스</span> 아메리카노</div>
+              <div class="tx-meta">카페 · 3월 6일</div>
+            </div>
+            <span style="font-size:14px;font-weight:600;color:var(--expense);">-5,000</span>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📋</div><div class="tab-label-a">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 3: FilterPanel 열린 상태 -->
+<div class="screen-wrap">
+  <div class="screen-label">3. TransactionListScreen — FilterPanel 열린 상태</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header"><div></div><div class="nav-title">거래 내역</div><div></div></div>
+      <div class="content">
+        <div class="search-bar-wrap">
+          <div class="search-row">
+            <div class="search-input" style="position:relative;">
+              <span class="search-icon">🔍</span>
+              <span style="margin-left:20px;font-size:14px;color:var(--text-3);">거래명 또는 메모 검색</span>
+            </div>
+            <div class="filter-btn active">필터 ▾ <span class="filter-badge">2</span></div>
+          </div>
+        </div>
+        <!-- ★ FilterPanel 열림 -->
+        <div class="filter-panel">
+          <!-- 유형 -->
+          <div class="fp-label">유형</div>
+          <div class="chip-row" style="margin-bottom:12px;">
+            <div class="chip">전체</div>
+            <div class="chip selected">지출</div>
+            <div class="chip">수입</div>
+          </div>
+          <!-- 카테고리 -->
+          <div class="fp-label">카테고리</div>
+          <div class="chip-row" style="margin-bottom:12px;">
+            <div class="chip selected">🍽 식비</div>
+            <div class="chip">☕ 카페</div>
+            <div class="chip">🛍 쇼핑</div>
+            <div class="chip">📺 구독</div>
+            <div class="chip">기타</div>
+          </div>
+          <!-- 금액 범위 -->
+          <div class="fp-label">금액 범위</div>
+          <div class="amount-row">
+            <div class="amount-input"><span>10,000</span><span style="font-size:11px;color:var(--text-3);">원</span></div>
+            <div class="amount-dash">~</div>
+            <div class="amount-input"><span style="color:var(--text-3);">최대</span><span style="font-size:11px;color:var(--text-3);">원</span></div>
+          </div>
+          <!-- 하단 버튼 -->
+          <div class="fp-footer">
+            <div class="fp-reset-btn">초기화</div>
+            <div class="fp-apply-btn">적용하기</div>
+          </div>
+        </div>
+        <!-- 목록 (흐리게) -->
+        <div style="background:var(--bg);padding-bottom:80px;opacity:.4;">
+          <div class="tx-item"><div class="cat-icon">🍽</div><div class="tx-info"><div class="tx-name">점심 식사</div><div class="tx-meta">식비 · 3월 7일</div></div><span style="font-size:14px;font-weight:600;color:var(--expense);">-12,000</span></div>
+          <div class="tx-item"><div class="cat-icon">🍽</div><div class="tx-info"><div class="tx-name">저녁 식사</div><div class="tx-meta">식비 · 3월 6일</div></div><span style="font-size:14px;font-weight:600;color:var(--expense);">-18,000</span></div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📋</div><div class="tab-label-a">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 화면 4: 검색 결과 0건 -->
+<div class="screen-wrap">
+  <div class="screen-label">4. TransactionListScreen — 검색 결과 없음</div>
+  <div class="phone">
+    <div class="phone-inner">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="nav-header"><div></div><div class="nav-title">거래 내역</div><div></div></div>
+      <div class="content">
+        <div class="search-bar-wrap">
+          <div class="search-row">
+            <div class="search-input search-input-focused" style="position:relative;">
+              <span class="search-icon">🔍</span>
+              <span style="margin-left:20px;font-size:14px;color:var(--text);">롯데리아</span>
+              <span class="search-clear">✕</span>
+            </div>
+            <div class="filter-btn">필터 ▾</div>
+          </div>
+        </div>
+        <div style="background:var(--bg);padding-bottom:80px;">
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-title">검색 결과가 없어요</div>
+            <div class="empty-sub">"롯데리아"와 일치하는 거래가 없어요</div>
+            <div class="empty-reset-btn">필터 초기화</div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+        <div class="tab-item"><div class="tab-icon-a">📋</div><div class="tab-label-a">거래</div></div>
+        <div class="tab-item"><div class="tab-fab">+</div></div>
+        <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+        <div class="tab-item"><div class="tab-icon-i">☰</div><div class="tab-label-i">더보기</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
