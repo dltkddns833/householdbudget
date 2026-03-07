@@ -1,6 +1,7 @@
 import firestore from '@react-native-firebase/firestore';
 import { Transaction, TransactionInput, MonthlySummary } from '../../../shared/types';
 import { getYearMonth, getDayOfMonth } from '../../../shared/utils/date';
+import { storageService } from './storageService';
 
 const txCollection = (familyId: string) =>
   firestore().collection('families').doc(familyId).collection('transactions');
@@ -57,11 +58,18 @@ export const transactionService = {
     }
   },
 
+  async updateReceiptUrl(familyId: string, txId: string, url: string | null): Promise<void> {
+    await txCollection(familyId).doc(txId).update({
+      receiptUrl: url ?? firestore.FieldValue.delete(),
+    });
+  },
+
   async deleteTransaction(
     familyId: string,
     txId: string,
     yearMonth: string,
   ): Promise<void> {
+    await storageService.deleteReceipt(familyId, txId);
     await txCollection(familyId).doc(txId).delete();
     await this.recalculateMonthlySummary(familyId, yearMonth);
   },

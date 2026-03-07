@@ -32,6 +32,11 @@ import {
   useRecentNames,
 } from '../hooks/useTransactions';
 import { Transaction, TransactionType } from '../../../shared/types';
+import { storageService } from '../services/storageService';
+import { transactionService } from '../services/transactionService';
+import { useAuthStore } from '../../../store/authStore';
+import { ReceiptPicker } from '../components/ReceiptPicker';
+import { ReceiptViewer } from '../components/ReceiptViewer';
 
 interface Props {
   navigation: any;
@@ -56,11 +61,17 @@ export const TransactionAddScreen: React.FC<Props> = ({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState(date);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [localReceiptUri, setLocalReceiptUri] = useState<string | null>(
+    editTx?.receiptUrl ?? null,
+  );
+  const [receiptRemoved, setReceiptRemoved] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const addMutation = useAddTransaction();
   const updateMutation = useUpdateTransaction();
   const deleteMutation = useDeleteTransaction();
   const { data: recentNames = [] } = useRecentNames(category);
+  const { family } = useAuthStore();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -98,6 +109,7 @@ export const TransactionAddScreen: React.FC<Props> = ({
 
   const handleSave = async () => {
     if (!validate()) return;
+    const familyId = family?.id;
     try {
       if (isEdit) {
         await updateMutation.mutateAsync({
@@ -105,25 +117,51 @@ export const TransactionAddScreen: React.FC<Props> = ({
           input: getInput(),
           oldYearMonth: editTx!.yearMonth,
         });
+        if (familyId) {
+          const isNewImage = !!localReceiptUri && localReceiptUri !== editTx!.receiptUrl;
+          if (isNewImage) {
+            setIsUploading(true);
+            const url = await storageService.uploadReceipt(familyId, editTx!.id, localReceiptUri!);
+            await transactionService.updateReceiptUrl(familyId, editTx!.id, url);
+          } else if (receiptRemoved) {
+            await storageService.deleteReceipt(familyId, editTx!.id);
+            await transactionService.updateReceiptUrl(familyId, editTx!.id, null);
+          }
+        }
       } else {
-        await addMutation.mutateAsync(getInput());
+        const txId = await addMutation.mutateAsync(getInput());
+        if (familyId && localReceiptUri) {
+          setIsUploading(true);
+          const url = await storageService.uploadReceipt(familyId, txId, localReceiptUri);
+          await transactionService.updateReceiptUrl(familyId, txId, url);
+        }
       }
       navigation.goBack();
     } catch (error: any) {
       Alert.alert('오류', error.message);
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleSaveAndContinue = async () => {
     if (!validate()) return;
     try {
-      await addMutation.mutateAsync(getInput());
+      const txId = await addMutation.mutateAsync(getInput());
+      if (family?.id && localReceiptUri) {
+        setIsUploading(true);
+        const url = await storageService.uploadReceipt(family.id, txId, localReceiptUri);
+        await transactionService.updateReceiptUrl(family.id, txId, url);
+      }
       // Reset fields but keep type, category, and date
       setAmountText('');
       setName('');
       setMemo('');
+      setLocalReceiptUri(null);
     } catch (error: any) {
       Alert.alert('오류', error.message);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -149,7 +187,7 @@ export const TransactionAddScreen: React.FC<Props> = ({
     ]);
   };
 
-  const isLoading = addMutation.isPending || updateMutation.isPending;
+  const isLoading = addMutation.isPending || updateMutation.isPending || isUploading;
 
   return (
     <KeyboardAvoidingView
@@ -339,6 +377,20 @@ export const TransactionAddScreen: React.FC<Props> = ({
           placeholder="선택사항"
           placeholderTextColor={colors.textTertiary}
           multiline
+        />
+
+        {/* Receipt */}
+        <Text style={styles.sectionLabel}>영수증</Text>
+        <ReceiptPicker
+          uri={localReceiptUri ?? undefined}
+          onSelected={uri => {
+            setLocalReceiptUri(uri);
+            setReceiptRemoved(false);
+          }}
+          onRemoved={() => {
+            setLocalReceiptUri(null);
+            setReceiptRemoved(true);
+          }}
         />
 
         {/* Buttons */}
