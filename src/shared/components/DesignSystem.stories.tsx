@@ -86,6 +86,32 @@ const ColorPaletteStory: React.FC = () => {
         { name: 'borderLight', value: colors.borderLight },
       ],
     },
+    {
+      name: 'InsightCard 타입',
+      tokens: [
+        { name: 'warning (bg)', value: '#FEF3C7' },
+        { name: 'warning (icon)', value: '#F59E0B' },
+        { name: 'achievement (bg)', value: '#DCFCE7' },
+        { name: 'achievement (icon)', value: '#22C55E' },
+        { name: 'saving (bg)', value: '#CCFBF1' },
+        { name: 'saving (icon)', value: '#0D9488' },
+        { name: 'info (bg)', value: '#DBEAFE' },
+        { name: 'info (icon)', value: '#3B82F6' },
+      ],
+    },
+    {
+      name: '멤버 아바타',
+      tokens: [
+        { name: 'member-0', value: '#0D9488' },
+        { name: 'member-1', value: '#7C5CFC' },
+        { name: 'member-2', value: '#F59E0B' },
+        { name: 'member-3', value: '#EF4444' },
+        { name: 'member-4', value: '#3B82F6' },
+        { name: 'member-5', value: '#EC4899' },
+        { name: 'member-6', value: '#22C55E' },
+        { name: 'member-7', value: '#64748B' },
+      ],
+    },
   ];
 
   return (
