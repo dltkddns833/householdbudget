@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>#28 홈 화면 위젯 — 디자인 시안</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8; padding: 40px 24px; color: #0f172a;
+    }
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .issue-meta { font-size: 13px; color: #64748b; margin-bottom: 32px; }
+
+    .section-heading {
+      font-size: 16px; font-weight: 700; margin: 32px 0 16px;
+      color: #0f172a; display: flex; align-items: center; gap: 8px;
+    }
+    .section-heading::after {
+      content: ''; flex: 1; height: 1px; background: #e2e8f0;
+    }
+
+    .widgets-row { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 40px; }
+    .widget-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .widget-label { font-size: 12px; font-weight: 600; color: #64748b; text-align: center; }
+
+    /* ===== 위젯 공통 ===== */
+    .widget {
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+      overflow: hidden;
+    }
+
+    /* Small 위젯 (2×2) — 라이트 */
+    .widget-small {
+      width: 160px; height: 160px;
+      background: #fff;
+      padding: 14px;
+      display: flex; flex-direction: column;
+    }
+    .ws-app-name { font-size: 10px; font-weight: 600; color: #64748b; }
+    .ws-spacer { flex: 1; }
+    .ws-label { font-size: 11px; color: #64748b; margin-bottom: 2px; }
+    .ws-amount { font-size: 22px; font-weight: 800; color: #3b82f6; line-height: 1.1; }
+    .ws-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 8px;
+    }
+    .ws-remaining { font-size: 11px; font-weight: 600; color: #22c55e; }
+    .ws-remaining.negative { color: #ef4444; }
+    .ws-month { font-size: 11px; color: #94a3b8; }
+
+    /* Small 위젯 — 다크 */
+    .widget-small-dark {
+      background: #1e293b;
+    }
+    .widget-small-dark .ws-app-name { color: #94a3b8; }
+    .widget-small-dark .ws-label { color: #94a3b8; }
+    .widget-small-dark .ws-amount { color: #60a5fa; }
+    .widget-small-dark .ws-remaining { color: #4ade80; }
+    .widget-small-dark .ws-month { color: #64748b; }
+
+    /* Medium 위젯 (4×2) — 라이트 */
+    .widget-medium {
+      width: 344px; height: 160px;
+      background: #fff;
+      padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .wm-header { display: flex; align-items: center; justify-content: space-between; }
+    .wm-app-name { font-size: 13px; font-weight: 700; color: #0d9488; }
+    .wm-month { font-size: 11px; color: #94a3b8; }
+    .wm-divider { height: 1px; background: #e2e8f0; }
+    .wm-amounts { display: flex; justify-content: space-around; }
+    .wm-col { text-align: center; }
+    .wm-col-label { font-size: 10px; color: #94a3b8; margin-bottom: 3px; }
+    .wm-col-amount { font-size: 17px; font-weight: 800; }
+    .wm-col-amount.income { color: #ef4444; }
+    .wm-col-amount.expense { color: #3b82f6; }
+    .wm-col-amount.remaining { color: #22c55e; }
+    .wm-progress-wrap { background: #f1f5f9; border-radius: 4px; height: 8px; overflow: hidden; }
+    .wm-progress-bar { height: 100%; border-radius: 4px; }
+    .wm-progress-footer { display: flex; justify-content: flex-end; margin-top: 3px; }
+    .wm-progress-pct { font-size: 11px; font-weight: 700; }
+
+    /* Medium 위젯 — 다크 */
+    .widget-medium-dark {
+      background: #1e293b;
+    }
+    .widget-medium-dark .wm-app-name { color: #2dd4bf; }
+    .widget-medium-dark .wm-month { color: #64748b; }
+    .widget-medium-dark .wm-divider { background: #334155; }
+    .widget-medium-dark .wm-col-label { color: #64748b; }
+    .widget-medium-dark .wm-col-amount.income { color: #f87171; }
+    .widget-medium-dark .wm-col-amount.expense { color: #60a5fa; }
+    .widget-medium-dark .wm-col-amount.remaining { color: #4ade80; }
+    .widget-medium-dark .wm-progress-wrap { background: #334155; }
+
+    /* 실제 홈 화면 시뮬레이션 */
+    .homescreen {
+      width: 390px; height: 600px;
+      background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      border-radius: 44px; border: 8px solid #1e293b;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+      overflow: hidden; position: relative; padding: 20px 16px;
+    }
+    .hs-time { font-size: 52px; font-weight: 200; color: #fff; text-align: center; margin-bottom: 4px; }
+    .hs-date { font-size: 16px; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 20px; }
+    .hs-widgets { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+
+    /* 흐름 다이어그램 */
+    .flow-diagram {
+      background: #fff; border-radius: 16px; padding: 28px 32px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 680px;
+    }
+    .flow-row { display: flex; align-items: flex-start; gap: 0; }
+    .flow-col { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .flow-box {
+      border-radius: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600;
+      text-align: center; white-space: nowrap;
+    }
+    .flow-box.trigger { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .flow-box.process { background: #f0fdf9; color: #065f46; border: 1px solid #a7f3d0; }
+    .flow-box.native { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .flow-box.result { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+    .flow-arrow-v {
+      width: 2px; height: 20px; background: #e2e8f0; margin: 0 auto;
+      position: relative;
+    }
+    .flow-arrow-v::after {
+      content: '▼'; position: absolute; bottom: -8px; left: 50%;
+      transform: translateX(-50%); font-size: 10px; color: #94a3b8;
+    }
+    .flow-split { display: flex; gap: 24px; margin-top: 0; }
+    .flow-label { font-size: 11px; color: #64748b; text-align: center; margin-top: 6px; }
+
+    .annotation {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 16px 20px; margin-top: 12px;
+    }
+    .annotation h3 { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #0d9488; }
+    .annotation ul { padding-left: 16px; }
+    .annotation li { font-size: 12px; color: #475569; line-height: 1.7; }
+
+    .badge {
+      display: inline-block; background: #0d9488; color: #fff;
+      font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>#28 홈 화면 위젯</h1>
+<p class="issue-meta">디자인 시안 · 관련 기획: plan.md</p>
+
+<!-- Small 위젯 -->
+<div class="section-heading">Small 위젯 (2×2)</div>
+<div class="widgets-row">
+
+  <div class="widget-wrap">
+    <div class="widget-label">라이트 모드</div>
+    <div class="widget widget-small">
+      <div class="ws-app-name">우리집 가계부</div>
+      <div class="ws-spacer"></div>
+      <div class="ws-label">이번달 지출</div>
+      <div class="ws-amount">280,000원</div>
+      <div class="ws-footer">
+        <span class="ws-remaining">잔액 70,000원</span>
+        <span class="ws-month">3월</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget-wrap">
+    <div class="widget-label">다크 모드</div>
+    <div class="widget widget-small widget-small-dark">
+      <div class="ws-app-name">우리집 가계부</div>
+      <div class="ws-spacer"></div>
+      <div class="ws-label">이번달 지출</div>
+      <div class="ws-amount">280,000원</div>
+      <div class="ws-footer">
+        <span class="ws-remaining">잔액 70,000원</span>
+        <span class="ws-month">3월</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget-wrap">
+    <div class="widget-label">잔액 음수 상태</div>
+    <div class="widget widget-small">
+      <div class="ws-app-name">우리집 가계부</div>
+      <div class="ws-spacer"></div>
+      <div class="ws-label">이번달 지출</div>
+      <div class="ws-amount" style="color:#ef4444;">410,000원</div>
+      <div class="ws-footer">
+        <span class="ws-remaining negative">-60,000원 초과</span>
+        <span class="ws-month">3월</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget-wrap">
+    <div class="widget-label">데이터 없음</div>
+    <div class="widget widget-small">
+      <div class="ws-app-name">우리집 가계부</div>
+      <div class="ws-spacer"></div>
+      <div class="ws-label">이번달 지출</div>
+      <div class="ws-amount" style="color:#94a3b8; font-size:18px;">불러오는 중...</div>
+      <div class="ws-footer">
+        <span class="ws-remaining" style="color:#94a3b8;">—</span>
+        <span class="ws-month">3월</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Medium 위젯 -->
+<div class="section-heading">Medium 위젯 (4×2)</div>
+<div class="widgets-row">
+
+  <div class="widget-wrap" style="align-items:flex-start;">
+    <div class="widget-label">라이트 모드</div>
+    <div class="widget widget-medium">
+      <div class="wm-header">
+        <span class="wm-app-name">우리집 가계부</span>
+        <span class="wm-month">2026년 3월</span>
+      </div>
+      <div class="wm-divider"></div>
+      <div class="wm-amounts">
+        <div class="wm-col">
+          <div class="wm-col-label">수입</div>
+          <div class="wm-col-amount income">350만원</div>
+        </div>
+        <div class="wm-col">
+          <div class="wm-col-label">지출</div>
+          <div class="wm-col-amount expense">280만원</div>
+        </div>
+        <div class="wm-col">
+          <div class="wm-col-label">잔액</div>
+          <div class="wm-col-amount remaining">70만원</div>
+        </div>
+      </div>
+      <div>
+        <div class="wm-progress-wrap">
+          <div class="wm-progress-bar" style="width:80%; background:#f59e0b;"></div>
+        </div>
+        <div class="wm-progress-footer">
+          <span class="wm-progress-pct" style="color:#f59e0b;">지출 80%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget-wrap" style="align-items:flex-start;">
+    <div class="widget-label">다크 모드</div>
+    <div class="widget widget-medium widget-medium-dark">
+      <div class="wm-header">
+        <span class="wm-app-name">우리집 가계부</span>
+        <span class="wm-month">2026년 3월</span>
+      </div>
+      <div class="wm-divider"></div>
+      <div class="wm-amounts">
+        <div class="wm-col">
+          <div class="wm-col-label">수입</div>
+          <div class="wm-col-amount income">350만원</div>
+        </div>
+        <div class="wm-col">
+          <div class="wm-col-label">지출</div>
+          <div class="wm-col-amount expense">280만원</div>
+        </div>
+        <div class="wm-col">
+          <div class="wm-col-label">잔액</div>
+          <div class="wm-col-amount remaining">70만원</div>
+        </div>
+      </div>
+      <div>
+        <div class="wm-progress-wrap">
+          <div class="wm-progress-bar" style="width:80%; background:#f59e0b;"></div>
+        </div>
+        <div class="wm-progress-footer">
+          <span class="wm-progress-pct" style="color:#f59e0b;">지출 80%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 실제 홈 화면 시뮬레이션 -->
+<div class="section-heading">실제 홈 화면 배치 시뮬레이션</div>
+<div style="display:flex; gap:32px; flex-wrap:wrap; margin-bottom:40px;">
+  <div class="widget-wrap">
+    <div class="widget-label">Small + Medium 동시 배치</div>
+    <div class="homescreen">
+      <div class="hs-time">9:41</div>
+      <div class="hs-date">2026년 3월 15일 일요일</div>
+      <div class="hs-widgets">
+        <!-- Medium 위젯 -->
+        <div class="widget widget-medium" style="width:358px;">
+          <div class="wm-header">
+            <span class="wm-app-name">우리집 가계부</span>
+            <span class="wm-month">2026년 3월</span>
+          </div>
+          <div class="wm-divider"></div>
+          <div class="wm-amounts">
+            <div class="wm-col">
+              <div class="wm-col-label">수입</div>
+              <div class="wm-col-amount income">350만원</div>
+            </div>
+            <div class="wm-col">
+              <div class="wm-col-label">지출</div>
+              <div class="wm-col-amount expense">280만원</div>
+            </div>
+            <div class="wm-col">
+              <div class="wm-col-label">잔액</div>
+              <div class="wm-col-amount remaining">70만원</div>
+            </div>
+          </div>
+          <div>
+            <div class="wm-progress-wrap">
+              <div class="wm-progress-bar" style="width:80%;background:#f59e0b;"></div>
+            </div>
+            <div class="wm-progress-footer">
+              <span class="wm-progress-pct" style="color:#f59e0b;">지출 80%</span>
+            </div>
+          </div>
+        </div>
+        <!-- Small 위젯 두 개 나란히 -->
+        <div style="display:flex; gap:12px;">
+          <div class="widget widget-small" style="width:173px;">
+            <div class="ws-app-name">우리집 가계부</div>
+            <div class="ws-spacer"></div>
+            <div class="ws-label">이번달 지출</div>
+            <div class="ws-amount" style="font-size:18px;">280,000원</div>
+            <div class="ws-footer">
+              <span class="ws-remaining" style="font-size:10px;">잔액 70,000원</span>
+              <span class="ws-month">3월</span>
+            </div>
+          </div>
+          <div style="width:173px; height:160px; border-radius:20px; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center;">
+            <span style="color:rgba(255,255,255,0.4); font-size:12px;">다른 앱 위젯</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 데이터 동기화 흐름 -->
+<div class="section-heading">데이터 동기화 흐름</div>
+<div class="flow-diagram" style="margin-bottom:32px;">
+  <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+    <div class="flow-box trigger">거래 추가 / 앱 실행</div>
+    <div class="flow-arrow-v" style="margin-bottom:12px;"></div>
+    <div class="flow-box process">monthlySummaries 업데이트 (Firestore)</div>
+    <div class="flow-arrow-v" style="margin-bottom:12px;"></div>
+    <div class="flow-box process">useWidgetSync 훅 변경 감지</div>
+    <div class="flow-arrow-v" style="margin-bottom:12px;"></div>
+    <div class="flow-box process">widgetService.saveWidgetData()</div>
+    <div style="display:flex; gap:48px; margin-top:20px; align-items:flex-start;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+        <div class="flow-box native" style="font-size:12px;">Android<br>SharedPreferences JSON 저장</div>
+        <div class="flow-arrow-v" style="margin-bottom:12px;"></div>
+        <div class="flow-box result" style="font-size:12px;">AppWidgetManager<br>RemoteViews 갱신</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:0;">
+        <div class="flow-box native" style="font-size:12px;">iOS<br>App Groups UserDefaults 저장</div>
+        <div class="flow-arrow-v" style="margin-bottom:12px;"></div>
+        <div class="flow-box result" style="font-size:12px;">WidgetCenter<br>reloadAllTimelines()</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 프로그레스 바 색상 기준 -->
+<div class="section-heading">프로그레스 바 색상 기준 (지출/수입 비율)</div>
+<div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:40px;">
+  <div class="annotation" style="width:200px;">
+    <h3 style="color:#0d9488;">0 ~ 79%</h3>
+    <div style="background:#f1f5f9;border-radius:4px;height:10px;margin:10px 0;overflow:hidden;">
+      <div style="width:70%;height:100%;background:#0d9488;border-radius:4px;"></div>
+    </div>
+    <ul><li>색상: primary #0D9488</li><li>여유 있는 상태</li></ul>
+  </div>
+  <div class="annotation" style="width:200px;">
+    <h3 style="color:#f59e0b;">80 ~ 99%</h3>
+    <div style="background:#f1f5f9;border-radius:4px;height:10px;margin:10px 0;overflow:hidden;">
+      <div style="width:85%;height:100%;background:#f59e0b;border-radius:4px;"></div>
+    </div>
+    <ul><li>색상: warning #F59E0B</li><li>주의 필요 상태</li></ul>
+  </div>
+  <div class="annotation" style="width:200px;">
+    <h3 style="color:#ef4444;">100% 초과</h3>
+    <div style="background:#f1f5f9;border-radius:4px;height:10px;margin:10px 0;overflow:hidden;">
+      <div style="width:100%;height:100%;background:#ef4444;border-radius:4px;"></div>
+    </div>
+    <ul><li>색상: danger #EF4444</li><li>예산 초과 상태</li></ul>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>#27 자산 변동 추이 상세 — 디자인 시안</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8; padding: 40px 24px; color: #0f172a;
+    }
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .issue-meta { font-size: 13px; color: #64748b; margin-bottom: 32px; }
+    .screens { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+    .screen-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .screen-label { font-size: 13px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; }
+
+    .phone {
+      width: 375px; min-height: 780px;
+      background: #f8fafc;
+      border-radius: 44px; border: 8px solid #1e293b;
+      overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column;
+    }
+    .status-bar {
+      background: #0d9488; padding: 12px 20px 8px;
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: #fff; font-weight: 600;
+    }
+    .header {
+      background: #fff; padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .header-back { font-size: 20px; color: #64748b; }
+    .header-title { font-size: 17px; font-weight: 700; flex: 1; }
+
+    /* 기간 선택 탭 */
+    .period-tab-wrap { padding: 14px 16px; background: #fff; border-bottom: 1px solid #e2e8f0; }
+    .period-tab-inner {
+      background: #f1f5f9; border-radius: 8px; padding: 4px;
+      display: flex; gap: 2px;
+    }
+    .period-tab {
+      flex: 1; text-align: center; padding: 8px 0;
+      font-size: 14px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+    }
+    .period-tab.active {
+      background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      font-weight: 700; color: #0f172a;
+    }
+    .period-tab:not(.active) { color: #64748b; }
+
+    /* 스크롤 영역 */
+    .scroll-area { flex: 1; overflow-y: auto; }
+
+    /* 섹션 카드 */
+    .section-card {
+      background: #fff; margin: 12px; border-radius: 12px;
+      overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .section-title {
+      padding: 16px 16px 0;
+      font-size: 14px; font-weight: 700; color: #0f172a;
+    }
+    .section-divider {
+      width: 32px; height: 2px; background: #0d9488;
+      margin: 4px 16px 12px;
+    }
+
+    /* 라인 차트 (SVG) */
+    .chart-wrap { padding: 0 12px 16px; }
+    .chart-legend {
+      display: flex; gap: 16px; padding: 8px 16px 12px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; }
+    .legend-line {
+      width: 20px; height: 2px;
+    }
+
+    /* 월별 증감 목록 */
+    .change-row {
+      display: flex; align-items: center; padding: 14px 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .change-month { font-size: 14px; color: #0f172a; flex: 1; }
+    .change-amount { font-size: 14px; font-weight: 700; }
+    .change-amount.up { color: #22c55e; }
+    .change-amount.down { color: #ef4444; }
+    .change-arrow { font-size: 14px; margin-left: 4px; }
+
+    /* 계좌별 현황 */
+    .account-sub-header {
+      background: #f8fafc; padding: 8px 16px;
+      font-size: 12px; font-weight: 700; color: #64748b;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .account-row {
+      padding: 14px 16px; border-bottom: 1px solid #f1f5f9;
+      display: flex; align-items: center; gap: 0;
+    }
+    .account-info { flex: 1; }
+    .account-name { font-size: 14px; font-weight: 600; }
+    .account-bank { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .account-amount-wrap { text-align: right; }
+    .account-amount { font-size: 15px; font-weight: 700; }
+    .account-change { font-size: 12px; margin-top: 2px; }
+    .account-change.up { color: #22c55e; }
+    .account-change.down { color: #ef4444; }
+
+    /* 홈 카드 수정 */
+    .home-hero {
+      background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+      margin: 12px; border-radius: 16px; padding: 20px;
+      color: #fff;
+    }
+    .hero-label { font-size: 13px; opacity: 0.85; margin-bottom: 4px; }
+    .hero-amount { font-size: 28px; font-weight: 800; margin-bottom: 2px; }
+    .hero-sub { font-size: 12px; opacity: 0.7; }
+    .hero-link {
+      display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+      margin-top: 12px; font-size: 13px; color: #2dd4bf; font-weight: 600;
+    }
+
+    .annotation {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 16px 20px; margin-top: 12px; width: 375px;
+    }
+    .annotation h3 { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #0d9488; }
+    .annotation ul { padding-left: 16px; }
+    .annotation li { font-size: 12px; color: #475569; line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+<h1>#27 자산 변동 추이 상세</h1>
+<p class="issue-meta">디자인 시안 · 관련 기획: plan.md</p>
+
+<div class="screens">
+
+  <!-- 화면 1: HomeScreen 카드 수정 -->
+  <div class="screen-wrap">
+    <div class="screen-label">① HomeScreen — 실자산 카드 "추이 자세히" 추가</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="header" style="background:#0d9488; border-bottom:none;">
+        <span class="header-title" style="color:#fff;">우리집 가계부</span>
+        <span style="color:rgba(255,255,255,0.7); font-size:13px;">2026년 3월</span>
+      </div>
+      <div style="flex:1; background:#f8fafc; overflow-y:auto;">
+        <div class="home-hero">
+          <div class="hero-label">실자산</div>
+          <div class="hero-amount">4,750만원</div>
+          <div class="hero-sub">은퇴자금 제외</div>
+          <div class="hero-link">추이 자세히 →</div>
+        </div>
+        <div style="background:#fff; margin:0 12px 12px; border-radius:12px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="font-size:13px;color:#64748b;margin-bottom:8px;">이번달 요약</div>
+          <div style="display:flex; justify-content:space-between;">
+            <div style="text-align:center;">
+              <div style="font-size:11px;color:#64748b;">수입</div>
+              <div style="font-size:16px;font-weight:700;color:#ef4444;">350만원</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:11px;color:#64748b;">지출</div>
+              <div style="font-size:16px;font-weight:700;color:#3b82f6;">280만원</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:11px;color:#64748b;">잔액</div>
+              <div style="font-size:16px;font-weight:700;color:#22c55e;">70만원</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation">
+      <h3>변경 사항</h3>
+      <ul>
+        <li>실자산 히어로 카드 우하단 "추이 자세히 →" 추가</li>
+        <li>텍스트: fontSize 13 / color #2DD4BF (primaryLight)</li>
+        <li>아이콘: arrow-forward 14px</li>
+        <li>탭 시 AssetTrendScreen으로 이동</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 화면 2: AssetTrendScreen -->
+  <div class="screen-wrap">
+    <div class="screen-label">② AssetTrendScreen — 자산 변동 추이</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="header">
+        <span class="header-back">←</span>
+        <span class="header-title">자산 변동 추이</span>
+      </div>
+      <div class="period-tab-wrap">
+        <div class="period-tab-inner">
+          <div class="period-tab">6개월</div>
+          <div class="period-tab active">12개월</div>
+          <div class="period-tab">전체</div>
+        </div>
+      </div>
+      <div class="scroll-area">
+
+        <!-- 라인 차트 섹션 -->
+        <div class="section-card">
+          <div class="section-title">전체 자산 추이</div>
+          <div class="section-divider"></div>
+          <div class="chart-wrap">
+            <svg width="100%" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+              <!-- Y축 격자 -->
+              <line x1="30" y1="20" x2="310" y2="20" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+              <line x1="30" y1="60" x2="310" y2="60" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+              <line x1="30" y1="100" x2="310" y2="100" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+              <line x1="30" y1="140" x2="310" y2="140" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+              <!-- Y축 레이블 -->
+              <text x="28" y="23" text-anchor="end" font-size="9" fill="#94a3b8">9천만</text>
+              <text x="28" y="63" text-anchor="end" font-size="9" fill="#94a3b8">7천만</text>
+              <text x="28" y="103" text-anchor="end" font-size="9" fill="#94a3b8">5천만</text>
+              <text x="28" y="143" text-anchor="end" font-size="9" fill="#94a3b8">3천만</text>
+              <!-- 실자산 라인 (Teal) -->
+              <polyline
+                points="45,130 85,118 125,110 165,95 205,88 245,80 285,72"
+                fill="none" stroke="#0d9488" stroke-width="2.5" stroke-linejoin="round"/>
+              <!-- 도트 -->
+              <circle cx="45" cy="130" r="3.5" fill="#0d9488"/>
+              <circle cx="85" cy="118" r="3.5" fill="#0d9488"/>
+              <circle cx="125" cy="110" r="3.5" fill="#0d9488"/>
+              <circle cx="165" cy="95" r="3.5" fill="#0d9488"/>
+              <circle cx="205" cy="88" r="3.5" fill="#0d9488"/>
+              <circle cx="245" cy="80" r="3.5" fill="#0d9488"/>
+              <circle cx="285" cy="72" r="3.5" fill="#0d9488"/>
+              <!-- 은퇴자금 라인 (Amber) -->
+              <polyline
+                points="45,100 85,96 125,90 165,85 205,80 245,75 285,68"
+                fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6,3" stroke-linejoin="round"/>
+              <circle cx="45" cy="100" r="3.5" fill="#f59e0b"/>
+              <circle cx="85" cy="96" r="3.5" fill="#f59e0b"/>
+              <circle cx="125" cy="90" r="3.5" fill="#f59e0b"/>
+              <circle cx="165" cy="85" r="3.5" fill="#f59e0b"/>
+              <circle cx="205" cy="80" r="3.5" fill="#f59e0b"/>
+              <circle cx="245" cy="75" r="3.5" fill="#f59e0b"/>
+              <circle cx="285" cy="68" r="3.5" fill="#f59e0b"/>
+              <!-- X축 레이블 -->
+              <text x="45" y="158" text-anchor="middle" font-size="9" fill="#94a3b8">9월</text>
+              <text x="85" y="158" text-anchor="middle" font-size="9" fill="#94a3b8">10월</text>
+              <text x="125" y="158" text-anchor="middle" font-size="9" fill="#94a3b8">11월</text>
+              <text x="165" y="158" text-anchor="middle" font-size="9" fill="#94a3b8">12월</text>
+              <text x="205" y="158" text-anchor="middle" font-size="9" fill="#94a3b8">1월</text>
+              <text x="245" y="158" text-anchor="middle" font-size="9" fill="#94a3b8">2월</text>
+              <text x="285" y="158" text-anchor="middle" font-size="9" fill="#94a3b8">3월</text>
+            </svg>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-line" style="background:#0d9488;"></div>
+              <span>실자산</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-line" style="background:#f59e0b; background: repeating-linear-gradient(90deg, #f59e0b 0, #f59e0b 5px, transparent 5px, transparent 8px);"></div>
+              <span>은퇴자금</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 월별 증감 -->
+        <div class="section-card">
+          <div class="section-title">월별 증감</div>
+          <div class="section-divider"></div>
+          <div class="change-row">
+            <span class="change-month">2026년 3월</span>
+            <span class="change-amount up">+120만원</span>
+            <span class="change-arrow" style="color:#22c55e;">↑</span>
+          </div>
+          <div class="change-row">
+            <span class="change-month">2026년 2월</span>
+            <span class="change-amount down">-30만원</span>
+            <span class="change-arrow" style="color:#ef4444;">↓</span>
+          </div>
+          <div class="change-row">
+            <span class="change-month">2026년 1월</span>
+            <span class="change-amount up">+250만원</span>
+            <span class="change-arrow" style="color:#22c55e;">↑</span>
+          </div>
+          <div class="change-row" style="border-bottom:none;">
+            <span class="change-month">2025년 12월</span>
+            <span class="change-amount up">+180만원</span>
+            <span class="change-arrow" style="color:#22c55e;">↑</span>
+          </div>
+        </div>
+
+        <!-- 계좌별 현황 -->
+        <div class="section-card" style="margin-bottom:20px;">
+          <div class="section-title">계좌별 현황 · 2026년 3월</div>
+          <div class="section-divider"></div>
+          <div class="account-sub-header">실자산</div>
+          <div class="account-row">
+            <div class="account-info">
+              <div class="account-name">KB 주택청약</div>
+              <div class="account-bank">국민은행</div>
+            </div>
+            <div class="account-amount-wrap">
+              <div class="account-amount">1,250만원</div>
+              <div class="account-change up">+20만원</div>
+            </div>
+          </div>
+          <div class="account-row">
+            <div class="account-info">
+              <div class="account-name">토스 저축예금</div>
+              <div class="account-bank">토스뱅크</div>
+            </div>
+            <div class="account-amount-wrap">
+              <div class="account-amount">3,500만원</div>
+              <div class="account-change up">+100만원</div>
+            </div>
+          </div>
+          <div class="account-sub-header">은퇴자금</div>
+          <div class="account-row" style="border-bottom:none;">
+            <div class="account-info">
+              <div class="account-name">삼성증권 IRP</div>
+              <div class="account-bank">삼성증권</div>
+            </div>
+            <div class="account-amount-wrap">
+              <div class="account-amount">4,800만원</div>
+              <div class="account-change up">+50만원</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /scroll-area -->
+    </div>
+    <div class="annotation">
+      <h3>차트 스펙</h3>
+      <ul>
+        <li>라이브러리: react-native-chart-kit LineChart</li>
+        <li>실자산: #0D9488 실선 / 은퇴자금: #F59E0B 점선</li>
+        <li>기간 탭 전환 시 차트+목록 모두 업데이트</li>
+        <li>증감 양수: #22C55E / 음수: #EF4444</li>
+        <li>금액 포맷: 만/억 단위 자동 변환</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

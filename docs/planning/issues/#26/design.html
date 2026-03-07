@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>#26 월간 결산 리포트 — 디자인 시안</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      padding: 40px 24px;
+      color: #0f172a;
+    }
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .issue-meta { font-size: 13px; color: #64748b; margin-bottom: 32px; }
+    .screens { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+    .screen-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .screen-label { font-size: 13px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; }
+
+    .phone {
+      width: 375px;
+      min-height: 760px;
+      background: #f1f5f9;
+      border-radius: 44px;
+      border: 8px solid #1e293b;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column;
+    }
+    .status-bar {
+      background: #0d9488;
+      padding: 12px 20px 8px;
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: #fff; font-weight: 600;
+    }
+    .header {
+      background: #fff;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .header-back { font-size: 20px; color: #64748b; }
+    .header-title { font-size: 17px; font-weight: 700; flex: 1; }
+    .header-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: #0d9488;
+      background: #f0fdf9; gap: 4px;
+    }
+
+    /* 진입 버튼 (StatsScreen) */
+    .stats-content { flex: 1; padding: 16px; background: #f1f5f9; }
+    .stats-placeholder {
+      background: #fff; border-radius: 12px; height: 180px;
+      display: flex; align-items: center; justify-content: center;
+      color: #94a3b8; font-size: 13px; margin-bottom: 16px;
+    }
+    .report-entry-btn {
+      background: #f0fdf9;
+      border: 1px solid #0d9488;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
+    }
+    .report-entry-btn .icon { font-size: 22px; }
+    .report-entry-btn .label { flex: 1; font-size: 15px; font-weight: 600; color: #0d9488; }
+    .report-entry-btn .arrow { font-size: 18px; color: #0d9488; }
+
+    /* 리포트 스크롤 영역 */
+    .report-scroll { flex: 1; padding: 16px; overflow-y: auto; background: #f1f5f9; }
+
+    /* 리포트 카드 */
+    .report-card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    /* 카드 헤더 그라디언트 */
+    .card-header {
+      background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .card-header .app-icon { font-size: 28px; margin-bottom: 4px; }
+    .card-header .app-name { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); }
+    .card-header .report-title { font-size: 20px; font-weight: 800; color: #fff; margin-top: 4px; }
+
+    /* 요약 섹션 */
+    .summary-section {
+      padding: 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .summary-row {
+      display: flex; justify-content: space-between; margin-bottom: 12px;
+    }
+    .summary-item { flex: 1; text-align: center; }
+    .summary-label { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+    .summary-amount { font-size: 18px; font-weight: 800; }
+    .summary-amount.income { color: #ef4444; }
+    .summary-amount.expense { color: #3b82f6; }
+    .summary-amount.saving { color: #22c55e; }
+    .saving-rate {
+      text-align: center;
+      font-size: 13px; font-weight: 600; color: #22c55e;
+      background: #f0fdf4; padding: 6px; border-radius: 8px;
+    }
+
+    /* 카테고리 TOP5 */
+    .section { padding: 20px; border-bottom: 1px solid #e2e8f0; }
+    .section-title { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 14px; }
+    .cat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .cat-icon { font-size: 16px; width: 22px; text-align: center; }
+    .cat-name { font-size: 12px; color: #0f172a; width: 40px; flex-shrink: 0; }
+    .cat-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 4px; height: 8px; overflow: hidden; }
+    .cat-bar { height: 100%; border-radius: 4px; }
+    .cat-amount { font-size: 11px; color: #64748b; font-weight: 600; width: 68px; text-align: right; flex-shrink: 0; }
+
+    /* 인사이트 */
+    .insight-item {
+      border-radius: 8px; padding: 10px 12px;
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .insight-item.saving { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .insight-item.warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+    /* 예산 달성률 */
+    .budget-bar-wrap {
+      background: #f1f5f9; border-radius: 6px; height: 12px;
+      overflow: hidden; margin: 10px 0 6px;
+    }
+    .budget-bar { height: 100%; border-radius: 6px; background: #0d9488; }
+    .budget-footer { display: flex; justify-content: space-between; }
+    .budget-desc { font-size: 12px; color: #64748b; }
+    .budget-pct { font-size: 14px; font-weight: 700; color: #0d9488; }
+
+    /* 하단 버튼 (저장/공유) */
+    .action-row {
+      display: flex; gap: 10px; padding: 16px;
+      background: #fff; border-top: 1px solid #e2e8f0;
+    }
+    .action-btn {
+      flex: 1; padding: 13px;
+      border-radius: 12px; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .action-btn.share { background: #0d9488; color: #fff; }
+    .action-btn.save { background: #f1f5f9; color: #0f172a; border: 1px solid #e2e8f0; }
+
+    .annotation {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 16px 20px; margin-top: 12px; width: 375px;
+    }
+    .annotation h3 { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #0d9488; }
+    .annotation ul { padding-left: 16px; }
+    .annotation li { font-size: 12px; color: #475569; line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+<h1>#26 월간 결산 리포트</h1>
+<p class="issue-meta">디자인 시안 · 관련 기획: plan.md</p>
+
+<div class="screens">
+
+  <!-- 화면 1: StatsScreen 진입 버튼 -->
+  <div class="screen-wrap">
+    <div class="screen-label">① StatsScreen — 결산 리포트 진입 버튼</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="header">
+        <span class="header-title">통계</span>
+      </div>
+      <div class="stats-content">
+        <div class="stats-placeholder">기존 통계 차트 영역</div>
+        <div class="report-entry-btn">
+          <span class="icon">📊</span>
+          <span class="label">이달의 결산 리포트 보기</span>
+          <span class="arrow">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="annotation">
+      <h3>버튼 스펙</h3>
+      <ul>
+        <li>배경: #F0FDF9 (primaryLight 연하게)</li>
+        <li>테두리: 1px #0D9488</li>
+        <li>borderRadius: 12</li>
+        <li>아이콘: MaterialIcons bar-chart 22px</li>
+        <li>텍스트: fontSize 15 / fontWeight 600 / primary</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 화면 2: MonthlyReportScreen -->
+  <div class="screen-wrap">
+    <div class="screen-label">② MonthlyReportScreen — 리포트 미리보기</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+      <div class="header">
+        <span class="header-back">←</span>
+        <span class="header-title">2026년 3월 결산</span>
+        <div class="header-btn">📤 공유</div>
+        <div class="header-btn">💾 저장</div>
+      </div>
+
+      <div class="report-scroll">
+        <div class="report-card">
+
+          <!-- 카드 헤더 -->
+          <div class="card-header">
+            <div class="app-icon">🏠</div>
+            <div class="app-name">우리집 가계부</div>
+            <div class="report-title">2026년 3월 결산</div>
+          </div>
+
+          <!-- 요약 -->
+          <div class="summary-section">
+            <div class="summary-row">
+              <div class="summary-item">
+                <div class="summary-label">수입</div>
+                <div class="summary-amount income">350만원</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">지출</div>
+                <div class="summary-amount expense">280만원</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">저축</div>
+                <div class="summary-amount saving">70만원</div>
+              </div>
+            </div>
+            <div class="saving-rate">저축률 20%</div>
+          </div>
+
+          <!-- 카테고리 TOP5 -->
+          <div class="section">
+            <div class="section-title">카테고리별 지출 TOP 5</div>
+            <div class="cat-row">
+              <span class="cat-icon">🍽️</span>
+              <span class="cat-name">식비</span>
+              <div class="cat-bar-wrap"><div class="cat-bar" style="width:100%;background:#FF6B6B"></div></div>
+              <span class="cat-amount">120,000원</span>
+            </div>
+            <div class="cat-row">
+              <span class="cat-icon">🛒</span>
+              <span class="cat-name">쇼핑</span>
+              <div class="cat-bar-wrap"><div class="cat-bar" style="width:70%;background:#4ECDC4"></div></div>
+              <span class="cat-amount">85,000원</span>
+            </div>
+            <div class="cat-row">
+              <span class="cat-icon">🚌</span>
+              <span class="cat-name">교통</span>
+              <div class="cat-bar-wrap"><div class="cat-bar" style="width:51%;background:#7C5CFC"></div></div>
+              <span class="cat-amount">62,000원</span>
+            </div>
+            <div class="cat-row">
+              <span class="cat-icon">☕</span>
+              <span class="cat-name">카페</span>
+              <div class="cat-bar-wrap"><div class="cat-bar" style="width:40%;background:#FFD93D"></div></div>
+              <span class="cat-amount">48,000원</span>
+            </div>
+            <div class="cat-row">
+              <span class="cat-icon">📱</span>
+              <span class="cat-name">구독</span>
+              <div class="cat-bar-wrap"><div class="cat-bar" style="width:29%;background:#6C9BCF"></div></div>
+              <span class="cat-amount">35,000원</span>
+            </div>
+          </div>
+
+          <!-- 인사이트 -->
+          <div class="section">
+            <div class="section-title">전월 비교</div>
+            <div class="insight-item saving">✅ 지난달보다 3만원 절약했어요</div>
+            <div class="insight-item warning">⚠️ 쇼핑이 지난달의 1.5배예요</div>
+          </div>
+
+          <!-- 예산 달성률 -->
+          <div class="section" style="border-bottom:none">
+            <div class="section-title">예산 달성률</div>
+            <div class="budget-desc" style="margin-bottom:4px;font-size:12px;color:#64748b">전체 예산의 78% 사용</div>
+            <div class="budget-bar-wrap">
+              <div class="budget-bar" style="width:78%"></div>
+            </div>
+            <div class="budget-footer">
+              <span class="budget-desc">0원</span>
+              <span class="budget-pct">78%</span>
+            </div>
+          </div>
+
+        </div><!-- /report-card -->
+      </div><!-- /report-scroll -->
+
+      <div class="action-row">
+        <button class="action-btn share">📤 공유하기</button>
+        <button class="action-btn save">💾 갤러리 저장</button>
+      </div>
+    </div>
+    <div class="annotation">
+      <h3>캡처 & 공유 스펙</h3>
+      <ul>
+        <li>react-native-view-shot으로 카드 영역만 PNG 캡처</li>
+        <li>[공유]: react-native-share 공유 시트</li>
+        <li>[저장]: 카메라롤 저장 + 권한 요청</li>
+        <li>저장 완료 후 토스트 "갤러리에 저장되었어요"</li>
+        <li>전월 데이터 없으면 비교 섹션 숨김</li>
+        <li>예산 미설정 시 달성률 섹션 숨김</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
