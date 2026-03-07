@@ -51,6 +51,23 @@
 #C68B59  #95AABB  #FF8FAB  #45B7D1  #96CEB4  #A0A0A0
 ```
 
+### 1.5 InsightCard 타입별 색상
+
+| type | 배경 (라이트) | 테두리 | 텍스트 | 용도 |
+|------|--------------|--------|--------|------|
+| `warning` | `#FEF3C7` | `#FDE68A` | `#92400E` | 지출 증가, 카테고리 급증, 지출>수입 |
+| `saving` | `#D1FAE5` | `#A7F3D0` | `#065F46` | 지출 감소, 절약 달성 |
+| `achievement` | `#DBEAFE` | `#BFDBFE` | `#1E40AF` | 저축률 목표 달성, 카테고리 0원 |
+| `info` | `surfaceSecondary` | `border` | `textSecondary` | 단순 사실, 전월 데이터 없을 때 |
+
+### 1.6 멤버 아바타 컬러 팔레트
+
+가족 멤버별 고정 색상 (uid 순서 기준 할당).
+
+```
+#0D9488  #8B5CF6  #F59E0B  #EF4444  #3B82F6  #22C55E
+```
+
 ---
 
 ## 2. 타이포그래피 스케일
@@ -191,12 +208,178 @@ if (isLoading) return <LoadingSpinner />;
 
 전체 화면(`flex: 1`)을 차지하며 중앙에 `ActivityIndicator`를 표시.
 
+### SegmentControl
+
+수입/지출 유형 전환 등 2-option 선택에 사용하는 세그먼트 토글.
+
+| 속성 | 값 |
+|------|-----|
+| 컨테이너 배경 | `surfaceSecondary`, radius `md` (8px), padding 3px |
+| 선택 항목 | `surface`, shadow `sm`, radius 6px |
+| 선택 텍스트 | Body (14/700), 지출=`expense` / 수입=`income` |
+| 미선택 텍스트 | Body (14/400) `textSecondary` |
+| 높이 | 44px |
+
+```tsx
+// 사용 패턴 (react-hook-form 연동)
+const [type, setType] = useState<'expense' | 'income'>('expense');
+
+<View style={styles.segment}>
+  <Pressable style={[styles.segBtn, type === 'expense' && styles.segActive]}
+    onPress={() => setType('expense')}>
+    <Text style={type === 'expense' ? styles.segTextExpense : styles.segTextInactive}>지출</Text>
+  </Pressable>
+  <Pressable style={[styles.segBtn, type === 'income' && styles.segActive]}
+    onPress={() => setType('income')}>
+    <Text style={type === 'income' ? styles.segTextIncome : styles.segTextInactive}>수입</Text>
+  </Pressable>
+</View>
+```
+
+### GaugeBar
+
+예산 달성률, 저축률, 자산 목표 진행률에 공통 사용하는 진행 바.
+
+| 속성 | 값 |
+|------|-----|
+| 높이 | 8px (기본) / 10px (강조) |
+| 배경 | `surfaceSecondary` |
+| 진행색 | 기본: `primary` / 달성: `success` / 초과/음수: `danger` |
+| border radius | 4px (기본) / 5px (강조) |
+| 최대 너비 | 100% 클램프 (초과 달성 시 시각적으로 꽉 참) |
+
+```tsx
+// 사용 패턴
+<View style={styles.gaugeBg}>
+  <View style={[styles.gaugeFill, {
+    width: `${Math.min(percentage, 100)}%`,
+    backgroundColor: isAchieved ? colors.success : colors.primary,
+  }]} />
+</View>
+```
+
+### WarningBanner
+
+미반영 고정비, 알림 권한 해제 등 주의 사항을 화면 내 인라인으로 표시.
+
+| 속성 | 값 |
+|------|-----|
+| 배경 (라이트) | `#FFFBEB` (Amber-50) |
+| 배경 (다크) | `#451A03` |
+| 테두리 | 1px `#FDE68A` |
+| 좌측 아이콘 | MaterialIcons `error-outline` 또는 `notifications-active` 18px `warning` |
+| 본문 텍스트 | Body (14/400) `#92400E` / 다크 `#FDE68A` |
+| border radius | 12px |
+| 외부 margin | 수평 16px |
+
+```tsx
+// 홈 화면 고정비 배너 예시
+{pendingCount > 0 && (
+  <Pressable style={styles.warningBanner} onPress={() => navigate('RecurringList')}>
+    <MaterialIcons name="notifications-active" size={18} color={colors.warning} />
+    <Text style={styles.bannerText}>
+      {`${firstTitle} 등 ${pendingCount}건의 고정비가 반영 안 됐어요`}
+    </Text>
+    <Text style={styles.bannerCta}>확인하기</Text>
+  </Pressable>
+)}
+```
+
+### MemberChip
+
+거래 추가 시 지출 멤버를 선택하는 수평 스크롤 칩 목록 (가족 2인 이상에서만 노출).
+
+| 속성 | 값 |
+|------|-----|
+| 칩 높이 | 34px, radius `full` |
+| 선택 상태 | 배경 `primaryLight` opacity 0.1, 테두리 `primary`, 텍스트 `primary` |
+| 미선택 상태 | 배경 `surfaceSecondary`, 텍스트 `textSecondary` |
+| 아바타 | 22×22 원형, 섹션 1.6의 멤버 색상 |
+| "공동" 칩 | 아바타 배경 `textTertiary` |
+| 가족 1인 시 | 숨김 (`family.members.length < 2`) |
+
+### SearchBar
+
+거래 목록 상단 검색 + 필터 진입점.
+
+| 속성 | 값 |
+|------|-----|
+| 입력 필드 | 높이 40px, radius `full`, 배경 `surfaceSecondary` |
+| 좌측 아이콘 | `search` 16px `textTertiary` |
+| 우측 클리어 | 검색어 있을 때만 노출, `close` 아이콘 |
+| 필터 버튼 | 높이 40px, radius `full`, 활성: 배경 `primaryLight`+테두리 `primary` |
+| 필터 배지 | 활성 필터 수, `primary` 배경 원형, Micro(10/700) 흰색 |
+| 검색 활성 시 | `MonthSelector` 숨김 |
+
+### ActionSheet
+
+카메라/갤러리 선택, 삭제 확인 등 OS 스타일 액션 시트.
+
+| 속성 | 값 |
+|------|-----|
+| 배경 | 반투명 오버레이 `rgba(0,0,0,0.45)` |
+| 시트 | `surface`, radius 16px, margin 수평 14px |
+| 타이틀 행 | Caption (13/400) `textTertiary`, border-bottom |
+| 액션 버튼 | Body Large (16/500) `text`, 패딩 수직 15px, border-bottom |
+| 강조 액션 | `primary` 색상, fontWeight 600 |
+| 취소 버튼 | 별도 카드, margin-top 8px, Body Large (16/600) `text` |
+
 ---
 
-## 7. 사용 컨벤션
+## 7. 신규 피처 컴포넌트
+
+이슈별로 추가된 기능 전용 컴포넌트. 공통 컴포넌트(6절)의 토큰/패턴을 기반으로 구성.
+
+### InsightCard — `#4 전월 비교 인사이트`
+
+경로: `src/features/stats/components/InsightCard.tsx`
+
+- `messages: InsightMessage[]` prop 수신, 빈 배열이면 `null` 반환
+- 각 행: 타입별 아이콘 + 배경색(1.5절) + 텍스트
+- 최대 3개 표시, 우선순위: `warning > achievement > saving > info`
+
+```tsx
+<InsightCard messages={insights} />
+```
+
+### SavingRateCard — `#6 저축률 트래킹`
+
+경로: `src/features/home/components/SavingRateCard.tsx`
+
+- `SavingRateSummary` props 수신
+- 저축률 색상: `positive` → `success`, `negative` → `danger`, `zero` → `textSecondary`
+- 목표 미설정 시 GaugeBar 숨김
+- 달성 시: `success` GaugeBar + "목표 달성!" 텍스트
+- `totalIncome === 0`인 달은 카드 전체 숨김
+
+### AssetGoalCard — `#14 자산 목표 설정`
+
+경로: `src/features/home/components/AssetGoalCard.tsx`
+
+- `AssetGoalProgress` props 수신
+- 달성 시: 다크 그린 그라데이션 배경 + 초록 GaugeBar + `success` 텍스트
+- 달성 미만: `primary` GaugeBar, "목표까지 N원 남음"
+- 카드 탭 → `GoalSettingScreen` 이동
+- `goalProgress === null` 시 카드 미렌더링
+
+### ReceiptPicker — `#11 영수증 첨부`
+
+경로: `src/features/transactions/components/ReceiptPicker.tsx`
+
+- **첨부 전**: 점선 테두리 버튼, `camera` 아이콘 + "영수증 첨부" 텍스트
+- **첨부 후**: 썸네일 이미지 + 우상단 삭제(✕) 버튼 + 하단 파일명/변경 버튼
+- **업로드 중**: 썸네일 위 반투명 오버레이 + `ActivityIndicator`
+- ActionSheet로 "카메라 촬영 / 갤러리 선택 / 취소" 제공
+
+---
+
+## 8. 사용 컨벤션
 
 - 색상은 항상 `useTheme().colors.*` 토큰을 사용. 하드코딩 금지.
 - 스타일은 `useMemo(() => createStyles(colors), [colors])` 패턴으로 생성.
 - 아이콘은 `react-native-vector-icons/MaterialIcons` 사용.
 - 통화 포맷은 `src/shared/utils/currency.ts`의 `formatCurrency` / `formatCurrencyShort` 사용.
 - 날짜는 `src/shared/utils/date.ts`의 dayjs 유틸 사용.
+- GaugeBar 진행률은 항상 `Math.min(value, 100)`으로 클램프한 뒤 렌더링.
+- 멤버 아바타 색상은 `MEMBER_COLORS[index % MEMBER_COLORS.length]` 방식으로 순환 할당.
+- InsightCard 타입 우선순위: `warning > achievement > saving > info` (최대 3개 표시).
