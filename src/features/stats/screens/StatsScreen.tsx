@@ -18,6 +18,8 @@ import { useOverviewRange } from '../../home/hooks/useOverview';
 import { useUIStore } from '../../../store/uiStore';
 import { formatCurrency, formatCurrencyShort } from '../../../shared/utils/currency';
 import { useBudgetProgress } from '../../budget/hooks/useBudget';
+import { useInsights } from '../hooks/useInsights';
+import { InsightCard } from '../components/InsightCard';
 import dayjs from 'dayjs';
 
 const screenWidth = Dimensions.get('window').width;
@@ -33,6 +35,7 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
   const { summary } = useTransactions(currentMonth);
   const rangeQuery = useOverviewRange(6);
   const budgetProgress = useBudgetProgress(currentMonth);
+  const insights = useInsights(currentMonth);
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -85,6 +88,8 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       <MonthSelector yearMonth={currentMonth} onChangeMonth={setCurrentMonth} />
+
+      <InsightCard insights={insights} />
 
       {/* Total Expense */}
       <Card>

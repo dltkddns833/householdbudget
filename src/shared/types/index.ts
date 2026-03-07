@@ -86,6 +86,13 @@ export interface LeaseInfo {
   net: number;
 }
 
+export type InsightType = 'saving' | 'warning' | 'info' | 'achievement';
+
+export interface InsightMessage {
+  type: InsightType;
+  message: string;
+}
+
 export interface RecurringTransaction {
   id: string;
   title: string;
