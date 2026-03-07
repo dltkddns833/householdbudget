@@ -89,7 +89,7 @@ export const authService = {
         members: firestore.FieldValue.arrayUnion(uid),
         [`memberNames.${uid}`]: userName,
       });
-      tx.update(firestore().collection('users').doc(uid), { familyId: familyDoc.id });
+      tx.set(firestore().collection('users').doc(uid), { familyId: familyDoc.id }, { merge: true });
     });
 
     return {
