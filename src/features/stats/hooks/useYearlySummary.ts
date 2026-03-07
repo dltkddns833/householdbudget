@@ -12,8 +12,9 @@ const fetchYearlySummary = async (
     .collection('families')
     .doc(familyId)
     .collection('monthlySummaries')
-    .where('yearMonth', '>=', `${year}-01`)
-    .where('yearMonth', '<=', `${year}-12`)
+    .orderBy(firestore.FieldPath.documentId())
+    .startAt(`${year}-01`)
+    .endAt(`${year}-12`)
     .get();
 
   const summaryMap: Record<number, MonthlySummary> = {};
