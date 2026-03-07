@@ -132,6 +132,16 @@ export interface RecurringTransaction {
   lastAppliedYearMonth?: string;
 }
 
+export interface TransactionFilter {
+  query?: string;
+  category?: string;
+  type?: 'income' | 'expense' | 'all';
+  amountMin?: number;
+  amountMax?: number;
+  dateFrom?: string; // "YYYY-MM-DD"
+  dateTo?: string;   // "YYYY-MM-DD"
+}
+
 export interface MonthlyBudget {
   yearMonth: string;
   categories: Record<string, number>; // categoryKey -> 예산 금액

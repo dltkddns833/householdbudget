@@ -16,18 +16,18 @@ import {
   Card,
   EmptyState,
 } from '../../../shared/components';
-import {
-  EXPENSE_CATEGORIES,
-  getCategoryByKey,
-} from '../../../shared/constants/categories';
+import { getCategoryByKey } from '../../../shared/constants/categories';
 import { formatCurrency } from '../../../shared/utils/currency';
 import { formatDateWithDay } from '../../../shared/utils/date';
 import {
   useTransactions,
   useDeleteTransaction,
 } from '../hooks/useTransactions';
+import { useTransactionFilter } from '../hooks/useTransactionFilter';
 import { useUIStore } from '../../../store/uiStore';
 import { Transaction } from '../../../shared/types';
+import { SearchBar } from '../components/SearchBar';
+import { FilterPanel } from '../components/FilterPanel';
 
 interface Props {
   navigation: any;
@@ -39,14 +39,17 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
   const { currentMonth, setCurrentMonth } = useUIStore();
   const { transactions, summary } = useTransactions(currentMonth);
   const deleteMutation = useDeleteTransaction();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const filteredTransactions = useMemo(() => {
-    if (!selectedCategory) return transactions;
-    return transactions.filter(tx => tx.category === selectedCategory);
-  }, [transactions, selectedCategory]);
+  const [filterPanelVisible, setFilterPanelVisible] = useState(false);
+  const { filter, setFilter, replaceFilter, resetFilter, filterTransactions, activeFilterCount } =
+    useTransactionFilter();
+
+  const filteredTransactions = useMemo(
+    () => filterTransactions(transactions),
+    [filterTransactions, transactions],
+  );
 
   // Group by date
   const sections = useMemo(() => {
@@ -103,9 +106,7 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
             {tx.memo ? ` · ${tx.memo}` : ''}
           </Text>
         </View>
-        <Text
-          style={styles.txAmount}
-        >
+        <Text style={styles.txAmount}>
           {tx.type === 'income' ? '+' : '-'}
           {formatCurrency(tx.amount)}
         </Text>
@@ -124,16 +125,28 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     </View>
   );
 
+  const isSearchMode = !!(filter.query);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>내역</Text>
       </View>
 
-      <MonthSelector yearMonth={currentMonth} onChangeMonth={setCurrentMonth} />
+      {!isSearchMode && (
+        <MonthSelector yearMonth={currentMonth} onChangeMonth={setCurrentMonth} />
+      )}
+
+      <SearchBar
+        value={filter.query || ''}
+        onChangeText={text => setFilter({ query: text })}
+        onClear={() => setFilter({ query: '' })}
+        onFilterPress={() => setFilterPanelVisible(true)}
+        activeFilterCount={activeFilterCount}
+      />
 
       {/* Summary Card */}
-      {summary && (
+      {summary && !isSearchMode && (
         <Card style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
@@ -164,49 +177,17 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
         </Card>
       )}
 
-      {/* Category Filter */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[
-            styles.filterChip,
-            !selectedCategory && styles.filterChipActive,
-          ]}
-          onPress={() => setSelectedCategory(null)}
-        >
-          <Text
-            style={[
-              styles.filterText,
-              !selectedCategory && styles.filterTextActive,
-            ]}
-          >
-            전체
+      {/* 활성 필터 표시 (검색 모드가 아닐 때 비query 필터 배지) */}
+      {activeFilterCount > 0 && (
+        <View style={[styles.activeFilterBar, { backgroundColor: colors.surfaceSecondary }]}>
+          <Text style={[styles.activeFilterText, { color: colors.textSecondary }]}>
+            필터 {activeFilterCount}개 적용 중 · {filteredTransactions.length}건
           </Text>
-        </TouchableOpacity>
-        {EXPENSE_CATEGORIES.map(cat => (
-          <TouchableOpacity
-            key={cat.key}
-            style={[
-              styles.filterChip,
-              selectedCategory === cat.key && {
-                backgroundColor: cat.color,
-                borderColor: cat.color,
-              },
-            ]}
-            onPress={() =>
-              setSelectedCategory(selectedCategory === cat.key ? null : cat.key)
-            }
-          >
-            <Text
-              style={[
-                styles.filterText,
-                selectedCategory === cat.key && { color: colors.white },
-              ]}
-            >
-              {cat.label}
-            </Text>
+          <TouchableOpacity onPress={resetFilter}>
+            <Text style={[styles.activeFilterReset, { color: colors.primary }]}>초기화</Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        </View>
+      )}
 
       {/* Transaction List */}
       <SectionList
@@ -217,13 +198,28 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
         renderSectionHeader={renderSectionHeader}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <EmptyState
-            icon="receipt-long"
-            title="거래 내역이 없습니다"
-            subtitle="+ 버튼을 눌러 거래를 추가하세요"
-          />
+          activeFilterCount > 0 ? (
+            <EmptyState
+              icon="search-off"
+              title="검색 결과가 없어요"
+              subtitle="다른 조건으로 검색해보세요"
+            />
+          ) : (
+            <EmptyState
+              icon="receipt-long"
+              title="거래 내역이 없습니다"
+              subtitle="+ 버튼을 눌러 거래를 추가하세요"
+            />
+          )
         }
         stickySectionHeadersEnabled={false}
+      />
+
+      <FilterPanel
+        visible={filterPanelVisible}
+        filter={filter}
+        onApply={newFilter => replaceFilter({ ...newFilter, query: filter.query })}
+        onClose={() => setFilterPanelVisible(false)}
       />
     </View>
   );
@@ -272,32 +268,19 @@ const createStyles = (colors: ThemeColors) =>
       fontWeight: '700',
       color: colors.text,
     },
-    filterContainer: {
+    activeFilterBar: {
       flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       paddingHorizontal: 16,
       paddingVertical: 8,
-      gap: 6,
-      flexWrap: 'wrap',
     },
-    filterChip: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    filterChipActive: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
-    },
-    filterText: {
+    activeFilterText: {
       fontSize: 13,
-      fontWeight: '500',
-      color: colors.textSecondary,
     },
-    filterTextActive: {
-      color: colors.white,
+    activeFilterReset: {
+      fontSize: 13,
+      fontWeight: '600',
     },
     listContent: {
       paddingBottom: 100,
