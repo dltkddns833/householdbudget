@@ -80,6 +80,12 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       onPress: () => navigation.navigate('BudgetSetting'),
     },
     {
+      icon: 'repeat',
+      label: '정기 지출 관리',
+      subtitle: '월세, 구독 등 고정비 등록',
+      onPress: () => navigation.navigate('RecurringList'),
+    },
+    {
       icon: 'account-balance',
       label: '재무상태',
       subtitle: '자산 현황 관리',

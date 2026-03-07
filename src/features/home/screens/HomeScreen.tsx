@@ -2,12 +2,14 @@ import React, { useMemo, useRef } from 'react';
 import {
   View,
   Text,
+  TouchableOpacity,
   ScrollView,
   StyleSheet,
   RefreshControl,
   Dimensions,
 } from 'react-native';
 import { useScrollToTop } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LineChart } from 'react-native-chart-kit';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
@@ -17,10 +19,15 @@ import { useTransactions } from '../../transactions/hooks/useTransactions';
 import { useUIStore } from '../../../store/uiStore';
 import { formatYearMonth } from '../../../shared/utils/date';
 import { useBudget } from '../../budget/hooks/useBudget';
+import { usePendingRecurring } from '../../recurring/hooks/useRecurring';
 
 const screenWidth = Dimensions.get('window').width;
 
-export const HomeScreen: React.FC = () => {
+interface Props {
+  navigation: any;
+}
+
+export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
   const { currentMonth, setCurrentMonth } = useUIStore();
@@ -28,10 +35,11 @@ export const HomeScreen: React.FC = () => {
   const rangeQuery = useOverviewRange(7);
   const { summary } = useTransactions(currentMonth);
   const budgetQuery = useBudget(currentMonth);
+  const { data: pendingRecurring = [] } = usePendingRecurring(currentMonth);
   const overview = overviewQuery.data;
   const overviewRange = rangeQuery.data || [];
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { colors, isDark } = useTheme();
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
   const totalBudget = useMemo(() => {
     const cats = budgetQuery.data?.categories ?? {};
@@ -82,6 +90,22 @@ export const HomeScreen: React.FC = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>우리집 가계부</Text>
       </View>
+
+      {pendingRecurring.length > 0 && (
+        <TouchableOpacity
+          style={styles.recurringBanner}
+          onPress={() => navigation.navigate('More', { screen: 'RecurringList' })}
+          activeOpacity={0.8}
+        >
+          <Icon name="notifications-active" size={18} color="#D97706" />
+          <Text style={styles.recurringBannerText}>
+            {pendingRecurring.length === 1
+              ? `${pendingRecurring[0].title} 고정비가 반영 안 됐어요`
+              : `${pendingRecurring[0].title} 등 ${pendingRecurring.length}건의 고정비가 반영 안 됐어요`}
+          </Text>
+          <Text style={styles.recurringBannerAction}>확인하기</Text>
+        </TouchableOpacity>
+      )}
 
       <MonthSelector yearMonth={currentMonth} onChangeMonth={setCurrentMonth} />
 
@@ -237,7 +261,7 @@ export const HomeScreen: React.FC = () => {
   );
 };
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, isDark: boolean) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -253,6 +277,25 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 22,
       fontWeight: '800',
       color: colors.text,
+    },
+    recurringBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: isDark ? '#451A03' : '#FFFBEB',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      gap: 8,
+    },
+    recurringBannerText: {
+      flex: 1,
+      fontSize: 13,
+      fontWeight: '500',
+      color: '#92400E',
+    },
+    recurringBannerAction: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: '#D97706',
     },
     heroCard: {
       backgroundColor: colors.surface,

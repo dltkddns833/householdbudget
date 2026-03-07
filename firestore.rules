@@ -33,6 +33,14 @@ service cloud.firestore {
         allow delete: if isFamilyMember(familyId);
       }
 
+      // Recurring Transactions
+      match /recurringTransactions/{recurringId} {
+        allow read: if isFamilyMember(familyId);
+        allow create: if isFamilyMember(familyId);
+        allow update: if isFamilyMember(familyId);
+        allow delete: if isFamilyMember(familyId);
+      }
+
       // Monthly Summaries
       match /monthlySummaries/{yearMonth} {
         allow read: if isFamilyMember(familyId);

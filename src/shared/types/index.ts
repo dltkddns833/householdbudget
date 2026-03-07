@@ -86,6 +86,19 @@ export interface LeaseInfo {
   net: number;
 }
 
+export interface RecurringTransaction {
+  id: string;
+  title: string;
+  amount: number;
+  category: string;
+  dayOfMonth: number;
+  type: 'expense' | 'income';
+  isActive: boolean;
+  createdAt: Date;
+  createdBy: string;
+  lastAppliedYearMonth?: string;
+}
+
 export interface MonthlyBudget {
   yearMonth: string;
   categories: Record<string, number>; // categoryKey -> 예산 금액
