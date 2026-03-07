@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import { MonthlyDataPoint } from '../../../shared/types';
@@ -9,74 +8,72 @@ interface Props {
   monthlyData: MonthlyDataPoint[];
 }
 
-const screenWidth = Dimensions.get('window').width;
-const CHART_WIDTH = screenWidth - 64;
+const BAR_WIDTH = 10;
+const BAR_GAP = 2;
+const COL_WIDTH = BAR_WIDTH * 2 + BAR_GAP + 12; // 두 막대 + 간격 + 여백
+const CHART_HEIGHT = 120;
 
 export const MonthlyBarChart: React.FC<Props> = ({ monthlyData }) => {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const labels = monthlyData.map(d => String(d.month));
-
-  const incomeData = {
-    labels,
-    datasets: [{ data: monthlyData.map(d => d.income / 10000) }],
-  };
-
-  const expenseData = {
-    labels,
-    datasets: [{ data: monthlyData.map(d => d.expense / 10000) }],
-  };
-
-  const chartConfig = (color: string) => ({
-    backgroundColor: colors.surface,
-    backgroundGradientFrom: colors.surface,
-    backgroundGradientTo: colors.surface,
-    decimalPlaces: 0,
-    color: () => color,
-    labelColor: () => colors.textTertiary,
-    propsForBackgroundLines: {
-      strokeDasharray: '5,5',
-      stroke: colors.borderLight,
-    },
-  });
+  const maxValue = useMemo(() => {
+    const max = Math.max(...monthlyData.flatMap(d => [d.income, d.expense]));
+    return max > 0 ? max : 1;
+  }, [monthlyData]);
 
   return (
     <View>
+      {/* 범례 */}
       <View style={styles.legendRow}>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: colors.income }]} />
-          <Text style={styles.legendText}>수입 (만원)</Text>
+          <Text style={styles.legendText}>수입</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: colors.expense }]} />
-          <Text style={styles.legendText}>지출 (만원)</Text>
+          <Text style={styles.legendText}>지출</Text>
         </View>
       </View>
-      <BarChart
-        data={incomeData}
-        width={CHART_WIDTH}
-        height={130}
-        chartConfig={chartConfig(colors.income)}
-        style={styles.chart}
-        showValuesOnTopOfBars={false}
-        withInnerLines={true}
-        fromZero
-        yAxisLabel=""
-        yAxisSuffix=""
-      />
-      <BarChart
-        data={expenseData}
-        width={CHART_WIDTH}
-        height={130}
-        chartConfig={chartConfig(colors.expense)}
-        style={styles.chart}
-        showValuesOnTopOfBars={false}
-        withInnerLines={true}
-        fromZero
-        yAxisLabel=""
-        yAxisSuffix=""
-      />
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={styles.chartContainer}>
+          {/* 막대 영역 */}
+          <View style={styles.barsArea}>
+            {monthlyData.map(d => {
+              const incomeH = Math.max((d.income / maxValue) * CHART_HEIGHT, d.income > 0 ? 2 : 0);
+              const expenseH = Math.max((d.expense / maxValue) * CHART_HEIGHT, d.expense > 0 ? 2 : 0);
+              return (
+                <View key={d.month} style={styles.colWrapper}>
+                  <View style={styles.barsRow}>
+                    {/* 수입 막대 */}
+                    <View style={styles.barSlot}>
+                      <View
+                        style={[
+                          styles.bar,
+                          { height: incomeH, backgroundColor: colors.income },
+                        ]}
+                      />
+                    </View>
+                    {/* 지출 막대 */}
+                    <View style={styles.barSlot}>
+                      <View
+                        style={[
+                          styles.bar,
+                          { height: expenseH, backgroundColor: colors.expense },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                  <Text style={styles.monthLabel}>{d.month}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      </ScrollView>
+
+      <Text style={styles.unit}>단위: 만원</Text>
     </View>
   );
 };
@@ -86,7 +83,7 @@ const createStyles = (colors: ThemeColors) =>
     legendRow: {
       flexDirection: 'row',
       gap: 16,
-      marginBottom: 8,
+      marginBottom: 12,
     },
     legendItem: {
       flexDirection: 'row',
@@ -102,9 +99,42 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 12,
       color: colors.textSecondary,
     },
-    chart: {
-      borderRadius: 8,
-      marginLeft: -8,
-      marginBottom: 4,
+    chartContainer: {
+      paddingBottom: 4,
+    },
+    barsArea: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      height: CHART_HEIGHT + 24,
+    },
+    colWrapper: {
+      alignItems: 'center',
+      width: COL_WIDTH,
+    },
+    barsRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      height: CHART_HEIGHT,
+      gap: BAR_GAP,
+    },
+    barSlot: {
+      width: BAR_WIDTH,
+      height: CHART_HEIGHT,
+      justifyContent: 'flex-end',
+    },
+    bar: {
+      width: BAR_WIDTH,
+      borderRadius: 3,
+    },
+    monthLabel: {
+      fontSize: 11,
+      color: colors.textTertiary,
+      marginTop: 4,
+    },
+    unit: {
+      fontSize: 11,
+      color: colors.textTertiary,
+      textAlign: 'right',
+      marginTop: 4,
     },
   });
