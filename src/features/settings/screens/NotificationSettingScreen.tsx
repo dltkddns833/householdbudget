@@ -122,16 +122,19 @@ export const NotificationSettingScreen: React.FC<Props> = ({ navigation }) => {
                 styles.row,
                 { borderBottomColor: colors.borderLight },
                 idx === ITEMS.length - 1 && styles.rowLast,
+                !permissionGranted && styles.rowDisabled,
               ]}
             >
               <View style={styles.rowContent}>
-                <Text style={[styles.rowLabel, { color: colors.text }]}>{item.label}</Text>
+                <Text style={[styles.rowLabel, { color: permissionGranted ? colors.text : colors.textTertiary }]}>
+                  {item.label}
+                </Text>
                 <Text style={[styles.rowSubtitle, { color: colors.textTertiary }]}>
                   {item.subtitle}
                 </Text>
               </View>
               <Switch
-                value={settings[item.key]}
+                value={permissionGranted && settings[item.key]}
                 onValueChange={val => handleToggle(item.key, val)}
                 trackColor={{ false: colors.borderLight, true: colors.primary }}
                 thumbColor={colors.white}
@@ -208,6 +211,9 @@ const createStyles = (colors: ThemeColors) =>
     },
     rowLast: {
       borderBottomWidth: 0,
+    },
+    rowDisabled: {
+      opacity: 0.45,
     },
     rowContent: {
       flex: 1,
