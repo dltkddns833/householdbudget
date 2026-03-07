@@ -41,17 +41,14 @@ target 'HouseholdBudget' do
     dst = File.join(grpc_dir, "gRPC-Core.modulemap")
     FileUtils.ln_sf(src, dst) if File.exist?(src)
 
-    # Fix 2: Remove weak_framework FirebaseFirestoreInternal (it's a static lib, not framework)
-    installer.pods_project.targets.each do |target|
-      if target.name == 'Pods-HouseholdBudget'
-        target.build_configurations.each do |bc|
-          if bc.build_settings['OTHER_LDFLAGS']
-            bc.build_settings['OTHER_LDFLAGS'] = Array(bc.build_settings['OTHER_LDFLAGS']).reject { |f|
-              f == '-weak_framework' || f == '"FirebaseFirestoreInternal"'
-            }
-          end
-        end
-      end
+    # Fix 2: Remove -weak_framework FirebaseFirestoreInternal from xcconfig files
+    # FirebaseFirestoreInternal is a static lib, not a framework, so -weak_framework fails at link time.
+    # CocoaPods generates xcconfig files (not pbxproj build settings) for aggregate target OTHER_LDFLAGS.
+    Dir.glob(File.join(installer.sandbox.root, "Target Support Files", "Pods-HouseholdBudget", "*.xcconfig")).each do |xcconfig_path|
+      content = File.read(xcconfig_path)
+      # Remove the pair: -weak_framework "FirebaseFirestoreInternal" (with optional space variations)
+      content = content.gsub(/-weak_framework\s+"FirebaseFirestoreInternal"/, '')
+      File.write(xcconfig_path, content)
     end
 
     # Fix 3: Copy the pre-generated FirebaseAuth-Swift.h compatibility header
