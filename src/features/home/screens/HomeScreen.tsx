@@ -17,7 +17,10 @@ import { Card, CurrencyText, MonthSelector } from '../../../shared/components';
 import { useCurrentOverview, useOverviewRange } from '../hooks/useOverview';
 import { useTransactions } from '../../transactions/hooks/useTransactions';
 import { useUIStore } from '../../../store/uiStore';
+import { useAuthStore } from '../../../store/authStore';
+import { MemberExpenseSummary } from '../../../shared/types';
 import { formatYearMonth } from '../../../shared/utils/date';
+import { formatCurrency } from '../../../shared/utils/currency';
 import { useBudget } from '../../budget/hooks/useBudget';
 import { usePendingRecurring } from '../../recurring/hooks/useRecurring';
 import { useSavingRate } from '../hooks/useSavingRate';
@@ -35,9 +38,10 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
   const { currentMonth, setCurrentMonth } = useUIStore();
+  const { family } = useAuthStore();
   const overviewQuery = useCurrentOverview();
   const rangeQuery = useOverviewRange(7);
-  const { summary } = useTransactions(currentMonth);
+  const { summary, transactions } = useTransactions(currentMonth);
   const budgetQuery = useBudget(currentMonth);
   const { data: pendingRecurring = [] } = usePendingRecurring(currentMonth);
   const savingRateSummary = useSavingRate(currentMonth);
@@ -51,6 +55,29 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
     const cats = budgetQuery.data?.categories ?? {};
     return Object.values(cats).reduce((sum, v) => sum + v, 0);
   }, [budgetQuery.data]);
+
+  // 멤버별 지출 요약 (가족 멤버 2명 이상일 때만)
+  const memberExpenses = useMemo((): MemberExpenseSummary[] => {
+    if (!family || family.members.length < 2) return [];
+    const expenseTotal = summary?.totalExpense ?? 0;
+    if (expenseTotal === 0) return [];
+
+    const breakdown: Record<string, number> = {};
+    transactions
+      .filter(tx => tx.type === 'expense')
+      .forEach(tx => {
+        const key = tx.memberId ?? 'shared';
+        breakdown[key] = (breakdown[key] ?? 0) + tx.amount;
+      });
+
+    return Object.entries(breakdown).map(([uid, amount]) => ({
+      memberId: uid,
+      memberName:
+        uid === 'shared' ? '공동' : family.memberNames[uid] ?? uid,
+      amount,
+      percentage: expenseTotal > 0 ? Math.round((amount / expenseTotal) * 100) : 0,
+    })).sort((a, b) => b.amount - a.amount);
+  }, [family, transactions, summary?.totalExpense]);
 
   const totalExpense = summary?.totalExpense ?? overview?.totalExpense ?? 0;
   const budgetRate = totalBudget > 0 ? Math.min((totalExpense / totalBudget) * 100, 100) : 0;
@@ -201,6 +228,30 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
           />
         </Card>
       </View>
+
+      {/* 멤버별 지출 카드 */}
+      {memberExpenses.length > 0 && (
+        <Card style={styles.memberCard}>
+          <Text style={styles.chartTitle}>멤버별 지출</Text>
+          {memberExpenses.map(m => (
+            <View key={m.memberId} style={styles.memberRow}>
+              <Text style={styles.memberName}>{m.memberName}</Text>
+              <View style={styles.memberBarBg}>
+                <View
+                  style={[
+                    styles.memberBarFill,
+                    { width: `${m.percentage}%`, backgroundColor: colors.primary },
+                  ]}
+                />
+              </View>
+              <Text style={styles.memberAmount}>{m.percentage}%</Text>
+              <Text style={styles.memberAmountValue}>
+                -{formatCurrency(m.amount)}
+              </Text>
+            </View>
+          ))}
+        </Card>
+      )}
 
       {savingRateSummary && <SavingRateCard summary={savingRateSummary} />}
 
@@ -391,6 +442,45 @@ const createStyles = (colors: ThemeColors, isDark: boolean) =>
       fontSize: 18,
       fontWeight: '700',
       color: colors.text,
+    },
+    memberCard: {
+      marginTop: 4,
+    },
+    memberRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingVertical: 8,
+    },
+    memberName: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+      width: 40,
+    },
+    memberBarBg: {
+      flex: 1,
+      height: 8,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 4,
+      overflow: 'hidden',
+    },
+    memberBarFill: {
+      height: '100%',
+      borderRadius: 4,
+    },
+    memberAmount: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      width: 30,
+      textAlign: 'right',
+    },
+    memberAmountValue: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      width: 80,
+      textAlign: 'right',
     },
     chartCard: {
       marginTop: 4,

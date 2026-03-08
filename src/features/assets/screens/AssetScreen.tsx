@@ -80,12 +80,20 @@ export const AssetScreen: React.FC<Props> = ({ navigation }) => {
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>재무상태</Text>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('AssetAdd', { yearMonth })}
-          style={styles.addBtn}
-        >
-          <Icon name="add" size={26} color={colors.text} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AssetTrend')}
+            style={styles.trendBtn}
+          >
+            <Icon name="show-chart" size={22} color={colors.text} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AssetAdd', { yearMonth })}
+            style={styles.addBtn}
+          >
+            <Icon name="add" size={26} color={colors.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <MonthSelector yearMonth={yearMonth} onChangeMonth={setYearMonth} />
@@ -166,6 +174,14 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 18,
       fontWeight: '700',
       color: colors.text,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    trendBtn: {
+      padding: 4,
     },
     addBtn: {
       padding: 4,

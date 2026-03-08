@@ -13,14 +13,17 @@ import { HomeScreen } from '../../features/home/screens/HomeScreen';
 // Transactions
 import { TransactionListScreen } from '../../features/transactions/screens/TransactionListScreen';
 import { TransactionAddScreen } from '../../features/transactions/screens/TransactionAddScreen';
+import { CalendarScreen } from '../../features/transactions/screens/CalendarScreen';
 // Stats
 import { StatsScreen } from '../../features/stats/screens/StatsScreen';
 import { CategoryDetailScreen } from '../../features/stats/screens/CategoryDetailScreen';
+import { MonthlyReportScreen } from '../../features/stats/screens/MonthlyReportScreen';
 // More
 import { MoreMenuScreen } from '../../features/settings/screens/MoreMenuScreen';
 import { AssetScreen } from '../../features/assets/screens/AssetScreen';
 import { AssetEditScreen } from '../../features/assets/screens/AssetEditScreen';
 import { AssetAddScreen } from '../../features/assets/screens/AssetAddScreen';
+import { AssetTrendScreen } from '../../features/assets/screens/AssetTrendScreen';
 import { BudgetSettingScreen } from '../../features/budget/screens/BudgetSettingScreen';
 import { RecurringListScreen } from '../../features/recurring/screens/RecurringListScreen';
 import { RecurringFormScreen } from '../../features/recurring/screens/RecurringFormScreen';
@@ -56,6 +59,10 @@ const TransactionStackScreen = () => (
       name="TransactionEdit"
       component={TransactionAddScreen}
     />
+    <TransactionStack.Screen
+      name="Calendar"
+      component={CalendarScreen}
+    />
   </TransactionStack.Navigator>
 );
 
@@ -63,6 +70,7 @@ const StatsStackScreen = () => (
   <StatsStack.Navigator screenOptions={{ headerShown: false }}>
     <StatsStack.Screen name="StatsMain" component={StatsScreen} />
     <StatsStack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
+    <StatsStack.Screen name="MonthlyReport" component={MonthlyReportScreen} />
   </StatsStack.Navigator>
 );
 
@@ -73,6 +81,7 @@ const MoreStackScreen = () => (
     <MoreStack.Screen name="Assets" component={AssetScreen} />
     <MoreStack.Screen name="AssetEdit" component={AssetEditScreen} />
     <MoreStack.Screen name="AssetAdd" component={AssetAddScreen} />
+    <MoreStack.Screen name="AssetTrend" component={AssetTrendScreen} />
     <MoreStack.Screen name="RecurringList" component={RecurringListScreen} />
     <MoreStack.Screen name="RecurringForm" component={RecurringFormScreen} />
     <MoreStack.Screen name="SavingRateGoal" component={SavingRateGoalScreen} />

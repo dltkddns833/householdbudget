@@ -31,12 +31,8 @@ import {
   useDeleteTransaction,
   useRecentNames,
 } from '../hooks/useTransactions';
-import { Transaction, TransactionType } from '../../../shared/types';
-import { storageService } from '../services/storageService';
-import { transactionService } from '../services/transactionService';
 import { useAuthStore } from '../../../store/authStore';
-import { ReceiptPicker } from '../components/ReceiptPicker';
-import { ReceiptViewer } from '../components/ReceiptViewer';
+import { Transaction, TransactionType } from '../../../shared/types';
 
 interface Props {
   navigation: any;
@@ -50,6 +46,8 @@ export const TransactionAddScreen: React.FC<Props> = ({
   const editTx: Transaction | undefined = route?.params?.transaction;
   const isEdit = !!editTx;
 
+  const { family, user } = useAuthStore();
+
   const [type, setType] = useState<TransactionType>(editTx?.type || 'expense');
   const [category, setCategory] = useState(editTx?.category || '');
   const [amountText, setAmountText] = useState(
@@ -58,21 +56,30 @@ export const TransactionAddScreen: React.FC<Props> = ({
   const [name, setName] = useState(editTx?.name || '');
   const [date, setDate] = useState(editTx ? editTx.date.toDate() : new Date());
   const [memo, setMemo] = useState(editTx?.memo || '');
+  // 수정 시 저장된 값, 새 거래 시 현재 사용자(가족장) 디폴트
+  const [memberId, setMemberId] = useState<string | undefined>(
+    isEdit ? editTx?.memberId : user?.uid,
+  );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState(date);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [localReceiptUri, setLocalReceiptUri] = useState<string | null>(
-    editTx?.receiptUrl ?? null,
-  );
-  const [receiptRemoved, setReceiptRemoved] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
 
   const addMutation = useAddTransaction();
   const updateMutation = useUpdateTransaction();
   const deleteMutation = useDeleteTransaction();
   const { data: recentNames = [] } = useRecentNames(category);
-  const { family } = useAuthStore();
   const { colors } = useTheme();
+
+  const memberOptions = useMemo(() => {
+    if (!family || family.members.length < 2) return [];
+    return [
+      ...family.members.map(uid => ({
+        uid,
+        name: family.memberNames[uid] || uid,
+      })),
+      { uid: undefined as string | undefined, name: '공동' },
+    ];
+  }, [family]);
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const categories: CategoryDef[] =
@@ -105,62 +112,36 @@ export const TransactionAddScreen: React.FC<Props> = ({
     name: name.trim(),
     amount: parseInputNumber(amountText),
     memo: memo.trim(),
+    memberId,
   });
 
   const handleSave = async () => {
     if (!validate()) return;
-    const familyId = family?.id;
     try {
       if (isEdit) {
         await updateMutation.mutateAsync({
           txId: editTx!.id,
           input: getInput(),
         });
-        if (familyId) {
-          const isNewImage = !!localReceiptUri && localReceiptUri !== editTx!.receiptUrl;
-          if (isNewImage) {
-            setIsUploading(true);
-            const url = await storageService.uploadReceipt(familyId, editTx!.id, localReceiptUri!);
-            await transactionService.updateReceiptUrl(familyId, editTx!.id, url);
-          } else if (receiptRemoved) {
-            await storageService.deleteReceipt(familyId, editTx!.id);
-            await transactionService.updateReceiptUrl(familyId, editTx!.id, null);
-          }
-        }
       } else {
-        const txId = await addMutation.mutateAsync(getInput());
-        if (familyId && localReceiptUri) {
-          setIsUploading(true);
-          const url = await storageService.uploadReceipt(familyId, txId, localReceiptUri);
-          await transactionService.updateReceiptUrl(familyId, txId, url);
-        }
+        await addMutation.mutateAsync(getInput());
       }
       navigation.goBack();
     } catch (error: any) {
       Alert.alert('오류', error.message);
-    } finally {
-      setIsUploading(false);
     }
   };
 
   const handleSaveAndContinue = async () => {
     if (!validate()) return;
     try {
-      const txId = await addMutation.mutateAsync(getInput());
-      if (family?.id && localReceiptUri) {
-        setIsUploading(true);
-        const url = await storageService.uploadReceipt(family.id, txId, localReceiptUri);
-        await transactionService.updateReceiptUrl(family.id, txId, url);
-      }
+      await addMutation.mutateAsync(getInput());
       // Reset fields but keep type, category, and date
       setAmountText('');
       setName('');
       setMemo('');
-      setLocalReceiptUri(null);
     } catch (error: any) {
       Alert.alert('오류', error.message);
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -186,7 +167,7 @@ export const TransactionAddScreen: React.FC<Props> = ({
     ]);
   };
 
-  const isLoading = addMutation.isPending || updateMutation.isPending || isUploading;
+  const isLoading = addMutation.isPending || updateMutation.isPending;
 
   return (
     <KeyboardAvoidingView
@@ -249,6 +230,34 @@ export const TransactionAddScreen: React.FC<Props> = ({
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* 멤버 선택 (가족 멤버가 2명 이상일 때만 표시) */}
+        {memberOptions.length > 0 && (
+          <>
+            <Text style={styles.sectionLabel}>누가 쓴 돈?</Text>
+            <View style={styles.memberRow}>
+              {memberOptions.map(opt => (
+                <TouchableOpacity
+                  key={opt.uid ?? 'shared'}
+                  style={[
+                    styles.memberChip,
+                    memberId === opt.uid && styles.memberChipActive,
+                  ]}
+                  onPress={() => setMemberId(opt.uid)}
+                >
+                  <Text
+                    style={[
+                      styles.memberChipText,
+                      memberId === opt.uid && styles.memberChipTextActive,
+                    ]}
+                  >
+                    {opt.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
 
         {/* Categories */}
         <Text style={styles.sectionLabel}>카테고리</Text>
@@ -378,20 +387,6 @@ export const TransactionAddScreen: React.FC<Props> = ({
           multiline
         />
 
-        {/* Receipt */}
-        <Text style={styles.sectionLabel}>영수증</Text>
-        <ReceiptPicker
-          uri={localReceiptUri ?? undefined}
-          onSelected={uri => {
-            setLocalReceiptUri(uri);
-            setReceiptRemoved(false);
-          }}
-          onRemoved={() => {
-            setLocalReceiptUri(null);
-            setReceiptRemoved(true);
-          }}
-        />
-
         {/* Buttons */}
         <View style={styles.buttonGroup}>
           <TouchableOpacity
@@ -496,6 +491,31 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.textSecondary,
       marginTop: 20,
       marginBottom: 8,
+    },
+    memberRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    memberChip: {
+      paddingHorizontal: 18,
+      paddingVertical: 9,
+      borderRadius: 20,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    memberChipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    memberChipText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    memberChipTextActive: {
+      color: colors.white,
     },
     categoryGrid: {
       flexDirection: 'row',

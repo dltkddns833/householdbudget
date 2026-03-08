@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useScrollToTop } from '@react-navigation/native';
 import { BarChart } from 'react-native-chart-kit';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import { Card, MonthSelector, CurrencyText } from '../../../shared/components';
@@ -16,6 +17,8 @@ import { getCategoryByKey } from '../../../shared/constants/categories';
 import { useTransactions } from '../../transactions/hooks/useTransactions';
 import { useOverviewRange } from '../../home/hooks/useOverview';
 import { useUIStore } from '../../../store/uiStore';
+import { useAuthStore } from '../../../store/authStore';
+import { MemberExpenseSummary } from '../../../shared/types';
 import { formatCurrency, formatCurrencyShort } from '../../../shared/utils/currency';
 import { useBudgetProgress } from '../../budget/hooks/useBudget';
 import { useInsights } from '../hooks/useInsights';
@@ -33,7 +36,8 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
   const { currentMonth, setCurrentMonth } = useUIStore();
-  const { summary } = useTransactions(currentMonth);
+  const { family } = useAuthStore();
+  const { summary, transactions } = useTransactions(currentMonth);
   const rangeQuery = useOverviewRange(6);
   const budgetProgress = useBudgetProgress(currentMonth);
   const insights = useInsights(currentMonth);
@@ -65,6 +69,31 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
       datasets: [{ data: data.map(o => (o.totalExpense || 0) / 10000) }],
     };
   }, [rangeQuery.data]);
+
+  // 멤버별 지출 breakdown
+  const memberExpenses = useMemo((): MemberExpenseSummary[] => {
+    if (!family || family.members.length < 2) return [];
+    const expenseTotal = summary?.totalExpense ?? 0;
+    if (expenseTotal === 0) return [];
+
+    const breakdown: Record<string, number> = {};
+    transactions
+      .filter(tx => tx.type === 'expense')
+      .forEach(tx => {
+        const key = tx.memberId ?? 'shared';
+        breakdown[key] = (breakdown[key] ?? 0) + tx.amount;
+      });
+
+    return Object.entries(breakdown)
+      .map(([uid, amount]) => ({
+        memberId: uid,
+        memberName: uid === 'shared' ? '공동' : family.memberNames[uid] ?? uid,
+        amount,
+        percentage:
+          expenseTotal > 0 ? Math.round((amount / expenseTotal) * 100) : 0,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+  }, [family, transactions, summary?.totalExpense]);
 
   // Daily totals
   const dailyData = useMemo(() => {
@@ -119,6 +148,17 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
       {activeTab === 'monthly' && (
         <>
       <MonthSelector yearMonth={currentMonth} onChangeMonth={setCurrentMonth} />
+
+      {/* 결산 리포트 버튼 */}
+      <TouchableOpacity
+        style={styles.reportButton}
+        onPress={() => navigation.navigate('MonthlyReport')}
+        activeOpacity={0.8}
+      >
+        <Icon name="summarize" size={18} color={colors.primary} />
+        <Text style={styles.reportButtonText}>결산 리포트 보기</Text>
+        <Icon name="chevron-right" size={18} color={colors.textTertiary} />
+      </TouchableOpacity>
 
       <InsightCard insights={insights} />
 
@@ -230,6 +270,31 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
           );
         })}
       </Card>
+
+      {/* 멤버별 지출 breakdown */}
+      {memberExpenses.length > 0 && (
+        <Card>
+          <Text style={styles.sectionTitle}>멤버별 지출</Text>
+          {memberExpenses.map(m => (
+            <View key={m.memberId} style={styles.memberRow}>
+              <Text style={styles.memberName}>{m.memberName}</Text>
+              <View style={styles.memberBarBg}>
+                <View
+                  style={[
+                    styles.memberBar,
+                    {
+                      width: `${m.percentage}%`,
+                      backgroundColor: colors.primary,
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={styles.memberPct}>{m.percentage}%</Text>
+              <Text style={styles.memberAmount}>{formatCurrency(m.amount)}</Text>
+            </View>
+          ))}
+        </Card>
+      )}
 
       {/* Monthly Trend */}
       {monthlyTrendData && (
@@ -440,5 +505,60 @@ const createStyles = (colors: ThemeColors) =>
     chart: {
       borderRadius: 12,
       marginLeft: -16,
+    },
+    memberRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingVertical: 8,
+    },
+    memberName: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+      width: 44,
+    },
+    memberBarBg: {
+      flex: 1,
+      height: 10,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 5,
+      overflow: 'hidden',
+    },
+    memberBar: {
+      height: '100%',
+      borderRadius: 5,
+    },
+    memberPct: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      width: 32,
+      textAlign: 'right',
+    },
+    memberAmount: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      width: 86,
+      textAlign: 'right',
+    },
+    reportButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      marginHorizontal: 16,
+      marginTop: 8,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 8,
+    },
+    reportButtonText: {
+      flex: 1,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
     },
   });

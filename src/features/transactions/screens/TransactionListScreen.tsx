@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useScrollToTop } from '@react-navigation/native';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
@@ -131,6 +132,12 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>내역</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Calendar')}
+          style={styles.calendarBtn}
+        >
+          <Icon name="calendar-today" size={22} color={colors.text} />
+        </TouchableOpacity>
       </View>
 
       {!isSearchMode && (
@@ -232,6 +239,9 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.background,
     },
     header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       paddingHorizontal: 20,
       paddingTop: 56,
       paddingBottom: 16,
@@ -241,6 +251,9 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 22,
       fontWeight: '800',
       color: colors.text,
+    },
+    calendarBtn: {
+      padding: 4,
     },
     summaryCard: {
       marginTop: 4,

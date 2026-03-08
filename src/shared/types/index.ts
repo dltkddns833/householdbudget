@@ -43,7 +43,7 @@ export interface Transaction {
   amount: number; // 원 단위 정수
   memo: string;
   createdBy: string;
-  receiptUrl?: string; // Firebase Storage URL, 없으면 미첨부
+  memberId?: string; // 지출한 멤버 uid (없으면 공동)
 }
 
 export interface TransactionInput {
@@ -53,6 +53,7 @@ export interface TransactionInput {
   name: string;
   amount: number;
   memo: string;
+  memberId?: string; // 지출한 멤버 uid
 }
 
 export interface MonthlySummary {
@@ -62,6 +63,7 @@ export interface MonthlySummary {
   remaining: number;
   categoryBreakdown: Record<string, number>;
   dailyTotals: Record<string, number>;
+  memberBreakdown?: Record<string, number>; // uid -> 지출 합계
 }
 
 export interface OverviewMonth {
@@ -184,6 +186,21 @@ export interface AssetGoalProgress {
   remaining: number;
   percentage: number; // min(currentAmount / targetAmount * 100, 100)
   isAchieved: boolean;
+}
+
+export interface AssetTrendPoint {
+  yearMonth: string;
+  realAsset: number;
+  retirementFund: number;
+  realAssetChange: number | null;
+  retirementChange: number | null;
+}
+
+export interface MemberExpenseSummary {
+  memberId: string; // uid 또는 'shared'
+  memberName: string;
+  amount: number;
+  percentage: number;
 }
 
 export interface CategoryBudgetProgress {

@@ -1,7 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 import { Transaction, TransactionInput, MonthlySummary } from '../../../shared/types';
 import { getYearMonth } from '../../../shared/utils/date';
-import { storageService } from './storageService';
 
 const txCollection = (familyId: string) =>
   firestore().collection('families').doc(familyId).collection('transactions');
@@ -18,7 +17,7 @@ export const transactionService = {
     const yearMonth = getYearMonth(input.date);
     const ref = txCollection(familyId).doc();
 
-    await ref.set({
+    const data: Record<string, any> = {
       type: input.type,
       date: firestore.Timestamp.fromDate(input.date),
       yearMonth,
@@ -27,7 +26,11 @@ export const transactionService = {
       amount: input.amount,
       memo: input.memo || '',
       createdBy: uid,
-    });
+    };
+    if (input.memberId) {
+      data.memberId = input.memberId;
+    }
+    await ref.set(data);
 
     return ref.id;
   },
@@ -39,7 +42,7 @@ export const transactionService = {
   ): Promise<void> {
     const yearMonth = getYearMonth(input.date);
 
-    await txCollection(familyId).doc(txId).update({
+    const updateData: Record<string, any> = {
       type: input.type,
       date: firestore.Timestamp.fromDate(input.date),
       yearMonth,
@@ -47,20 +50,15 @@ export const transactionService = {
       name: input.name,
       amount: input.amount,
       memo: input.memo || '',
-    });
-  },
-
-  async updateReceiptUrl(familyId: string, txId: string, url: string | null): Promise<void> {
-    await txCollection(familyId).doc(txId).update({
-      receiptUrl: url ?? firestore.FieldValue.delete(),
-    });
+      memberId: input.memberId ?? firestore.FieldValue.delete(),
+    };
+    await txCollection(familyId).doc(txId).update(updateData);
   },
 
   async deleteTransaction(
     familyId: string,
     txId: string,
   ): Promise<void> {
-    await storageService.deleteReceipt(familyId, txId);
     await txCollection(familyId).doc(txId).delete();
   },
 
