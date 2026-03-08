@@ -1,6 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 import { Transaction, TransactionInput, MonthlySummary } from '../../../shared/types';
-import { getYearMonth, getDayOfMonth } from '../../../shared/utils/date';
+import { getYearMonth } from '../../../shared/utils/date';
 import { storageService } from './storageService';
 
 const txCollection = (familyId: string) =>
@@ -18,7 +18,7 @@ export const transactionService = {
     const yearMonth = getYearMonth(input.date);
     const ref = txCollection(familyId).doc();
 
-    const txData = {
+    await ref.set({
       type: input.type,
       date: firestore.Timestamp.fromDate(input.date),
       yearMonth,
@@ -27,10 +27,8 @@ export const transactionService = {
       amount: input.amount,
       memo: input.memo || '',
       createdBy: uid,
-    };
+    });
 
-    await ref.set(txData);
-    await this.recalculateMonthlySummary(familyId, yearMonth);
     return ref.id;
   },
 
@@ -38,7 +36,6 @@ export const transactionService = {
     familyId: string,
     txId: string,
     input: TransactionInput,
-    oldYearMonth: string,
   ): Promise<void> {
     const yearMonth = getYearMonth(input.date);
 
@@ -51,11 +48,6 @@ export const transactionService = {
       amount: input.amount,
       memo: input.memo || '',
     });
-
-    await this.recalculateMonthlySummary(familyId, yearMonth);
-    if (oldYearMonth !== yearMonth) {
-      await this.recalculateMonthlySummary(familyId, oldYearMonth);
-    }
   },
 
   async updateReceiptUrl(familyId: string, txId: string, url: string | null): Promise<void> {
@@ -67,11 +59,9 @@ export const transactionService = {
   async deleteTransaction(
     familyId: string,
     txId: string,
-    yearMonth: string,
   ): Promise<void> {
     await storageService.deleteReceipt(familyId, txId);
     await txCollection(familyId).doc(txId).delete();
-    await this.recalculateMonthlySummary(familyId, yearMonth);
   },
 
   getTransactionsQuery(familyId: string, yearMonth: string) {
@@ -91,34 +81,6 @@ export const transactionService = {
     const doc = await summaryCollection(familyId).doc(yearMonth).get();
     if (!doc.exists) return null;
     return { id: doc.id, ...doc.data() } as MonthlySummary;
-  },
-
-  async recalculateMonthlySummary(familyId: string, yearMonth: string): Promise<void> {
-    const transactions = await this.getTransactions(familyId, yearMonth);
-
-    let totalExpense = 0;
-    let totalIncome = 0;
-    const categoryBreakdown: Record<string, number> = {};
-    const dailyTotals: Record<string, number> = {};
-
-    transactions.forEach((tx) => {
-      if (tx.type === 'expense') {
-        totalExpense += tx.amount;
-        categoryBreakdown[tx.category] = (categoryBreakdown[tx.category] || 0) + tx.amount;
-        const day = getDayOfMonth(tx.date.toDate());
-        dailyTotals[day] = (dailyTotals[day] || 0) + tx.amount;
-      } else {
-        totalIncome += tx.amount;
-      }
-    });
-
-    await summaryCollection(familyId).doc(yearMonth).set({
-      totalExpense,
-      totalIncome,
-      remaining: totalIncome - totalExpense,
-      categoryBreakdown,
-      dailyTotals,
-    });
   },
 
   async getRecentNames(familyId: string, category: string): Promise<string[]> {

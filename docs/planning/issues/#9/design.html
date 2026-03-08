@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>#9 초대 코드 개선 — 디자인 시안</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#0D9488;--primary-light:#CCFBF1;--primary-dark:#0F766E;
+  --danger:#EF4444;--danger-light:#FEE2E2;
+  --warning:#F59E0B;--warning-light:#FEF3C7;
+  --success:#22C55E;--success-light:#DCFCE7;
+  --bg:#F8FAFC;--surface:#FFFFFF;--surface-2:#F1F5F9;
+  --text:#0F172A;--text-2:#64748B;--text-3:#94A3B8;--border:#E2E8F0;
+  --shadow-sm:0 1px 4px rgba(0,0,0,0.06);--shadow-md:0 4px 16px rgba(0,0,0,0.10);
+}
+body{background:#E8ECF0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding:48px 32px;}
+h1{text-align:center;font-size:22px;font-weight:800;color:#1E293B;margin-bottom:6px;}
+.subtitle{text-align:center;font-size:13px;color:var(--text-2);margin-bottom:40px;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:var(--text-2);letter-spacing:.5px;text-align:center;}
+
+.phone{width:375px;background:var(--bg);border-radius:44px;overflow:hidden;
+  box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.35);
+  position:relative;display:flex;flex-direction:column;}
+.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;}
+.phone-inner{padding-top:48px;flex:1;display:flex;flex-direction:column;}
+
+.status-bar{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 24px;font-size:12px;font-weight:600;color:var(--text);background:var(--surface);}
+.nav-header{display:flex;align-items:center;height:52px;background:var(--surface);
+  border-bottom:1px solid var(--border);padding:0 4px;}
+.nav-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:var(--text-2);}
+.nav-title{font-size:17px;font-weight:700;color:var(--text);flex:1;text-align:center;}
+.nav-spacer{width:44px;}
+.content{flex:1;background:var(--bg);overflow-y:auto;padding-bottom:40px;}
+
+/* 섹션 */
+.section{margin:20px 16px 0;}
+.section-title{font-size:11px;font-weight:600;color:var(--text-2);text-transform:uppercase;
+  letter-spacing:.6px;margin-bottom:8px;}
+.card{background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);}
+
+/* 초대 코드 카드 — 현재 (before) */
+.code-row-before{display:flex;align-items:center;padding:16px;}
+.code-text-before{font-size:20px;font-weight:800;color:var(--text);letter-spacing:2px;flex:1;}
+.copy-btn{background:var(--primary);color:white;border:none;border-radius:10px;
+  padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:6px;}
+
+/* 초대 코드 카드 — 이후 (after) */
+.code-section-after{padding:16px 16px 8px;}
+.code-label{font-size:11px;font-weight:500;color:var(--text-3);margin-bottom:6px;}
+.code-row-after{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.code-text-after{font-size:28px;font-weight:800;color:var(--text);letter-spacing:4px;
+  font-variant-numeric:tabular-nums;flex:1;}
+.expiry-row{display:flex;align-items:center;gap:6px;padding:0 16px 12px;
+  font-size:13px;color:var(--text-2);}
+.expiry-icon{font-size:14px;}
+.expiry-ok{color:var(--success);}
+.divider{height:1px;background:var(--border);}
+.regen-btn{display:flex;align-items:center;gap:8px;padding:14px 16px;
+  font-size:14px;font-weight:500;color:var(--primary);cursor:pointer;}
+.regen-icon{font-size:18px;}
+
+/* 초대 코드 없음 */
+.no-code-card{display:flex;flex-direction:column;align-items:center;padding:24px 16px;}
+.no-code-icon{font-size:36px;margin-bottom:10px;}
+.no-code-text{font-size:14px;color:var(--text-2);margin-bottom:16px;text-align:center;}
+.create-code-btn{background:var(--primary);color:white;border-radius:999px;
+  padding:12px 28px;font-size:15px;font-weight:700;}
+
+/* 재생성 다이얼로그 */
+.dialog-overlay{flex:1;display:flex;align-items:center;position:relative;}
+.dialog-bg{position:absolute;inset:0;background:rgba(0,0,0,0.45);}
+.dialog{background:var(--surface);border-radius:16px;margin:0 24px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.25);overflow:hidden;position:relative;z-index:10;width:100%;}
+.dialog-title{font-size:17px;font-weight:700;color:var(--text);text-align:center;padding:22px 20px 8px;}
+.dialog-body{font-size:14px;color:var(--text-2);text-align:center;padding:0 20px 20px;line-height:1.65;}
+.dialog-divider{height:1px;background:var(--border);}
+.dialog-actions{display:flex;}
+.dialog-cancel{flex:1;padding:16px;font-size:16px;color:var(--text-2);text-align:center;border-right:1px solid var(--border);}
+.dialog-confirm{flex:1;padding:16px;font-size:16px;font-weight:700;color:var(--primary);text-align:center;}
+
+/* FamilySetupScreen 에러 */
+.join-screen{flex:1;display:flex;flex-direction:column;padding:24px;}
+.join-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:24px;}
+.join-label{font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;}
+.join-input{background:var(--surface-2);border:2px solid var(--danger);border-radius:10px;
+  padding:14px 16px;font-size:17px;font-weight:700;letter-spacing:3px;color:var(--text);
+  margin-bottom:6px;}
+.join-error{font-size:13px;color:var(--danger);margin-bottom:20px;
+  display:flex;align-items:center;gap:4px;}
+.join-hint{font-size:12px;color:var(--text-3);}
+.join-btn-disabled{background:#CBD5E1;color:white;border-radius:999px;height:52px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;}
+
+/* Tab bar */
+.tab-bar{background:var(--surface);border-top:1px solid var(--border);
+  display:flex;padding:8px 0 20px;}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tab-icon-a{font-size:22px;color:var(--primary);}
+.tab-icon-i{font-size:22px;color:var(--text-3);}
+.tab-label-a{font-size:10px;color:var(--primary);font-weight:600;}
+.tab-label-i{font-size:10px;color:var(--text-3);}
+.tab-fab{width:44px;height:44px;background:var(--primary);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:white;font-size:22px;
+  box-shadow:0 4px 14px rgba(13,148,136,0.4);margin-top:-6px;}
+
+/* badge */
+.badge-before{display:inline-block;background:#F1F5F9;color:#64748B;font-size:10px;
+  font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle;}
+.badge-after{display:inline-block;background:var(--primary-light);color:var(--primary);
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle;}
+</style>
+</head>
+<body>
+<h1>#9 초대 코드 개선</h1>
+<p class="subtitle">암호학적으로 안전한 UUID 기반 코드 + 7일 만료 + 재생성 UI</p>
+
+<div class="screens">
+
+  <!-- 화면 1: 가족 정보 - Before -->
+  <div class="screen-wrap">
+    <div class="screen-label">① 초대 코드 섹션 <span class="badge-before">현재</span></div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="nav-header">
+          <div class="nav-btn">←</div>
+          <div class="nav-title">가족 정보</div>
+          <div class="nav-spacer"></div>
+        </div>
+        <div class="content">
+          <div class="section">
+            <div class="section-title">멤버 (2명)</div>
+            <div class="card" style="padding:14px 16px;display:flex;gap:12px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0D9488,#14B8A6);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">상</div>
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#60A5FA);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">채</div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">초대 코드</div>
+            <div class="card">
+              <div class="code-row-before">
+                <div class="code-text-before">3F8A2C</div>
+                <button class="copy-btn">📋 복사</button>
+              </div>
+              <!-- 만료 없음 표시 -->
+              <div style="padding:0 16px 14px;font-size:12px;color:var(--text-3);">
+                만료 없음 — 영구 유효
+              </div>
+            </div>
+          </div>
+          <div class="section" style="margin-top:12px;">
+            <div style="background:var(--warning-light);border-radius:10px;padding:12px 14px;border-left:3px solid var(--warning);font-size:12px;color:#92400E;">
+              ⚠️ Math.random() 기반 6자리 — 예측 가능, 만료 없음, 브루트포스 취약
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+          <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">내역</div></div>
+          <div class="tab-item"><div class="tab-fab">+</div></div>
+          <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+          <div class="tab-item"><div class="tab-icon-a">☰</div><div class="tab-label-a">더보기</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 화면 2: 가족 정보 - After (코드 유효) -->
+  <div class="screen-wrap">
+    <div class="screen-label">② 초대 코드 섹션 <span class="badge-after">#9 적용 후</span></div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="nav-header">
+          <div class="nav-btn">←</div>
+          <div class="nav-title">가족 정보</div>
+          <div class="nav-spacer"></div>
+        </div>
+        <div class="content">
+          <div class="section">
+            <div class="section-title">멤버 (2명)</div>
+            <div class="card" style="padding:14px 16px;display:flex;gap:12px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0D9488,#14B8A6);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">상</div>
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#60A5FA);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">채</div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">초대 코드</div>
+            <div class="card">
+              <div class="code-section-after">
+                <div class="code-label">8자리 보안 코드 (UUID 기반)</div>
+                <div class="code-row-after">
+                  <div class="code-text-after">3F8A2C1B</div>
+                  <button class="copy-btn">📋 복사</button>
+                </div>
+              </div>
+              <div class="expiry-row">
+                <span class="expiry-icon expiry-ok">✓</span>
+                <span style="color:var(--success);font-weight:500;">3월 15일까지 유효</span>
+                <span style="color:var(--text-3);margin-left:4px;">· 7일 남음</span>
+              </div>
+              <div class="divider"></div>
+              <div class="regen-btn">
+                <span class="regen-icon">🔄</span>
+                <span>코드 재생성</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+          <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">내역</div></div>
+          <div class="tab-item"><div class="tab-fab">+</div></div>
+          <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+          <div class="tab-item"><div class="tab-icon-a">☰</div><div class="tab-label-a">더보기</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 화면 3: 코드 만료 임박 / 만료됨 -->
+  <div class="screen-wrap">
+    <div class="screen-label">③ 만료 임박 / 코드 없음 상태</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="nav-header">
+          <div class="nav-btn">←</div>
+          <div class="nav-title">가족 정보</div>
+          <div class="nav-spacer"></div>
+        </div>
+        <div class="content">
+          <!-- 만료 임박 (1일 이하) -->
+          <div class="section">
+            <div class="section-title">초대 코드 — 만료 임박</div>
+            <div class="card">
+              <div class="code-section-after">
+                <div class="code-label">8자리 보안 코드</div>
+                <div class="code-row-after">
+                  <div class="code-text-after" style="color:var(--warning);">3F8A2C1B</div>
+                  <button class="copy-btn">📋 복사</button>
+                </div>
+              </div>
+              <div class="expiry-row">
+                <span class="expiry-icon" style="color:var(--warning);">⚠️</span>
+                <span style="color:var(--warning);font-weight:500;">오늘 만료 예정</span>
+              </div>
+              <div class="divider"></div>
+              <div class="regen-btn">
+                <span class="regen-icon">🔄</span>
+                <span>코드 재생성</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 코드 없음 (만료 후) -->
+          <div class="section" style="margin-top:20px;">
+            <div class="section-title">초대 코드 없음</div>
+            <div class="card">
+              <div class="no-code-card">
+                <div class="no-code-icon">🔑</div>
+                <div class="no-code-text">초대 코드가 없습니다.<br>새 코드를 생성하세요.</div>
+                <div class="create-code-btn">초대 코드 생성</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item"><div class="tab-icon-i">🏠</div><div class="tab-label-i">홈</div></div>
+          <div class="tab-item"><div class="tab-icon-i">📋</div><div class="tab-label-i">내역</div></div>
+          <div class="tab-item"><div class="tab-fab">+</div></div>
+          <div class="tab-item"><div class="tab-icon-i">📊</div><div class="tab-label-i">통계</div></div>
+          <div class="tab-item"><div class="tab-icon-a">☰</div><div class="tab-label-a">더보기</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 화면 4: 재생성 확인 다이얼로그 -->
+  <div class="screen-wrap">
+    <div class="screen-label">④ 코드 재생성 확인</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="nav-header">
+          <div class="nav-btn">←</div>
+          <div class="nav-title">가족 정보</div>
+          <div class="nav-spacer"></div>
+        </div>
+        <div class="dialog-overlay">
+          <div class="dialog-bg"></div>
+          <div class="dialog">
+            <div class="dialog-title">코드 재생성</div>
+            <div class="dialog-body">
+              기존 초대 코드 <strong style="color:var(--text);font-family:monospace;">3F8A2C1B</strong>이<br>
+              삭제되고 새 코드가 발급됩니다.<br><br>
+              <span style="color:var(--text-2);">기존 코드로 참여 중인 링크는<br>무효가 됩니다.</span>
+            </div>
+            <div class="dialog-divider"></div>
+            <div class="dialog-actions">
+              <div class="dialog-cancel">취소</div>
+              <div class="dialog-confirm">재생성</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 화면 5: 만료된 코드 입력 에러 (FamilySetupScreen) -->
+  <div class="screen-wrap">
+    <div class="screen-label">⑤ 만료 코드 입력 에러 (FamilySetupScreen)</div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="content" style="padding:0;">
+          <div class="join-screen">
+            <div style="margin-bottom:20px;margin-top:20px;">
+              <div style="font-size:28px;margin-bottom:12px;">🏠</div>
+              <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px;">가족 참여</div>
+              <div style="font-size:14px;color:var(--text-2);">초대 코드를 입력하세요</div>
+            </div>
+            <div class="join-label">초대 코드</div>
+            <div class="join-input">8B1C2F3A</div>
+            <div class="join-error">
+              <span>⚠️</span>
+              <span>초대 코드가 만료되었습니다. 새 코드를 발급받으세요.</span>
+            </div>
+            <div class="join-btn-disabled">참여하기</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 기술 변경 요약 -->
+<div style="max-width:900px;margin:56px auto 0;background:white;border-radius:16px;padding:28px 32px;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:16px;color:#0F172A;">변경 요약</h2>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;color:#334155;">
+    <tr style="background:#F8FAFC;">
+      <th style="text-align:left;padding:10px 12px;border-bottom:2px solid #E2E8F0;">항목</th>
+      <th style="text-align:left;padding:10px 12px;border-bottom:2px solid #E2E8F0;">현재 (Before)</th>
+      <th style="text-align:left;padding:10px 12px;border-bottom:2px solid #E2E8F0;">변경 후 (After)</th>
+    </tr>
+    <tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;font-weight:500;">저장 위치</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#EF4444;"><code>families/{id}.inviteCode</code></td>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#0D9488;"><code>inviteCodes/{code}</code> 별도 컬렉션</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;font-weight:500;">코드 생성</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#EF4444;">Math.random() 6자리 (취약)</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#0D9488;">uuid() 앞 8자리 대문자 (안전)</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;font-weight:500;">만료</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#EF4444;">영구 유효</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#0D9488;">발급 후 7일 (expiresAt 필드)</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 12px;font-weight:500;">재생성</td>
+      <td style="padding:10px 12px;color:#EF4444;">불가</td>
+      <td style="padding:10px 12px;color:#0D9488;">재생성 버튼 → 기존 삭제 + 신규 발급</td>
+    </tr>
+  </table>
+
+  <div style="margin-top:20px;border-top:1px solid #E2E8F0;padding-top:16px;">
+    <h3 style="font-size:14px;font-weight:600;margin-bottom:10px;">Firestore 신규 컬렉션: <code style="background:#F1F5F9;padding:2px 8px;border-radius:4px;">inviteCodes/{code}</code></h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13px;">
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;">
+        <div style="font-weight:600;color:#0D9488;margin-bottom:4px;">familyId</div>
+        <div style="color:#64748B;">string</div>
+      </div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;">
+        <div style="font-weight:600;color:#0D9488;margin-bottom:4px;">createdAt</div>
+        <div style="color:#64748B;">Timestamp</div>
+      </div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;">
+        <div style="font-weight:600;color:#0D9488;margin-bottom:4px;">expiresAt</div>
+        <div style="color:#64748B;">Timestamp (createdAt + 7일)</div>
+      </div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 14px;">
+        <div style="font-weight:600;color:#0D9488;margin-bottom:4px;">createdBy</div>
+        <div style="color:#64748B;">string (uid)</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;padding:12px 16px;background:#F0FDF4;border-radius:10px;border-left:3px solid #22C55E;font-size:13px;color:#166534;">
+    <strong>연계:</strong> #8 (Firestore Rules) — inviteCodes 컬렉션 rules 추가 | #31 — FamilyInfoScreen에서 만료일·재생성 UI 제공
+  </div>
+</div>
+
+</body>
+</html>

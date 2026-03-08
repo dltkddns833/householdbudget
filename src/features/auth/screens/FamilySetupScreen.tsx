@@ -110,10 +110,10 @@ export const FamilySetupScreen: React.FC = () => {
               style={[styles.input, styles.codeInput]}
               value={inviteCode}
               onChangeText={setInviteCode}
-              placeholder="6자리 코드 입력"
+              placeholder="8자리 코드 입력"
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="characters"
-              maxLength={6}
+              maxLength={8}
             />
           </View>
         )}

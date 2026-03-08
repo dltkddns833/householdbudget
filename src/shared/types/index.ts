@@ -12,8 +12,15 @@ export interface Family {
   id: string;
   members: string[];
   memberNames: Record<string, string>;
-  inviteCode: string;
   savingRateGoal?: number; // 0~100 정수, undefined = 미설정
+}
+
+export interface InviteCode {
+  code: string; // 문서 ID와 동일
+  familyId: string;
+  createdAt: FirebaseFirestoreTypes.Timestamp;
+  expiresAt: FirebaseFirestoreTypes.Timestamp;
+  createdBy: string;
 }
 
 export interface SavingRateSummary {

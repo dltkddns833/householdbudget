@@ -1,7 +1,14 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { User, Family } from '../../../shared/types';
+import { v4 as uuidv4 } from 'uuid';
+import { User, Family, InviteCode } from '../../../shared/types';
+
+const INVITE_CODE_EXPIRY_DAYS = 7;
+
+function generateInviteCode(): string {
+  return uuidv4().replace(/-/g, '').substring(0, 8).toUpperCase();
+}
 
 export const authService = {
   async signInWithGoogle(): Promise<User> {
@@ -52,12 +59,10 @@ export const authService = {
   },
 
   async createFamily(uid: string, userName: string): Promise<Family> {
-    const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const familyRef = firestore().collection('families').doc();
     const family: Omit<Family, 'id'> = {
       members: [uid],
       memberNames: { [uid]: userName },
-      inviteCode,
     };
 
     const batch = firestore().batch();
@@ -65,7 +70,50 @@ export const authService = {
     batch.set(firestore().collection('users').doc(uid), { familyId: familyRef.id }, { merge: true });
     await batch.commit();
 
+    // 초대 코드 발급
+    await this.createInviteCode(familyRef.id, uid);
+
     return { id: familyRef.id, ...family };
+  },
+
+  async createInviteCode(familyId: string, uid: string): Promise<InviteCode> {
+    const code = generateInviteCode();
+    const now = firestore.Timestamp.now();
+    const expiresAt = firestore.Timestamp.fromDate(
+      new Date(now.toMillis() + INVITE_CODE_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
+    );
+
+    const inviteCodeData: Omit<InviteCode, 'code'> = {
+      familyId,
+      createdAt: now,
+      expiresAt,
+      createdBy: uid,
+    };
+
+    await firestore().collection('inviteCodes').doc(code).set(inviteCodeData);
+    return { code, ...inviteCodeData };
+  },
+
+  async getActiveInviteCode(familyId: string): Promise<InviteCode | null> {
+    const snapshot = await firestore()
+      .collection('inviteCodes')
+      .where('familyId', '==', familyId)
+      .get();
+
+    const now = Date.now();
+    const valid = snapshot.docs
+      .map(doc => ({ code: doc.id, ...doc.data() } as InviteCode))
+      .filter(c => c.expiresAt.toMillis() > now)
+      .sort((a, b) => b.expiresAt.toMillis() - a.expiresAt.toMillis());
+
+    return valid[0] ?? null;
+  },
+
+  async regenerateInviteCode(familyId: string, uid: string, oldCode?: string): Promise<InviteCode> {
+    if (oldCode) {
+      await firestore().collection('inviteCodes').doc(oldCode).delete();
+    }
+    return this.createInviteCode(familyId, uid);
   },
 
   async updateSavingRateGoal(familyId: string, goal: number): Promise<void> {
@@ -73,30 +121,37 @@ export const authService = {
   },
 
   async joinFamily(uid: string, userName: string, inviteCode: string): Promise<Family> {
-    const snapshot = await firestore()
-      .collection('families')
-      .where('inviteCode', '==', inviteCode)
-      .limit(1)
-      .get();
+    const userDoc = await firestore().collection('users').doc(uid).get();
+    if (userDoc.exists && userDoc.data()?.familyId) {
+      throw new Error('이미 가족에 속해있습니다. 기존 가족에서 탈퇴 후 다시 시도해주세요.');
+    }
 
-    if (snapshot.empty) throw new Error('초대 코드를 찾을 수 없습니다.');
+    const inviteDoc = await firestore().collection('inviteCodes').doc(inviteCode).get();
+    if (!inviteDoc.exists) throw new Error('초대 코드를 찾을 수 없습니다.');
 
-    const familyDoc = snapshot.docs[0];
-    const familyData = familyDoc.data();
+    const inviteData = inviteDoc.data() as Omit<InviteCode, 'code'>;
+    if (inviteData.expiresAt.toMillis() < Date.now()) {
+      throw new Error('초대 코드가 만료되었습니다. 새 코드를 발급받으세요.');
+    }
+
+    const familyRef = firestore().collection('families').doc(inviteData.familyId);
+    const familyDoc = await familyRef.get();
+    if (!familyDoc.exists) throw new Error('가족 정보를 찾을 수 없습니다.');
+
+    const familyData = familyDoc.data()!;
 
     await firestore().runTransaction(async (tx) => {
-      tx.update(familyDoc.ref, {
+      tx.update(familyRef, {
         members: firestore.FieldValue.arrayUnion(uid),
         [`memberNames.${uid}`]: userName,
       });
-      tx.set(firestore().collection('users').doc(uid), { familyId: familyDoc.id }, { merge: true });
+      tx.set(firestore().collection('users').doc(uid), { familyId: inviteData.familyId }, { merge: true });
     });
 
     return {
-      id: familyDoc.id,
+      id: inviteData.familyId,
       members: [...familyData.members, uid],
       memberNames: { ...familyData.memberNames, [uid]: userName },
-      inviteCode: familyData.inviteCode,
     };
   },
 };

@@ -1,6 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import firestore from '@react-native-firebase/firestore';
 import { Transaction, TransactionInput, MonthlySummary } from '../../../shared/types';
 import { transactionService } from '../services/transactionService';
 import { useAuthStore } from '../../../store/authStore';
@@ -76,12 +75,11 @@ export const useUpdateTransaction = () => {
     mutationFn: ({
       txId,
       input,
-      oldYearMonth,
     }: {
       txId: string;
       input: TransactionInput;
-      oldYearMonth: string;
-    }) => transactionService.updateTransaction(family!.id, txId, input, oldYearMonth),
+      oldYearMonth?: string; // Cloud Functions이 처리하므로 더 이상 사용되지 않음
+    }) => transactionService.updateTransaction(family!.id, txId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['monthlySummary'] });
     },
@@ -93,8 +91,8 @@ export const useDeleteTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ txId, yearMonth }: { txId: string; yearMonth: string }) =>
-      transactionService.deleteTransaction(family!.id, txId, yearMonth),
+    mutationFn: ({ txId }: { txId: string; yearMonth?: string }) =>
+      transactionService.deleteTransaction(family!.id, txId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['monthlySummary'] });
     },
