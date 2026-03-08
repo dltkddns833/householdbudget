@@ -15,7 +15,7 @@ import { authService } from '../services/authService';
 import { useAuthStore } from '../../../store/authStore';
 
 export const FamilySetupScreen: React.FC = () => {
-  const { user, setUser, setFamily } = useAuthStore();
+  const { user, setUser, setFamily, reset } = useAuthStore();
   const [mode, setMode] = useState<'choose' | 'create' | 'join'>('choose');
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [inviteCode, setInviteCode] = useState('');
@@ -57,6 +57,20 @@ export const FamilySetupScreen: React.FC = () => {
     }
   };
 
+  const handleSignOut = () => {
+    Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '로그아웃',
+        style: 'destructive',
+        onPress: async () => {
+          await authService.signOut();
+          reset();
+        },
+      },
+    ]);
+  };
+
   if (mode === 'choose') {
     return (
       <View style={styles.container}>
@@ -72,6 +86,10 @@ export const FamilySetupScreen: React.FC = () => {
           <TouchableOpacity style={styles.optionButton} onPress={() => setMode('join')}>
             <Text style={styles.optionTitle}>초대 코드로 참여</Text>
             <Text style={styles.optionDesc}>받은 초대 코드를 입력하여 참여합니다</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <Text style={styles.signOutText}>다른 계정으로 로그인</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -218,5 +236,14 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.white,
       fontSize: 16,
       fontWeight: '700',
+    },
+    signOutButton: {
+      alignItems: 'center',
+      marginTop: 32,
+      paddingVertical: 8,
+    },
+    signOutText: {
+      fontSize: 14,
+      color: colors.textTertiary,
     },
   });
