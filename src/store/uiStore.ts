@@ -3,12 +3,16 @@ import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
 import { MMKV } from 'react-native-mmkv';
 import { getCurrentYearMonth } from '../shared/utils/date';
 
-const mmkv = new MMKV({ id: 'ui-store' });
+let _mmkv: MMKV | null = null;
+const getMMKV = (): MMKV => {
+  if (!_mmkv) _mmkv = new MMKV({ id: 'ui-store' });
+  return _mmkv;
+};
 
 const mmkvStorage: StateStorage = {
-  setItem: (name: string, value: string) => mmkv.set(name, value),
-  getItem: (name: string) => mmkv.getString(name) ?? null,
-  removeItem: (name: string) => mmkv.delete(name),
+  setItem: (name: string, value: string) => getMMKV().set(name, value),
+  getItem: (name: string) => getMMKV().getString(name) ?? null,
+  removeItem: (name: string) => getMMKV().delete(name),
 };
 
 export type ThemePreference = 'system' | 'light' | 'dark';
