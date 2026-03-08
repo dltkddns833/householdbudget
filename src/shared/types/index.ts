@@ -213,3 +213,12 @@ export interface CategoryBudgetProgress {
   rate: number;       // spent / budgeted * 100 (미설정 시 -1)
   status: 'normal' | 'warning' | 'over' | 'unset';
 }
+
+
+export interface WidgetData {
+  yearMonth: string;
+  totalExpense: number;
+  totalIncome: number;
+  remaining: number;
+  updatedAt: string;
+}

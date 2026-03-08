@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">우리집 가계부</string>
+    <string name="widget_description">이번달 지출과 잔액을 홈 화면에서 바로 확인</string>
 </resources>

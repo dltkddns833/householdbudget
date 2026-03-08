@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="우리집 가계부"
+        android:textSize="11sp"
+        android:textColor="#80FFFFFF"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_expense_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="이번달 지출"
+        android:textSize="10sp"
+        android:textColor="#80FFFFFF" />
+
+    <TextView
+        android:id="@+id/widget_expense"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="0원"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="#40FFFFFF" />
+
+    <TextView
+        android:id="@+id/widget_remaining_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="잔액"
+        android:textSize="10sp"
+        android:textColor="#80FFFFFF" />
+
+    <TextView
+        android:id="@+id/widget_remaining"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="0원"
+        android:textSize="13sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_month"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text=""
+        android:textSize="10sp"
+        android:textColor="#60FFFFFF" />
+
+</LinearLayout>

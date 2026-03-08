@@ -27,6 +27,7 @@ import { useSavingRate } from '../hooks/useSavingRate';
 import { SavingRateCard } from '../components/SavingRateCard';
 import { useGoalProgress } from '../../goals/hooks/useGoals';
 import { AssetGoalCard } from '../components/AssetGoalCard';
+import { useWidgetSync } from '../../widget/hooks/useWidgetSync';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -50,6 +51,8 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const overviewRange = rangeQuery.data || [];
   const { colors, isDark } = useTheme();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
+
+  useWidgetSync(currentMonth, summary);
 
   const totalBudget = useMemo(() => {
     const cats = budgetQuery.data?.categories ?? {};
