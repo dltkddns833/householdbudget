@@ -13,9 +13,10 @@ interface Props {
 
 const IMAGE_OPTIONS = {
   mediaType: 'photo' as const,
-  quality: 0.8 as const,
+  quality: 0.7 as const,
   maxWidth: 1080,
   maxHeight: 1080,
+  includeBase64: false,
 };
 
 export const ReceiptPicker: React.FC<Props> = ({ uri, onSelected, onRemoved }) => {
@@ -28,6 +29,7 @@ export const ReceiptPicker: React.FC<Props> = ({ uri, onSelected, onRemoved }) =
         text: '카메라로 촬영',
         onPress: () => {
           launchCamera(IMAGE_OPTIONS, response => {
+            if (response.didCancel || response.errorCode) return;
             if (response.assets?.[0]?.uri) {
               onSelected(response.assets[0].uri);
             }
@@ -38,6 +40,7 @@ export const ReceiptPicker: React.FC<Props> = ({ uri, onSelected, onRemoved }) =
         text: '갤러리에서 선택',
         onPress: () => {
           launchImageLibrary(IMAGE_OPTIONS, response => {
+            if (response.didCancel || response.errorCode) return;
             if (response.assets?.[0]?.uri) {
               onSelected(response.assets[0].uri);
             }

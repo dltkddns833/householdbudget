@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
   Image,
 } from 'react-native';
@@ -13,8 +12,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import { useAuthStore } from '../../../store/authStore';
-import { authService } from '../../auth/services/authService';
-import { ThemePreference } from '../../../store/uiStore';
 
 interface Props {
   navigation: any;
@@ -28,54 +25,24 @@ interface MenuItem {
   color?: string;
 }
 
-const THEME_LABELS: Record<ThemePreference, string> = {
-  system: '시스템 설정',
-  light: '라이트 모드',
-  dark: '다크 모드',
-};
-
 export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
-  const { user, family, reset } = useAuthStore();
-  const { colors, themePreference, setThemePreference } = useTheme();
+  const { user, family } = useAuthStore();
+  const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-
-  const handleSignOut = () => {
-    Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '로그아웃',
-        style: 'destructive',
-        onPress: async () => {
-          await authService.signOut();
-          reset();
-        },
-      },
-    ]);
-  };
-
-  const handleThemeChange = () => {
-    const options: { text: string; pref: ThemePreference }[] = [
-      { text: '시스템 설정', pref: 'system' },
-      { text: '라이트 모드', pref: 'light' },
-      { text: '다크 모드', pref: 'dark' },
-    ];
-
-    Alert.alert('화면 모드', '테마를 선택해주세요', [
-      ...options.map(opt => ({
-        text: opt.pref === themePreference ? `${opt.text} ✓` : opt.text,
-        onPress: () => setThemePreference(opt.pref),
-      })),
-      { text: '취소', style: 'cancel' as const },
-    ]);
-  };
 
   const familyMemberPreview = family
     ? Object.values(family.memberNames).join(', ')
     : '';
 
   const menuItems: MenuItem[] = [
+    {
+      icon: 'account-balance',
+      label: '재무상태',
+      subtitle: '자산 현황 관리',
+      onPress: () => navigation.navigate('Assets'),
+    },
     {
       icon: 'savings',
       label: '예산 설정',
@@ -89,10 +56,10 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       onPress: () => navigation.navigate('RecurringList'),
     },
     {
-      icon: 'notifications',
-      label: '알림 설정',
-      subtitle: '예산·고정비·월초 알림 관리',
-      onPress: () => navigation.navigate('NotificationSetting'),
+      icon: 'trending-up',
+      label: '저축률 목표 설정',
+      subtitle: family?.savingRateGoal ? `목표: ${family.savingRateGoal}%` : '목표 없음',
+      onPress: () => navigation.navigate('SavingRateGoal'),
     },
     {
       icon: 'flag',
@@ -101,28 +68,10 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       onPress: () => navigation.navigate('GoalSetting'),
     },
     {
-      icon: 'trending-up',
-      label: '저축률 목표 설정',
-      subtitle: family?.savingRateGoal ? `목표: ${family.savingRateGoal}%` : '목표 없음',
-      onPress: () => navigation.navigate('SavingRateGoal'),
-    },
-    {
-      icon: 'account-balance',
-      label: '재무상태',
-      subtitle: '자산 현황 관리',
-      onPress: () => navigation.navigate('Assets'),
-    },
-    {
-      icon: 'brightness-6',
-      label: '화면 모드',
-      subtitle: THEME_LABELS[themePreference],
-      onPress: handleThemeChange,
-    },
-    {
-      icon: 'logout',
-      label: '로그아웃',
-      onPress: handleSignOut,
-      color: colors.danger,
+      icon: 'people',
+      label: '가족 정보',
+      subtitle: familyMemberPreview || undefined,
+      onPress: () => navigation.navigate('FamilyInfo'),
     },
   ];
 
@@ -130,6 +79,12 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
     <ScrollView ref={scrollRef} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>더보기</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Settings')}
+          style={styles.settingsButton}
+        >
+          <Icon name="settings" size={24} color={colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Profile + 가족 정보 카드 */}
@@ -151,20 +106,6 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.profileEmail}>Google 연동</Text>
           </View>
         </View>
-        <View style={styles.profileDivider} />
-        <TouchableOpacity
-          style={styles.familyInfoRow}
-          onPress={() => navigation.navigate('FamilyInfo')}
-        >
-          <Icon name="people" size={20} color={colors.textSecondary} />
-          <View style={styles.familyInfoText}>
-            <Text style={styles.familyInfoLabel}>가족 정보</Text>
-            {familyMemberPreview ? (
-              <Text style={styles.familyInfoSub}>{familyMemberPreview}</Text>
-            ) : null}
-          </View>
-          <Icon name="chevron-right" size={20} color={colors.textTertiary} />
-        </TouchableOpacity>
       </View>
 
       {/* Menu Items */}
@@ -208,6 +149,9 @@ const createStyles = (colors: ThemeColors) =>
       backgroundColor: colors.background,
     },
     header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       paddingHorizontal: 20,
       paddingTop: 56,
       paddingBottom: 16,
@@ -217,6 +161,9 @@ const createStyles = (colors: ThemeColors) =>
       fontSize: 22,
       fontWeight: '800',
       color: colors.text,
+    },
+    settingsButton: {
+      padding: 4,
     },
     profileCard: {
       backgroundColor: colors.surface,
@@ -234,31 +181,6 @@ const createStyles = (colors: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       padding: 16,
-    },
-    profileDivider: {
-      height: 1,
-      backgroundColor: colors.borderLight,
-      marginHorizontal: 16,
-    },
-    familyInfoRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 13,
-      gap: 12,
-    },
-    familyInfoText: {
-      flex: 1,
-    },
-    familyInfoLabel: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    familyInfoSub: {
-      fontSize: 12,
-      color: colors.textTertiary,
-      marginTop: 1,
     },
     avatar: {
       width: 48,

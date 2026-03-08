@@ -147,6 +147,14 @@ export const authService = {
     }
   },
 
+  async deleteAccount(uid: string, familyId: string | null): Promise<void> {
+    if (familyId) {
+      await this.leaveFamily(uid, familyId);
+    }
+    await firestore().collection('users').doc(uid).delete();
+    await auth().currentUser!.delete();
+  },
+
   async updateSavingRateGoal(familyId: string, goal: number): Promise<void> {
     await firestore().collection('families').doc(familyId).update({ savingRateGoal: goal });
   },

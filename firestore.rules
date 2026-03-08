@@ -43,6 +43,7 @@ service cloud.firestore {
       allow read: if isAuth() && request.auth.uid == userId;
       allow create: if isAuth() && request.auth.uid == userId;
       allow update: if isAuth() && request.auth.uid == userId;
+      allow delete: if isAuth() && request.auth.uid == userId;
     }
 
     // 초대 코드 — 읽기: 인증 사용자 전체(join 조회 필요), 쓰기: 해당 가족 멤버만
