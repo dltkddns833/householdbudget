@@ -27,6 +27,7 @@ import { RecurringFormScreen } from '../../features/recurring/screens/RecurringF
 import { SavingRateGoalScreen } from '../../features/settings/screens/SavingRateGoalScreen';
 import { GoalSettingScreen } from '../../features/goals/screens/GoalSettingScreen';
 import { NotificationSettingScreen } from '../../features/settings/screens/NotificationSettingScreen';
+import { FamilyInfoScreen } from '../../features/settings/screens/FamilyInfoScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -76,6 +77,7 @@ const MoreStackScreen = () => (
     <MoreStack.Screen name="SavingRateGoal" component={SavingRateGoalScreen} />
     <MoreStack.Screen name="GoalSetting" component={GoalSettingScreen} />
     <MoreStack.Screen name="NotificationSetting" component={NotificationSettingScreen} />
+    <MoreStack.Screen name="FamilyInfo" component={FamilyInfoScreen} />
   </MoreStack.Navigator>
 );
 

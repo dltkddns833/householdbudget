@@ -116,6 +116,37 @@ export const authService = {
     return this.createInviteCode(familyId, uid);
   },
 
+  async leaveFamily(uid: string, familyId: string): Promise<void> {
+    const familyRef = firestore().collection('families').doc(familyId);
+    const familyDoc = await familyRef.get();
+    if (!familyDoc.exists) throw new Error('가족 정보를 찾을 수 없습니다.');
+
+    const members: string[] = familyDoc.data()?.members || [];
+    const isLastMember = members.length === 1;
+
+    if (isLastMember) {
+      // 마지막 멤버 → 가족 문서 삭제 + 활성 초대 코드 삭제
+      const inviteSnapshot = await firestore()
+        .collection('inviteCodes')
+        .where('familyId', '==', familyId)
+        .get();
+
+      const batch = firestore().batch();
+      inviteSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+      batch.delete(familyRef);
+      batch.update(firestore().collection('users').doc(uid), { familyId: null });
+      await batch.commit();
+    } else {
+      await firestore().runTransaction(async (tx) => {
+        tx.update(familyRef, {
+          members: firestore.FieldValue.arrayRemove(uid),
+          [`memberNames.${uid}`]: firestore.FieldValue.delete(),
+        });
+        tx.update(firestore().collection('users').doc(uid), { familyId: null });
+      });
+    }
+  },
+
   async updateSavingRateGoal(familyId: string, goal: number): Promise<void> {
     await firestore().collection('families').doc(familyId).update({ savingRateGoal: goal });
   },

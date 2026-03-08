@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   Alert,
   ScrollView,
   Image,
-  Clipboard,
 } from 'react-native';
 import { useScrollToTop } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -16,7 +15,6 @@ import { ThemeColors } from '../../../shared/constants/colors';
 import { useAuthStore } from '../../../store/authStore';
 import { authService } from '../../auth/services/authService';
 import { ThemePreference } from '../../../store/uiStore';
-import { InviteCode } from '../../../shared/types';
 
 interface Props {
   navigation: any;
@@ -42,17 +40,6 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
   const { user, family, reset } = useAuthStore();
   const { colors, themePreference, setThemePreference } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const [inviteCode, setInviteCode] = useState<InviteCode | null>(null);
-
-  const loadInviteCode = useCallback(async () => {
-    if (!family?.id) return;
-    const code = await authService.getActiveInviteCode(family.id);
-    setInviteCode(code);
-  }, [family?.id]);
-
-  useEffect(() => {
-    loadInviteCode();
-  }, [loadInviteCode]);
 
   const handleSignOut = () => {
     Alert.alert('로그아웃', '로그아웃 하시겠습니까?', [
@@ -83,6 +70,10 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       { text: '취소', style: 'cancel' as const },
     ]);
   };
+
+  const familyMemberPreview = family
+    ? Object.values(family.memberNames).join(', ')
+    : '';
 
   const menuItems: MenuItem[] = [
     {
@@ -129,55 +120,9 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
     },
     {
       icon: 'people',
-      label: '초대 코드',
-      subtitle: inviteCode
-        ? `${inviteCode.code} · ${new Date(inviteCode.expiresAt.toMillis()).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}까지 유효`
-        : '코드 없음 — 생성 필요',
-      onPress: () => {
-        if (!family) return;
-        const codeStr = inviteCode?.code;
-        const expiryStr = inviteCode
-          ? `${new Date(inviteCode.expiresAt.toMillis()).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}까지 유효`
-          : '';
-
-        Alert.alert(
-          '초대 코드',
-          codeStr
-            ? `${codeStr}\n${expiryStr}`
-            : '유효한 초대 코드가 없습니다.',
-          [
-            ...(codeStr
-              ? [{ text: '복사', onPress: () => Clipboard.setString(codeStr) }]
-              : []),
-            {
-              text: codeStr ? '코드 재생성' : '코드 생성',
-              onPress: () => {
-                Alert.alert(
-                  codeStr ? '코드 재생성' : '코드 생성',
-                  codeStr ? '기존 코드가 무효화됩니다. 재생성할까요?' : '새 초대 코드를 생성할까요?',
-                  [
-                    { text: '취소', style: 'cancel' },
-                    {
-                      text: '확인',
-                      onPress: async () => {
-                        const newCode = await authService.regenerateInviteCode(
-                          family.id,
-                          user!.uid,
-                          codeStr,
-                        );
-                        setInviteCode(newCode);
-                        Clipboard.setString(newCode.code);
-                        Alert.alert('완료', '새 초대 코드가 생성되어 복사되었습니다.');
-                      },
-                    },
-                  ],
-                );
-              },
-            },
-            { text: '닫기', style: 'cancel' },
-          ],
-        );
-      },
+      label: '가족 정보',
+      subtitle: familyMemberPreview || '멤버 정보',
+      onPress: () => navigation.navigate('FamilyInfo'),
     },
     {
       icon: 'logout',
