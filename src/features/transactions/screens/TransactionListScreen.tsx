@@ -26,6 +26,7 @@ import {
 } from '../hooks/useTransactions';
 import { useTransactionFilter } from '../hooks/useTransactionFilter';
 import { useUIStore } from '../../../store/uiStore';
+import { useAuthStore } from '../../../store/authStore';
 import { Transaction } from '../../../shared/types';
 import { SearchBar } from '../components/SearchBar';
 import { FilterPanel } from '../components/FilterPanel';
@@ -38,6 +39,7 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
   const listRef = useRef<SectionList>(null);
   useScrollToTop(listRef);
   const { currentMonth, setCurrentMonth } = useUIStore();
+  const { family } = useAuthStore();
   const { transactions, summary } = useTransactions(currentMonth);
   const deleteMutation = useDeleteTransaction();
   const { colors } = useTheme();
@@ -84,8 +86,16 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
     ]);
   };
 
+  const getMemberName = (memberId?: string): string | null => {
+    if (!family || family.members.length < 2) return null;
+    if (!memberId) return null;
+    return family.memberNames[memberId] ?? null;
+  };
+
   const renderItem = ({ item: tx }: { item: Transaction }) => {
     const cat = getCategoryByKey(tx.category);
+    const memberName = getMemberName(tx.memberId);
+
     return (
       <TouchableOpacity
         style={styles.txRow}
@@ -101,7 +111,14 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
           ]}
         />
         <View style={styles.txInfo}>
-          <Text style={styles.txName}>{tx.name}</Text>
+          <View style={styles.txNameRow}>
+            <Text style={styles.txName}>{tx.name}</Text>
+            {memberName && (
+              <View style={styles.memberBadge}>
+                <Text style={styles.memberBadgeText}>{memberName}</Text>
+              </View>
+            )}
+          </View>
           <Text style={styles.txCategory}>
             {tx.category}
             {tx.memo ? ` · ${tx.memo}` : ''}
@@ -334,10 +351,26 @@ const createStyles = (colors: ThemeColors) =>
     txInfo: {
       flex: 1,
     },
+    txNameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
     txName: {
       fontSize: 15,
       fontWeight: '600',
       color: colors.text,
+    },
+    memberBadge: {
+      backgroundColor: colors.primaryLight + '33',
+      borderRadius: 4,
+      paddingHorizontal: 5,
+      paddingVertical: 1,
+    },
+    memberBadgeText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.primary,
     },
     txCategory: {
       fontSize: 13,

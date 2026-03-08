@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -63,6 +63,10 @@ export const TransactionAddScreen: React.FC<Props> = ({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState(date);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const amountRef = useRef<TextInput>(null);
+  const nameRef = useRef<TextInput>(null);
+  const memoRef = useRef<TextInput>(null);
 
   const addMutation = useAddTransaction();
   const updateMutation = useUpdateTransaction();
@@ -234,7 +238,7 @@ export const TransactionAddScreen: React.FC<Props> = ({
         {/* 멤버 선택 (가족 멤버가 2명 이상일 때만 표시) */}
         {memberOptions.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>누가 쓴 돈?</Text>
+            <Text style={styles.sectionLabel}>{type === 'expense' ? '누가 쓴 돈?' : '누구의 수입?'}</Text>
             <View style={styles.memberRow}>
               {memberOptions.map(opt => (
                 <TouchableOpacity
@@ -296,18 +300,22 @@ export const TransactionAddScreen: React.FC<Props> = ({
         <View style={styles.amountContainer}>
           <Text style={styles.currencyPrefix}>₩</Text>
           <TextInput
+            ref={amountRef}
             style={styles.amountInput}
             value={amountText}
             onChangeText={handleAmountChange}
             keyboardType="numeric"
             placeholder="0"
             placeholderTextColor={colors.textTertiary}
+            returnKeyType="next"
+            onSubmitEditing={() => nameRef.current?.focus()}
           />
         </View>
 
         {/* Name */}
         <Text style={styles.sectionLabel}>이름</Text>
         <TextInput
+          ref={nameRef}
           style={styles.input}
           value={name}
           onChangeText={t => {
@@ -316,6 +324,8 @@ export const TransactionAddScreen: React.FC<Props> = ({
           }}
           placeholder="예: 쿠팡, 매머드"
           placeholderTextColor={colors.textTertiary}
+          returnKeyType="next"
+          onSubmitEditing={() => memoRef.current?.focus()}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
         />
         {showSuggestions && recentNames.length > 0 && name.length === 0 && (
@@ -379,12 +389,15 @@ export const TransactionAddScreen: React.FC<Props> = ({
         {/* Memo */}
         <Text style={styles.sectionLabel}>비고</Text>
         <TextInput
+          ref={memoRef}
           style={[styles.input, styles.memoInput]}
           value={memo}
           onChangeText={setMemo}
           placeholder="선택사항"
           placeholderTextColor={colors.textTertiary}
           multiline
+          returnKeyType="done"
+          blurOnSubmit
         />
 
         {/* Buttons */}
