@@ -10,10 +10,6 @@
 
 | 이슈 | 제목 | 비고 |
 |------|------|------|
-| [#3](https://github.com/dltkddns833/householdbudget/issues/3) | 가족 멤버별 지출 분리 | 채원 합류로 재오픈. 두 명 모두 입력하므로 필요 |
-| [#25](https://github.com/dltkddns833/householdbudget/issues/25) | 소비 캘린더 뷰 | 구현 난이도 낮고 일상 사용성 향상 |
-| [#27](https://github.com/dltkddns833/householdbudget/issues/27) | 자산 변동 추이 상세 | 기존 financialStatus 데이터 재활용, 자산 관리 핵심 |
-| [#26](https://github.com/dltkddns833/householdbudget/issues/26) | 월간 결산 리포트 | 월말 루틴으로 활용도 높음, react-native-view-shot 의존성 추가 필요 |
 | [#28](https://github.com/dltkddns833/householdbudget/issues/28) | 홈 화면 위젯 | 네이티브(iOS WidgetKit + Android AppWidget), 난이도 높음 |
 
 ---
@@ -34,4 +30,5 @@
 - **채원 합류 (2026-03-07)**: iOS 기기에 직접 설치하여 사용 시작. #3 멤버별 지출 분리 재오픈.
 - **v1.3.0 배포 (2026-03-08)**: 1순위 보안 5종 (#8 #9 #10 #12 #13) + #29 #31 #34 포함. 상세 내용은 `docs/release/v1.3.0/release-note.md` 참고.
 - **v1.4.0 배포 (2026-03-09)**: #22 #30 #32 #33 포함. 상세 내용은 `docs/release/v1.4.0/release-note.md` 참고.
+- **v1.5.0 배포 (2026-03-09)**: #3 #25 #26 #27 포함. 상세 내용은 `docs/release/v1.5.0/release-note.md` 참고.
 - **드롭된 이슈**: 없음.
