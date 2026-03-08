@@ -10,6 +10,7 @@ import {
   Clipboard,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
@@ -24,6 +25,7 @@ interface Props {
 export const FamilyInfoScreen: React.FC<Props> = ({ navigation }) => {
   const { user, family, setUser, setFamily } = useAuthStore();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [inviteCode, setInviteCode] = useState<InviteCode | null>(null);
@@ -124,7 +126,7 @@ export const FamilyInfoScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       {/* 헤더 */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Icon name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
@@ -236,12 +238,11 @@ const createStyles = (colors: ThemeColors) =>
     header: {
       flexDirection: 'row',
       alignItems: 'center',
-      height: 56,
       paddingHorizontal: 4,
+      paddingBottom: 12,
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
-      paddingTop: 8,
     },
     backBtn: {
       width: 44,
