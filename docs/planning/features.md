@@ -1,23 +1,10 @@
 # 기능 우선순위 및 대기 이슈
 
-> 마지막 업데이트: 2026-03-08
+> 마지막 업데이트: 2026-03-09
 
 ---
 
 ## 작업 순서
-
-### 🔴 1순위 — 즉시 처리
-
-| 이슈 | 제목 | 비고 |
-|------|------|------|
-| [#32](https://github.com/dltkddns833/householdbudget/issues/32) | 카메라·앨범 권한 다이얼로그 미표시 및 기능 미작동 | 영수증 첨부 기능 전체 불가. 원인 분석 필요 |
-| [#33](https://github.com/dltkddns833/householdbudget/issues/33) | 더보기 설정 화면 분리 — 우측 상단 톱니바퀴 | 기능 허브(더보기)와 환경·계정 설정(⚙️) 분리. #30 회원 탈퇴 위치 포함 |
-| [#30](https://github.com/dltkddns833/householdbudget/issues/30) | 회원 탈퇴 기능 | App Store·Google Play 필수 정책. #33 설정 화면 하단에 위치 |
-
-> **#10 후속 작업**: Cloud Functions 배포 및 안정화 확인 후 `firestore.rules`의
-> `monthlySummaries write: false` 적용 필요 (현재 TODO 주석으로 표시)
-
----
 
 ### 🟡 2순위 — 기능
 
@@ -46,4 +33,5 @@
 
 - **채원 합류 (2026-03-07)**: iOS 기기에 직접 설치하여 사용 시작. #3 멤버별 지출 분리 재오픈.
 - **v1.3.0 배포 (2026-03-08)**: 1순위 보안 5종 (#8 #9 #10 #12 #13) + #29 #31 #34 포함. 상세 내용은 `docs/release/v1.3.0/release-note.md` 참고.
+- **v1.4.0 배포 (2026-03-09)**: #22 #30 #32 #33 포함. 상세 내용은 `docs/release/v1.4.0/release-note.md` 참고.
 - **드롭된 이슈**: 없음.
