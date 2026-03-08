@@ -3,17 +3,26 @@ import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
 import { MMKV } from 'react-native-mmkv';
 import { getCurrentYearMonth } from '../shared/utils/date';
 
-let _mmkv: MMKV | null = null;
-const getMMKV = (): MMKV => {
-  if (!_mmkv) _mmkv = new MMKV({ id: 'ui-store' });
-  return _mmkv;
+const buildStorage = (): StateStorage => {
+  try {
+    const instance = new MMKV({ id: 'ui-store' });
+    return {
+      setItem: (name, value) => instance.set(name, value),
+      getItem: (name) => instance.getString(name) ?? null,
+      removeItem: (name) => instance.delete(name),
+    };
+  } catch {
+    // MMKV 초기화 실패 시 in-memory 폴백 (앱 재시작 시 초기화됨)
+    const map = new Map<string, string>();
+    return {
+      setItem: (name, value) => { map.set(name, value); },
+      getItem: (name) => map.get(name) ?? null,
+      removeItem: (name) => { map.delete(name); },
+    };
+  }
 };
 
-const mmkvStorage: StateStorage = {
-  setItem: (name: string, value: string) => getMMKV().set(name, value),
-  getItem: (name: string) => getMMKV().getString(name) ?? null,
-  removeItem: (name: string) => getMMKV().delete(name),
-};
+const mmkvStorage = buildStorage();
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 
