@@ -4,70 +4,69 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="12dp"
+    android:padding="14dp"
     android:background="@drawable/widget_background">
 
+    <!-- 앱 이름 -->
     <TextView
-        android:id="@+id/widget_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="우리집 가계부"
-        android:textSize="11sp"
-        android:textColor="#80FFFFFF"
-        android:textStyle="bold" />
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_app_name" />
 
+    <!-- Spacer -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical" />
+
+    <!-- 이번달 지출 라벨 -->
     <TextView
-        android:id="@+id/widget_expense_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:text="이번달 지출"
-        android:textSize="10sp"
-        android:textColor="#80FFFFFF" />
+        android:textSize="11sp"
+        android:textColor="@color/widget_label"
+        android:layout_marginBottom="2dp" />
 
+    <!-- 지출 금액 -->
     <TextView
         android:id="@+id/widget_expense"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
         android:text="0원"
-        android:textSize="16sp"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold" />
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:lineSpacingMultiplier="1.1" />
 
-    <View
-        android:layout_width="40dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="8dp"
-        android:background="#40FFFFFF" />
-
-    <TextView
-        android:id="@+id/widget_remaining_label"
-        android:layout_width="wrap_content"
+    <!-- 푸터: 잔액 + 월 -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="잔액"
-        android:textSize="10sp"
-        android:textColor="#80FFFFFF" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp">
 
-    <TextView
-        android:id="@+id/widget_remaining"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:text="0원"
-        android:textSize="13sp"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold" />
+        <TextView
+            android:id="@+id/widget_remaining"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="잔액 0원"
+            android:textSize="11sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/widget_month"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text=""
-        android:textSize="10sp"
-        android:textColor="#60FFFFFF" />
+        <TextView
+            android:id="@+id/widget_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="11sp"
+            android:textColor="@color/widget_month_color" />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 위젯 다크 모드 -->
+    <color name="widget_bg">#FF1E293B</color>
+    <color name="widget_app_name">#FF94A3B8</color>
+    <color name="widget_label">#FF64748B</color>
+    <color name="widget_brand">#FF2DD4BF</color>
+    <color name="widget_month_color">#FF64748B</color>
+    <color name="widget_divider">#FF334155</color>
+    <color name="widget_progress_bg">#FF334155</color>
+</resources>

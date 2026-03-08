@@ -27,13 +27,24 @@ class WidgetDataModule(reactContext: ReactApplicationContext) :
         editor.putString("updatedAt", data.getString("updatedAt") ?: "")
         editor.apply()
 
-        // 모든 위젯 업데이트 요청
-        val intent = Intent(context, BudgetWidget::class.java).apply {
-            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            val ids = AppWidgetManager.getInstance(context)
-                .getAppWidgetIds(ComponentName(context, BudgetWidget::class.java))
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+        val manager = AppWidgetManager.getInstance(context)
+
+        // Small 위젯 업데이트
+        val smallIds = manager.getAppWidgetIds(ComponentName(context, BudgetWidget::class.java))
+        if (smallIds.isNotEmpty()) {
+            context.sendBroadcast(Intent(context, BudgetWidget::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, smallIds)
+            })
         }
-        context.sendBroadcast(intent)
+
+        // Medium 위젯 업데이트
+        val mediumIds = manager.getAppWidgetIds(ComponentName(context, BudgetWidgetMedium::class.java))
+        if (mediumIds.isNotEmpty()) {
+            context.sendBroadcast(Intent(context, BudgetWidgetMedium::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, mediumIds)
+            })
+        }
     }
 }

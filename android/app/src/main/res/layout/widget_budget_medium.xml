@@ -5,9 +5,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="14dp"
+    android:gravity="center_vertical"
     android:background="@drawable/widget_background">
 
-    <!-- 헤더 -->
+    <!-- 헤더: 앱 이름 + 월 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,9 +20,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="우리집 가계부"
-            android:textSize="12sp"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold" />
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_brand" />
 
         <TextView
             android:id="@+id/widget_month"
@@ -29,19 +30,19 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textSize="11sp"
-            android:textColor="#80FFFFFF" />
+            android:textColor="@color/widget_month_color" />
 
     </LinearLayout>
 
     <!-- 구분선 -->
-    <View
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:background="#30FFFFFF" />
+        android:background="@color/widget_divider" />
 
-    <!-- 수입/지출/잔액 -->
+    <!-- 수입 / 지출 / 잔액 3열 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,17 +60,17 @@
                 android:layout_height="wrap_content"
                 android:text="수입"
                 android:textSize="10sp"
-                android:textColor="#80FFFFFF" />
+                android:textColor="@color/widget_label"
+                android:layout_marginBottom="3dp" />
 
             <TextView
                 android:id="@+id/widget_income"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
                 android:text="0원"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#FFEF4444" />
 
         </LinearLayout>
 
@@ -85,17 +86,17 @@
                 android:layout_height="wrap_content"
                 android:text="지출"
                 android:textSize="10sp"
-                android:textColor="#80FFFFFF" />
+                android:textColor="@color/widget_label"
+                android:layout_marginBottom="3dp" />
 
             <TextView
                 android:id="@+id/widget_expense"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
                 android:text="0원"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#FF3B82F6" />
 
         </LinearLayout>
 
@@ -111,31 +112,55 @@
                 android:layout_height="wrap_content"
                 android:text="잔액"
                 android:textSize="10sp"
-                android:textColor="#80FFFFFF" />
+                android:textColor="@color/widget_label"
+                android:layout_marginBottom="3dp" />
 
             <TextView
                 android:id="@+id/widget_remaining"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
                 android:text="0원"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#FF22C55E" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- 지출률 프로그레스바 -->
-    <ProgressBar
-        android:id="@+id/widget_progress"
-        style="?android:attr/progressBarStyleHorizontal"
+    <!-- 프로그레스바 영역 -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:layout_marginTop="10dp"
-        android:progressDrawable="@drawable/widget_progress_drawable"
-        android:max="100"
-        android:progress="0" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="10dp">
+
+        <ProgressBar
+            android:id="@+id/widget_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:progressDrawable="@drawable/widget_progress_drawable"
+            android:max="100"
+            android:progress="0" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="3dp">
+
+            <TextView
+                android:id="@+id/widget_progress_pct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

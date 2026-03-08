@@ -26,6 +26,7 @@
         </intent-filter>
       </activity>
 
+      <!-- Small 위젯 (2×2) -->
       <receiver
         android:name=".widget.BudgetWidget"
         android:exported="true">
@@ -35,6 +36,18 @@
         <meta-data
           android:name="android.appwidget.provider"
           android:resource="@xml/widget_budget_info" />
+      </receiver>
+
+      <!-- Medium 위젯 (4×2) -->
+      <receiver
+        android:name=".widget.BudgetWidgetMedium"
+        android:exported="true">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/widget_budget_medium_info" />
       </receiver>
     </application>
 </manifest>

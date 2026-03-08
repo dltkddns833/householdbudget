@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="splash_background_color">#0D9488</color>
+
+    <!-- 위젯 라이트 모드 -->
+    <color name="widget_bg">#FFFFFFFF</color>
+    <color name="widget_app_name">#FF64748B</color>
+    <color name="widget_label">#FF94A3B8</color>
+    <color name="widget_brand">#FF0D9488</color>
+    <color name="widget_month_color">#FF94A3B8</color>
+    <color name="widget_divider">#FFE2E8F0</color>
+    <color name="widget_progress_bg">#FFF1F5F9</color>
 </resources>
