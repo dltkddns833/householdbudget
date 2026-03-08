@@ -1,25 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
+import { MMKV } from 'react-native-mmkv';
 import { getCurrentYearMonth } from '../shared/utils/date';
 
-const createStorage = (): StateStorage => {
-  try {
-    const { MMKV } = require('react-native-mmkv');
-    const instance = new MMKV();
-    return {
-      setItem: (name: string, value: string) => instance.set(name, value),
-      getItem: (name: string) => instance.getString(name) ?? null,
-      removeItem: (name: string) => instance.delete(name),
-    };
-  } catch {
-    // Fallback: in-memory storage
-    const map = new Map<string, string>();
-    return {
-      setItem: (name: string, value: string) => { map.set(name, value); },
-      getItem: (name: string) => map.get(name) ?? null,
-      removeItem: (name: string) => { map.delete(name); },
-    };
-  }
+const mmkv = new MMKV({ id: 'ui-store' });
+
+const mmkvStorage: StateStorage = {
+  setItem: (name: string, value: string) => mmkv.set(name, value),
+  getItem: (name: string) => mmkv.getString(name) ?? null,
+  removeItem: (name: string) => mmkv.delete(name),
 };
 
 export type ThemePreference = 'system' | 'light' | 'dark';
@@ -47,7 +36,7 @@ export const useUIStore = create<UIState>()(
     }),
     {
       name: 'ui-store',
-      storage: createJSONStorage(() => createStorage()),
+      storage: createJSONStorage(() => mmkvStorage),
       partialize: (state) => ({ themePreference: state.themePreference }),
     },
   ),
