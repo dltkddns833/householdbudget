@@ -58,6 +58,23 @@ react-native-mmkv v2.12.2가 New Architecture(RN 0.84)에서 스토리지 초기
 
 ---
 
+## 제거
+
+### #11 영수증 첨부 기능 비활성화
+
+`TransactionAddScreen`에서 영수증 첨부 관련 코드 일체 제거. `ReceiptPicker` 컴포넌트 및 `ReceiptViewer`는 파일로 유지되나 화면에서 미사용 상태.
+
+제거 항목:
+- `storageService` / `transactionService` import
+- `localReceiptUri`, `receiptRemoved`, `isUploading` state
+- 저장 시 Firebase Storage 업로드 로직
+
+> 재활성화가 필요한 경우 `c558de3` 커밋 내용 참고.
+
+관련 이슈: [#11](https://github.com/dltkddns833/householdbudget/issues/11)
+
+---
+
 ## 기타
 
 - 하단 탭 버튼 Android ripple(원형 효과) 제거 — `tabBarButton`을 `TouchableOpacity`로 교체 | 커밋: 5bf112e
