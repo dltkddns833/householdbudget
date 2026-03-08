@@ -115,7 +115,6 @@ export const TransactionAddScreen: React.FC<Props> = ({
         await updateMutation.mutateAsync({
           txId: editTx!.id,
           input: getInput(),
-          oldYearMonth: editTx!.yearMonth,
         });
         if (familyId) {
           const isNewImage = !!localReceiptUri && localReceiptUri !== editTx!.receiptUrl;

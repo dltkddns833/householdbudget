@@ -78,7 +78,6 @@ export const useUpdateTransaction = () => {
     }: {
       txId: string;
       input: TransactionInput;
-      oldYearMonth?: string; // Cloud Functions이 처리하므로 더 이상 사용되지 않음
     }) => transactionService.updateTransaction(family!.id, txId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['monthlySummary'] });

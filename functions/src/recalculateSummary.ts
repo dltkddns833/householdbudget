@@ -29,7 +29,7 @@ export function calculateSummary(transactions: TxData[]): MonthlySummaryData {
     if (tx.type === 'expense') {
       totalExpense += tx.amount;
       categoryBreakdown[tx.category] = (categoryBreakdown[tx.category] || 0) + tx.amount;
-      const day = String(tx.date.toDate().getDate());
+      const day = String(tx.date.toDate().getDate()).padStart(2, '0');
       dailyTotals[day] = (dailyTotals[day] || 0) + tx.amount;
     } else {
       totalIncome += tx.amount;
