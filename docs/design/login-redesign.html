@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>로그인 화면 — 디자인 시안</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#E2E8F0;font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  padding:48px 32px;display:flex;flex-direction:column;align-items:center;gap:40px;}
+h1{font-size:20px;font-weight:800;color:#1E293B;}
+.screens{display:flex;gap:40px;justify-content:center;align-items:flex-start;flex-wrap:wrap;}
+.screen-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.screen-label{font-size:13px;font-weight:600;color:#64748B;letter-spacing:.5px;}
+
+/* 폰 프레임 */
+.phone{
+  width:375px;height:812px;
+  background:#F8FAFC;
+  border-radius:50px;overflow:hidden;
+  box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #3A3A3A,0 32px 64px rgba(0,0,0,0.4);
+  position:relative;display:flex;flex-direction:column;
+}
+.phone::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:126px;height:34px;background:#1A1A1A;border-radius:0 0 20px 20px;z-index:100;
+}
+.phone-dark{background:#0F172A;}
+
+/* 상태바 */
+.status-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 28px 6px;font-size:12px;font-weight:600;
+  position:relative;z-index:10;
+}
+.status-bar-light{color:#0F172A;}
+.status-bar-dark{color:#F8FAFC;}
+.status-bar-teal{color:#F8FAFC;}
+
+/* ── 시안 A: 라이트 모드 (현재 스타일 + 로고) ── */
+.login-a{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 32px;gap:0;
+  background:#F8FAFC;
+}
+.logo-wrap-a{
+  width:96px;height:96px;border-radius:24px;
+  background:#0D9488;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:28px;
+  box-shadow:0 8px 24px rgba(13,148,136,0.4);
+}
+.title-a{font-size:28px;font-weight:800;color:#0F172A;margin-bottom:8px;letter-spacing:-0.5px;}
+.subtitle-a{font-size:15px;color:#64748B;margin-bottom:72px;}
+.google-btn-a{
+  width:100%;height:54px;border-radius:14px;
+  background:#fff;border:1.5px solid #E2E8F0;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.google-g{font-size:20px;font-weight:700;color:#4285F4;}
+.google-text-a{font-size:16px;font-weight:600;color:#0F172A;}
+.terms-a{font-size:11px;color:#94A3B8;margin-top:20px;text-align:center;line-height:1.6;}
+
+/* ── 시안 B: 그라디언트 배경 ── */
+.login-b{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 32px;
+  background:linear-gradient(160deg,#0D9488 0%,#0F766E 50%,#134E4A 100%);
+}
+.logo-wrap-b{
+  width:100px;height:100px;border-radius:28px;
+  background:rgba(255,255,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:28px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.25);
+  border:1.5px solid rgba(255,255,255,0.3);
+  backdrop-filter:blur(10px);
+}
+.title-b{font-size:28px;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.5px;}
+.subtitle-b{font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:72px;}
+.google-btn-b{
+  width:100%;height:54px;border-radius:14px;
+  background:rgba(255,255,255,0.15);
+  border:1.5px solid rgba(255,255,255,0.4);
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  backdrop-filter:blur(8px);
+}
+.google-g-b{width:24px;height:24px;background:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:#4285F4;}
+.google-text-b{font-size:16px;font-weight:600;color:#fff;}
+.terms-b{font-size:11px;color:rgba(255,255,255,0.5);margin-top:20px;text-align:center;line-height:1.6;}
+
+/* ── 시안 C: 다크 모드 ── */
+.login-c{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px 32px;
+  background:#0F172A;
+}
+.logo-wrap-c{
+  width:96px;height:96px;border-radius:24px;
+  background:#0D9488;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:28px;
+  box-shadow:0 8px 24px rgba(13,148,136,0.5);
+}
+.title-c{font-size:28px;font-weight:800;color:#F1F5F9;margin-bottom:8px;letter-spacing:-0.5px;}
+.subtitle-c{font-size:15px;color:#64748B;margin-bottom:72px;}
+.google-btn-c{
+  width:100%;height:54px;border-radius:14px;
+  background:#1E293B;border:1.5px solid #334155;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+.google-text-c{font-size:16px;font-weight:600;color:#F1F5F9;}
+.terms-c{font-size:11px;color:#475569;margin-top:20px;text-align:center;line-height:1.6;}
+
+/* 지갑 SVG */
+.wallet-svg{width:56px;height:56px;}
+.wallet-svg-sm{width:52px;height:52px;}
+</style>
+</head>
+<body>
+
+<h1>로그인 화면 디자인 시안</h1>
+
+<div class="screens">
+
+  <!-- 시안 A: 라이트 (기존 스타일 + 실제 로고) -->
+  <div class="screen-wrap">
+    <div class="screen-label">A — 라이트 (기존 + 로고)</div>
+    <div class="phone">
+      <div class="status-bar status-bar-light" style="padding-top:14px;">
+        <span>9:41</span><span>●●●</span>
+      </div>
+      <div class="login-a">
+        <div class="logo-wrap-a">
+          <!-- 지갑 SVG -->
+          <svg class="wallet-svg" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- 지갑 몸통 -->
+            <rect x="6" y="16" width="44" height="30" rx="6" fill="white"/>
+            <!-- 카드 슬롯 (상단 튀어나온 부분) -->
+            <rect x="14" y="11" width="18" height="10" rx="3" fill="white"/>
+            <!-- 잠금 클립 -->
+            <rect x="32" y="24" width="14" height="12" rx="4" fill="#0D9488"/>
+            <!-- 클립 홀 -->
+            <circle cx="36" cy="30" r="2.5" fill="white"/>
+          </svg>
+        </div>
+        <div class="title-a">우리집 가계부</div>
+        <div class="subtitle-a">함께 관리하는 스마트한 가계부</div>
+        <div class="google-btn-a">
+          <div class="google-g">G</div>
+          <div class="google-text-a">Google로 시작하기</div>
+        </div>
+        <div class="terms-a">계속하면 서비스 이용약관 및<br>개인정보처리방침에 동의하게 됩니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시안 B: 그라디언트 배경 -->
+  <div class="screen-wrap">
+    <div class="screen-label">B — 그라디언트 배경</div>
+    <div class="phone">
+      <div class="status-bar status-bar-teal" style="padding-top:14px;background:transparent;position:relative;z-index:10;">
+        <span>9:41</span><span>●●●</span>
+      </div>
+      <div class="login-b" style="margin-top:-38px;padding-top:78px;">
+        <div class="logo-wrap-b">
+          <svg class="wallet-svg" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="16" width="44" height="30" rx="6" fill="white"/>
+            <rect x="14" y="11" width="18" height="10" rx="3" fill="white"/>
+            <rect x="32" y="24" width="14" height="12" rx="4" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="36" cy="30" r="2.5" fill="rgba(255,255,255,0.8)"/>
+          </svg>
+        </div>
+        <div class="title-b">우리집 가계부</div>
+        <div class="subtitle-b">함께 관리하는 스마트한 가계부</div>
+        <div class="google-btn-b">
+          <div class="google-g-b">G</div>
+          <div class="google-text-b">Google로 시작하기</div>
+        </div>
+        <div class="terms-b">계속하면 서비스 이용약관 및<br>개인정보처리방침에 동의하게 됩니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시안 C: 다크 모드 -->
+  <div class="screen-wrap">
+    <div class="screen-label">C — 다크 모드</div>
+    <div class="phone phone-dark">
+      <div class="status-bar status-bar-dark" style="padding-top:14px;">
+        <span>9:41</span><span>●●●</span>
+      </div>
+      <div class="login-c">
+        <div class="logo-wrap-c">
+          <svg class="wallet-svg" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="16" width="44" height="30" rx="6" fill="white"/>
+            <rect x="14" y="11" width="18" height="10" rx="3" fill="white"/>
+            <rect x="32" y="24" width="14" height="12" rx="4" fill="#0D9488"/>
+            <circle cx="36" cy="30" r="2.5" fill="white"/>
+          </svg>
+        </div>
+        <div class="title-c">우리집 가계부</div>
+        <div class="subtitle-c">함께 관리하는 스마트한 가계부</div>
+        <div class="google-btn-c">
+          <div class="google-g" style="color:#4285F4;">G</div>
+          <div class="google-text-c">Google로 시작하기</div>
+        </div>
+        <div class="terms-c">계속하면 서비스 이용약관 및<br>개인정보처리방침에 동의하게 됩니다.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="max-width:800px;background:white;border-radius:16px;padding:24px 28px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);font-size:13px;color:#334155;">
+  <strong style="color:#0F172A;font-size:14px;">구현 방식:</strong><br><br>
+  <code style="background:#F1F5F9;padding:2px 8px;border-radius:4px;">src/assets/splash_logo.png</code> 를
+  <code style="background:#F1F5F9;padding:2px 8px;border-radius:4px;">&lt;Image&gt;</code> 로 불러와 teal 배경 컨테이너 안에 배치.<br>
+  추가 패키지 없이 기존 에셋 재사용 가능.
+</div>
+
+</body>
+</html>

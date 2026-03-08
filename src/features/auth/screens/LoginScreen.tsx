@@ -5,7 +5,7 @@ import { ThemeColors } from '../../../shared/constants/colors';
 import { authService } from '../services/authService';
 import { useAuthStore } from '../../../store/authStore';
 
-const logoImage = require('../../../assets/splash_logo.png');
+const logoImage = require('../../../assets/app-icon.png');
 
 export const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -46,21 +46,27 @@ export const LoginScreen: React.FC = () => {
           onPress={handleGoogleSignIn}
           disabled={loading}
         >
-          <Text style={styles.googleIcon}>G</Text>
+          <View style={styles.googleIconCircle}>
+            <Text style={styles.googleIcon}>G</Text>
+          </View>
           <Text style={styles.googleButtonText}>
             {loading ? '로그인 중...' : 'Google로 시작하기'}
           </Text>
         </TouchableOpacity>
+
+        <Text style={styles.terms}>
+          계속하면 서비스 이용약관 및{'\n'}개인정보처리방침에 동의하게 됩니다.
+        </Text>
       </View>
     </View>
   );
 };
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (_colors: ThemeColors) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.background,
+      backgroundColor: '#0D9488',
     },
     content: {
       flex: 1,
@@ -73,62 +79,67 @@ const createStyles = (colors: ThemeColors) =>
       marginBottom: 64,
     },
     logoIconWrap: {
-      width: 100,
-      height: 100,
-      borderRadius: 24,
-      backgroundColor: '#0D9488',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 24,
-      shadowColor: '#0D9488',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
-      elevation: 8,
+      marginBottom: 28,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 10,
     },
     logoIcon: {
-      width: 60,
-      height: 60,
+      width: 100,
+      height: 100,
+      borderRadius: 22,
     },
     title: {
       fontSize: 28,
       fontWeight: '800',
-      color: colors.text,
+      color: '#FFFFFF',
       marginBottom: 8,
     },
     subtitle: {
-      fontSize: 16,
-      color: colors.textSecondary,
+      fontSize: 15,
+      color: 'rgba(255,255,255,0.75)',
     },
     googleButton: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.surface,
+      backgroundColor: 'rgba(255,255,255,0.15)',
       paddingHorizontal: 24,
       paddingVertical: 14,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: 14,
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.4)',
       width: '100%',
       justifyContent: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 3,
-      elevation: 2,
     },
     buttonDisabled: {
       opacity: 0.6,
     },
+    googleIconCircle: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: '#FFFFFF',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
     googleIcon: {
-      fontSize: 20,
+      fontSize: 15,
       fontWeight: '700',
       color: '#4285F4',
-      marginRight: 12,
     },
     googleButtonText: {
       fontSize: 16,
       fontWeight: '600',
-      color: colors.text,
+      color: '#FFFFFF',
+    },
+    terms: {
+      fontSize: 11,
+      color: 'rgba(255,255,255,0.5)',
+      textAlign: 'center',
+      marginTop: 20,
+      lineHeight: 18,
     },
   });
