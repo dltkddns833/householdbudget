@@ -54,3 +54,19 @@
 관련 이슈: [#26](https://github.com/dltkddns833/householdbudget/issues/26) | 커밋: 37034b6
 
 ---
+
+### #28 홈 화면 위젯 (Android)
+
+Android 홈 화면에서 이번달 가계부 현황을 바로 확인.
+
+- Small(2×2): 이번달 지출·잔액 표시
+- Medium(4×2): 수입·지출·잔액 + 지출률 프로그래스바
+- `WidgetDataModule` — JS↔Native 브릿지, SharedPreferences로 데이터 저장
+- 잔액 음수 시 빨강, 지출률 80% 이상 주황 / 100% 이상 빨강 색상 코딩
+- `useWidgetSync` 훅으로 홈 화면 진입 시 자동 동기화
+
+> iOS WidgetKit 구현 미완료. Widget Extension 타겟 추가 및 SwiftUI 구현 필요.
+
+관련 이슈: [#28](https://github.com/dltkddns833/householdbudget/issues/28) | 커밋: 0590733
+
+---
