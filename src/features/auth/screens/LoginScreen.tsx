@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import { authService } from '../services/authService';
 import { useAuthStore } from '../../../store/authStore';
+
+const logoImage = require('../../../assets/splash_logo.png');
 
 export const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -32,7 +34,9 @@ export const LoginScreen: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          <Text style={styles.logoEmoji}>💰</Text>
+          <View style={styles.logoIconWrap}>
+            <Image source={logoImage} style={styles.logoIcon} resizeMode="contain" />
+          </View>
           <Text style={styles.title}>우리집 가계부</Text>
           <Text style={styles.subtitle}>함께 관리하는 스마트한 가계부</Text>
         </View>
@@ -68,9 +72,23 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       marginBottom: 64,
     },
-    logoEmoji: {
-      fontSize: 72,
-      marginBottom: 16,
+    logoIconWrap: {
+      width: 100,
+      height: 100,
+      borderRadius: 24,
+      backgroundColor: '#0D9488',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 24,
+      shadowColor: '#0D9488',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 12,
+      elevation: 8,
+    },
+    logoIcon: {
+      width: 60,
+      height: 60,
     },
     title: {
       fontSize: 28,

@@ -158,8 +158,9 @@ const createStyles = (colors: ThemeColors) =>
     },
     content: {
       flex: 1,
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
       paddingHorizontal: 32,
+      paddingTop: 80,
     },
     backButton: {
       marginBottom: 24,

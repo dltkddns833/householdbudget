@@ -166,11 +166,9 @@ export const authService = {
     }
 
     const familyRef = firestore().collection('families').doc(inviteData.familyId);
-    const familyDoc = await familyRef.get();
-    if (!familyDoc.exists) throw new Error('가족 정보를 찾을 수 없습니다.');
 
-    const familyData = familyDoc.data()!;
-
+    // 트랜잭션: 가족 문서는 사전에 읽지 않음 (멤버 아니라 read 권한 없음)
+    // Rules의 update 조건(신규 멤버 self-add)으로 허용됨
     await firestore().runTransaction(async (tx) => {
       tx.update(familyRef, {
         members: firestore.FieldValue.arrayUnion(uid),
@@ -179,10 +177,8 @@ export const authService = {
       tx.set(firestore().collection('users').doc(uid), { familyId: inviteData.familyId }, { merge: true });
     });
 
-    return {
-      id: inviteData.familyId,
-      members: [...familyData.members, uid],
-      memberNames: { ...familyData.memberNames, [uid]: userName },
-    };
+    // 트랜잭션 완료 후 조회 (이제 멤버라 read 가능)
+    const familyDoc = await familyRef.get();
+    return { id: inviteData.familyId, ...familyDoc.data() } as Family;
   },
 };
