@@ -69,14 +69,18 @@ export const FamilyInfoScreen: React.FC<Props> = ({ navigation }) => {
         {
           text: '재생성',
           onPress: async () => {
-            const newCode = await authService.regenerateInviteCode(
-              family!.id,
-              user!.uid,
-              inviteCode?.code,
-            );
-            setInviteCode(newCode);
-            Clipboard.setString(newCode.code);
-            Alert.alert('완료', '새 초대 코드가 생성되어 복사되었습니다.');
+            try {
+              const newCode = await authService.regenerateInviteCode(
+                family!.id,
+                user!.uid,
+                inviteCode?.code,
+              );
+              setInviteCode(newCode);
+              Clipboard.setString(newCode.code);
+              Alert.alert('완료', '새 초대 코드가 생성되어 복사되었습니다.');
+            } catch (e: any) {
+              Alert.alert('오류', e.message);
+            }
           },
         },
       ],
@@ -84,10 +88,18 @@ export const FamilyInfoScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleCreateCode = async () => {
-    const newCode = await authService.createInviteCode(family!.id, user!.uid);
-    setInviteCode(newCode);
-    Clipboard.setString(newCode.code);
-    Alert.alert('완료', '초대 코드가 생성되어 복사되었습니다.');
+    if (inviteLoading) return;
+    try {
+      setInviteLoading(true);
+      const newCode = await authService.createInviteCode(family!.id, user!.uid);
+      setInviteCode(newCode);
+      Clipboard.setString(newCode.code);
+      Alert.alert('완료', '초대 코드가 생성되어 복사되었습니다.');
+    } catch (e: any) {
+      Alert.alert('오류', e.message);
+    } finally {
+      setInviteLoading(false);
+    }
   };
 
   const handleLeaveFamily = () => {
