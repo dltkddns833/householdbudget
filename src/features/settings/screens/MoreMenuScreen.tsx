@@ -67,12 +67,6 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       subtitle: '목표 금액 달성률 확인',
       onPress: () => navigation.navigate('GoalSetting'),
     },
-    {
-      icon: 'people',
-      label: '가족 정보',
-      subtitle: familyMemberPreview || undefined,
-      onPress: () => navigation.navigate('FamilyInfo'),
-    },
   ];
 
   return (
@@ -106,6 +100,20 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.profileEmail}>Google 연동</Text>
           </View>
         </View>
+        <View style={styles.profileDivider} />
+        <TouchableOpacity
+          style={styles.familyInfoRow}
+          onPress={() => navigation.navigate('FamilyInfo')}
+        >
+          <Icon name="people" size={20} color={colors.textSecondary} />
+          <View style={styles.familyInfoText}>
+            <Text style={styles.familyInfoLabel}>가족 정보</Text>
+            {familyMemberPreview ? (
+              <Text style={styles.familyInfoSub}>{familyMemberPreview}</Text>
+            ) : null}
+          </View>
+          <Icon name="chevron-right" size={20} color={colors.textTertiary} />
+        </TouchableOpacity>
       </View>
 
       {/* Menu Items */}
@@ -203,6 +211,31 @@ const createStyles = (colors: ThemeColors) =>
     profileInfo: {
       marginLeft: 14,
       flex: 1,
+    },
+    profileDivider: {
+      height: 1,
+      backgroundColor: colors.borderLight,
+      marginHorizontal: 16,
+    },
+    familyInfoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 13,
+      gap: 12,
+    },
+    familyInfoText: {
+      flex: 1,
+    },
+    familyInfoLabel: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    familyInfoSub: {
+      fontSize: 12,
+      color: colors.textTertiary,
+      marginTop: 1,
     },
     profileName: {
       fontSize: 17,
