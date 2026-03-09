@@ -145,7 +145,7 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
         ))}
       </View>
 
-      <Text style={styles.version}>v1.5.0</Text>
+      <Text style={styles.version}>v1.5.1</Text>
     </ScrollView>
   );
 };
