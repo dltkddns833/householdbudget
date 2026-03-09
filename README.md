@@ -12,11 +12,10 @@
 
 ## 스크린샷
 
-<p align="center">
+<p align="left">
   <img src="docs/design/screenshots/01_login.png" width="20%" />
   <img src="docs/design/screenshots/02_home.png" width="20%" />
   <img src="docs/design/screenshots/03_transactions.png" width="20%" />
-  <img src="docs/design/screenshots/04_add_modal.png" width="20%" />
   <img src="docs/design/screenshots/05_stats.png" width="20%" />
 </p>
 
