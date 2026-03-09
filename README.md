@@ -10,18 +10,28 @@
 - **가족 협업** - 초대 코드 기반 가족 그룹, 멤버별 데이터 관리
 - **자동 복사** - 새 달 진입 시 이전 월 자산 데이터 자동 이월
 
+## 스크린샷
+
+<p align="center">
+  <img src="docs/design/screenshots/01_login.png" width="20%" />
+  <img src="docs/design/screenshots/02_home.png" width="20%" />
+  <img src="docs/design/screenshots/03_transactions.png" width="20%" />
+  <img src="docs/design/screenshots/04_add_modal.png" width="20%" />
+  <img src="docs/design/screenshots/05_stats.png" width="20%" />
+</p>
+
 ## 기술 스택
 
-| 영역 | 기술 |
-|------|------|
-| Framework | React Native 0.84, React 19 |
-| Language | TypeScript 5.8 |
-| Navigation | React Navigation 7 |
-| State | Zustand, React Query |
-| Backend | Firebase Auth, Firestore |
-| Auth | Google Sign-In |
-| Charts | react-native-chart-kit |
-| Forms | React Hook Form + Zod |
+| 영역       | 기술                        |
+| ---------- | --------------------------- |
+| Framework  | React Native 0.84, React 19 |
+| Language   | TypeScript 5.8              |
+| Navigation | React Navigation 7          |
+| State      | Zustand, React Query        |
+| Backend    | Firebase Auth, Firestore    |
+| Auth       | Google Sign-In              |
+| Charts     | react-native-chart-kit      |
+| Forms      | React Hook Form + Zod       |
 
 ## 프로젝트 구조
 
