@@ -12,7 +12,7 @@ import {
   Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import {
@@ -169,6 +169,18 @@ export const TransactionAddScreen: React.FC<Props> = ({
         },
       },
     ]);
+  };
+
+  const openAndroidDatePicker = () => {
+    DateTimePickerAndroid.open({
+      value: date,
+      mode: 'date',
+      onChange: (event, selectedDate) => {
+        if (event.type === 'set' && selectedDate) {
+          setDate(selectedDate);
+        }
+      },
+    });
   };
 
   const isLoading = addMutation.isPending || updateMutation.isPending;
@@ -349,42 +361,51 @@ export const TransactionAddScreen: React.FC<Props> = ({
         <Text style={styles.sectionLabel}>날짜</Text>
         <TouchableOpacity
           style={styles.input}
-          onPress={() => { setTempDate(date); setShowDatePicker(true); }}
+          onPress={() => {
+            if (Platform.OS === 'android') {
+              openAndroidDatePicker();
+            } else {
+              setTempDate(date);
+              setShowDatePicker(true);
+            }
+          }}
         >
           <Text style={styles.dateText}>{formatDateFull(date)}</Text>
         </TouchableOpacity>
-        <Modal
-          visible={showDatePicker}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowDatePicker(false)}
-        >
-          <View style={styles.datePickerOverlay}>
-            <View style={styles.datePickerContainer}>
-              <View style={styles.datePickerHeader}>
-                <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                  <Text style={styles.datePickerCancel}>취소</Text>
-                </TouchableOpacity>
-                <Text style={styles.datePickerTitle}>날짜 선택</Text>
-                <TouchableOpacity onPress={() => {
-                  setDate(tempDate);
-                  setShowDatePicker(false);
-                }}>
-                  <Text style={styles.datePickerConfirm}>확인</Text>
-                </TouchableOpacity>
+        {Platform.OS === 'ios' && (
+          <Modal
+            visible={showDatePicker}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setShowDatePicker(false)}
+          >
+            <View style={styles.datePickerOverlay}>
+              <View style={styles.datePickerContainer}>
+                <View style={styles.datePickerHeader}>
+                  <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                    <Text style={styles.datePickerCancel}>취소</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.datePickerTitle}>날짜 선택</Text>
+                  <TouchableOpacity onPress={() => {
+                    setDate(tempDate);
+                    setShowDatePicker(false);
+                  }}>
+                    <Text style={styles.datePickerConfirm}>확인</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={tempDate}
+                  mode="date"
+                  display="spinner"
+                  locale="ko-KR"
+                  onChange={(_, selected) => {
+                    if (selected) setTempDate(selected);
+                  }}
+                />
               </View>
-              <DateTimePicker
-                value={tempDate}
-                mode="date"
-                display="spinner"
-                locale="ko-KR"
-                onChange={(_, selected) => {
-                  if (selected) setTempDate(selected);
-                }}
-              />
             </View>
-          </View>
-        </Modal>
+          </Modal>
+        )}
 
         {/* Memo */}
         <Text style={styles.sectionLabel}>비고</Text>
