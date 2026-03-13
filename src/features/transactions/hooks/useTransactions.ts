@@ -1,9 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Transaction, TransactionInput, MonthlySummary } from '../../../shared/types';
 import { transactionService } from '../services/transactionService';
 import { useAuthStore } from '../../../store/authStore';
 import { useUIStore } from '../../../store/uiStore';
+
+function computeSummary(month: string, transactions: Transaction[]): MonthlySummary {
+  let totalExpense = 0;
+  let totalIncome = 0;
+  const categoryBreakdown: Record<string, number> = {};
+  const dailyTotals: Record<string, number> = {};
+
+  for (const tx of transactions) {
+    if (tx.type === 'expense') {
+      totalExpense += tx.amount;
+      categoryBreakdown[tx.category] = (categoryBreakdown[tx.category] || 0) + tx.amount;
+      const day = String(tx.date?.toDate?.()?.getDate?.() ?? 0).padStart(2, '0');
+      dailyTotals[day] = (dailyTotals[day] || 0) + tx.amount;
+    } else if (tx.type === 'income') {
+      totalIncome += tx.amount;
+    }
+  }
+
+  return {
+    id: month,
+    totalExpense,
+    totalIncome,
+    remaining: totalIncome - totalExpense,
+    categoryBreakdown,
+    dailyTotals,
+  };
+}
 
 export const useTransactions = (yearMonth?: string) => {
   const { user, family } = useAuthStore();
@@ -39,18 +66,19 @@ export const useTransactions = (yearMonth?: string) => {
     return () => unsubscribe();
   }, [familyId, month]);
 
-  // Monthly summary query
-  const summaryQuery = useQuery<MonthlySummary | null>({
-    queryKey: ['monthlySummary', familyId, month],
-    queryFn: () => transactionService.getMonthlySummary(familyId!, month),
-    enabled: !!familyId,
-  });
+  // Client-side summary computed from real-time transactions
+  const summary = useMemo<MonthlySummary | null>(() => {
+    if (!isListening) return null;
+    return computeSummary(month, realtimeTransactions);
+  }, [month, realtimeTransactions, isListening]);
+
+  const refetchSummary = useCallback(() => {}, []);
 
   return {
     transactions: realtimeTransactions,
-    summary: summaryQuery.data ?? null,
+    summary,
     isLoading: !isListening,
-    refetchSummary: summaryQuery.refetch,
+    refetchSummary,
   };
 };
 
