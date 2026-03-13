@@ -44,18 +44,6 @@ export const MoreMenuScreen: React.FC<Props> = ({ navigation }) => {
       onPress: () => navigation.navigate('Assets'),
     },
     {
-      icon: 'savings',
-      label: '예산 설정',
-      subtitle: '카테고리별 월 예산 관리',
-      onPress: () => navigation.navigate('BudgetSetting'),
-    },
-    {
-      icon: 'repeat',
-      label: '정기 지출 관리',
-      subtitle: '월세, 구독 등 고정비 등록',
-      onPress: () => navigation.navigate('RecurringList'),
-    },
-    {
       icon: 'trending-up',
       label: '저축률 목표 설정',
       subtitle: family?.savingRateGoal ? `목표: ${family.savingRateGoal}%` : '목표 없음',

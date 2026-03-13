@@ -21,8 +21,6 @@ import { useAuthStore } from '../../../store/authStore';
 import { MemberExpenseSummary } from '../../../shared/types';
 import { formatYearMonth } from '../../../shared/utils/date';
 import { formatCurrency } from '../../../shared/utils/currency';
-import { useBudget } from '../../budget/hooks/useBudget';
-import { usePendingRecurring } from '../../recurring/hooks/useRecurring';
 import { useSavingRate } from '../hooks/useSavingRate';
 import { SavingRateCard } from '../components/SavingRateCard';
 import { useGoalProgress } from '../../goals/hooks/useGoals';
@@ -43,8 +41,6 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const overviewQuery = useCurrentOverview();
   const rangeQuery = useOverviewRange(7);
   const { summary, transactions } = useTransactions(currentMonth);
-  const budgetQuery = useBudget(currentMonth);
-  const { data: pendingRecurring = [] } = usePendingRecurring(currentMonth);
   const savingRateSummary = useSavingRate(currentMonth);
   const goalProgress = useGoalProgress();
   const overview = overviewQuery.data;
@@ -53,11 +49,6 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
 
   useWidgetSync(currentMonth, summary);
-
-  const totalBudget = useMemo(() => {
-    const cats = budgetQuery.data?.categories ?? {};
-    return Object.values(cats).reduce((sum, v) => sum + v, 0);
-  }, [budgetQuery.data]);
 
   // 멤버별 지출 요약 (가족 멤버 2명 이상일 때만)
   const memberExpenses = useMemo((): MemberExpenseSummary[] => {
@@ -83,13 +74,6 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   }, [family, transactions, summary?.totalExpense]);
 
   const totalExpense = summary?.totalExpense ?? overview?.totalExpense ?? 0;
-  const budgetRate = totalBudget > 0 ? Math.min((totalExpense / totalBudget) * 100, 100) : 0;
-  const budgetRateColor =
-    budgetRate >= 100
-      ? '#EF4444'
-      : budgetRate >= 80
-      ? '#F59E0B'
-      : colors.primary;
 
   const validRange = overviewRange.filter(
     o => typeof o.realAsset === 'number' && !isNaN(o.realAsset),
@@ -126,22 +110,6 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>우리집 가계부</Text>
       </View>
-
-      {pendingRecurring.length > 0 && (
-        <TouchableOpacity
-          style={styles.recurringBanner}
-          onPress={() => navigation.navigate('More', { screen: 'RecurringList' })}
-          activeOpacity={0.8}
-        >
-          <Icon name="notifications-active" size={18} color="#D97706" />
-          <Text style={styles.recurringBannerText}>
-            {pendingRecurring.length === 1
-              ? `${pendingRecurring[0].title} 고정비가 반영 안 됐어요`
-              : `${pendingRecurring[0].title} 등 ${pendingRecurring.length}건의 고정비가 반영 안 됐어요`}
-          </Text>
-          <Text style={styles.recurringBannerAction}>확인하기</Text>
-        </TouchableOpacity>
-      )}
 
       <MonthSelector yearMonth={currentMonth} onChangeMonth={setCurrentMonth} />
 
@@ -205,21 +173,6 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
               전월대비 {overview.expenseChange >= 0 ? '+' : ''}
               {overview.expenseChange.toFixed(1)}%
             </Text>
-          )}
-          {totalBudget > 0 && (
-            <View style={styles.budgetBarWrapper}>
-              <View style={styles.budgetBarBg}>
-                <View
-                  style={[
-                    styles.budgetBarFill,
-                    { width: `${budgetRate}%`, backgroundColor: budgetRateColor },
-                  ]}
-                />
-              </View>
-              <Text style={[styles.budgetBarLabel, { color: budgetRateColor }]}>
-                {budgetRate.toFixed(0)}%
-              </Text>
-            </View>
           )}
         </Card>
         <Card style={styles.metricCard}>
@@ -347,25 +300,6 @@ const createStyles = (colors: ThemeColors, isDark: boolean) =>
       fontWeight: '800',
       color: colors.text,
     },
-    recurringBanner: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: isDark ? '#451A03' : '#FFFBEB',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      gap: 8,
-    },
-    recurringBannerText: {
-      flex: 1,
-      fontSize: 13,
-      fontWeight: '500',
-      color: '#92400E',
-    },
-    recurringBannerAction: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: '#D97706',
-    },
     heroCard: {
       backgroundColor: colors.surface,
       marginTop: 4,
@@ -403,29 +337,6 @@ const createStyles = (colors: ThemeColors, isDark: boolean) =>
     expenseCaption: {
       fontSize: 12,
       marginTop: 4,
-    },
-    budgetBarWrapper: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: 8,
-      gap: 6,
-    },
-    budgetBarBg: {
-      flex: 1,
-      height: 6,
-      backgroundColor: colors.surfaceSecondary,
-      borderRadius: 3,
-      overflow: 'hidden',
-    },
-    budgetBarFill: {
-      height: '100%',
-      borderRadius: 3,
-    },
-    budgetBarLabel: {
-      fontSize: 11,
-      fontWeight: '600',
-      width: 32,
-      textAlign: 'right',
     },
     metricsRow: {
       flexDirection: 'row',

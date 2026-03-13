@@ -12,7 +12,6 @@ import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import { MonthlyReportCard } from '../components/MonthlyReportCard';
 import { useTransactions } from '../../transactions/hooks/useTransactions';
-import { useBudgetProgress } from '../../budget/hooks/useBudget';
 import { useInsights } from '../hooks/useInsights';
 import { useUIStore } from '../../../store/uiStore';
 import { formatYearMonth } from '../../../shared/utils/date';
@@ -25,7 +24,6 @@ interface Props {
 export const MonthlyReportScreen: React.FC<Props> = ({ navigation }) => {
   const { currentMonth } = useUIStore();
   const { summary } = useTransactions(currentMonth);
-  const budgetProgress = useBudgetProgress(currentMonth);
   const insights = useInsights(currentMonth);
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -95,7 +93,6 @@ export const MonthlyReportScreen: React.FC<Props> = ({ navigation }) => {
         <MonthlyReportCard
           yearMonth={currentMonth}
           summary={summary}
-          budgetProgress={budgetProgress}
           insights={insights}
         />
 

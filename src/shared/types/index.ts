@@ -129,19 +129,6 @@ export interface InsightMessage {
   message: string;
 }
 
-export interface RecurringTransaction {
-  id: string;
-  title: string;
-  amount: number;
-  category: string;
-  dayOfMonth: number;
-  type: 'expense' | 'income';
-  isActive: boolean;
-  createdAt: Date;
-  createdBy: string;
-  lastAppliedYearMonth?: string;
-}
-
 export interface TransactionFilter {
   query?: string;
   category?: string;
@@ -152,17 +139,8 @@ export interface TransactionFilter {
   dateTo?: string;   // "YYYY-MM-DD"
 }
 
-export interface MonthlyBudget {
-  yearMonth: string;
-  categories: Record<string, number>; // categoryKey -> 예산 금액
-  updatedAt: Date;
-  updatedBy: string;
-}
-
 export interface NotificationSettings {
-  budgetAlert: boolean;
-  recurringAlert: boolean;
-  monthlySetup: boolean;
+  [key: string]: boolean;
 }
 
 export interface UserProfile {
@@ -202,18 +180,6 @@ export interface MemberExpenseSummary {
   amount: number;
   percentage: number;
 }
-
-export interface CategoryBudgetProgress {
-  categoryKey: string;
-  label: string;
-  color: string;
-  icon: string;
-  budgeted: number;   // 설정 예산 (0이면 미설정)
-  spent: number;      // 실제 지출
-  rate: number;       // spent / budgeted * 100 (미설정 시 -1)
-  status: 'normal' | 'warning' | 'over' | 'unset';
-}
-
 
 export interface WidgetData {
   yearMonth: string;

@@ -2,11 +2,7 @@ import messaging from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
 import { NotificationSettings } from '../../../shared/types';
 
-const DEFAULT_SETTINGS: NotificationSettings = {
-  budgetAlert: true,
-  recurringAlert: true,
-  monthlySetup: true,
-};
+const DEFAULT_SETTINGS: NotificationSettings = {};
 
 const usersCol = () => firestore().collection('users');
 

@@ -4,20 +4,18 @@ import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
 import { formatCurrency } from '../../../shared/utils/currency';
 import { formatYearMonth } from '../../../shared/utils/date';
-import { MonthlySummary, CategoryBudgetProgress, InsightMessage } from '../../../shared/types';
+import { MonthlySummary, InsightMessage } from '../../../shared/types';
 import { getCategoryByKey } from '../../../shared/constants/categories';
 
 interface Props {
   yearMonth: string;
   summary: MonthlySummary;
-  budgetProgress: CategoryBudgetProgress[];
   insights: InsightMessage[];
 }
 
 export const MonthlyReportCard: React.FC<Props> = ({
   yearMonth,
   summary,
-  budgetProgress,
   insights,
 }) => {
   const { colors } = useTheme();
@@ -43,11 +41,6 @@ export const MonthlyReportCard: React.FC<Props> = ({
             : 0,
       }));
   }, [summary]);
-
-  const totalBudget = budgetProgress.reduce((s, b) => s + b.budgeted, 0);
-  const totalSpent = budgetProgress.reduce((s, b) => s + b.spent, 0);
-  const budgetRate =
-    totalBudget > 0 ? Math.min(Math.round((totalSpent / totalBudget) * 100), 100) : 0;
 
   const firstInsight = insights.find(ins =>
     ['saving', 'warning', 'info', 'achievement'].includes(ins.type),
@@ -139,30 +132,6 @@ export const MonthlyReportCard: React.FC<Props> = ({
               <Text style={styles.catPct}>{item.pct}%</Text>
             </View>
           ))}
-        </View>
-      )}
-
-      {/* 예산 달성률 */}
-      {totalBudget > 0 && (
-        <View style={styles.budgetRow}>
-          <Text style={styles.budgetLabel}>예산 달성률</Text>
-          <View style={styles.budgetBarBg}>
-            <View
-              style={[
-                styles.budgetBarFill,
-                {
-                  width: `${budgetRate}%`,
-                  backgroundColor:
-                    budgetRate >= 100
-                      ? '#EF4444'
-                      : budgetRate >= 80
-                      ? '#F59E0B'
-                      : colors.primary,
-                },
-              ]}
-            />
-          </View>
-          <Text style={styles.budgetPct}>{budgetRate}%</Text>
         </View>
       )}
 

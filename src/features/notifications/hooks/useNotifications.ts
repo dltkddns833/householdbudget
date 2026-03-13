@@ -18,15 +18,7 @@ const handleNotificationNavigation = (data?: Record<string, string>) => {
   if (!_navigationRef || !data?.type) return;
 
   switch (data.type) {
-    case 'budget':
-      _navigationRef.navigate('Stats', { screen: 'StatsMain' });
-      break;
-    case 'recurring':
-      _navigationRef.navigate('More', { screen: 'RecurringList' });
-      break;
-    case 'monthly_setup':
-      _navigationRef.navigate('More', { screen: 'BudgetSetting' });
-      break;
+    // no-op: budget/recurring notification types removed
   }
 };
 

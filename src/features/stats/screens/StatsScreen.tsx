@@ -19,8 +19,7 @@ import { useOverviewRange } from '../../home/hooks/useOverview';
 import { useUIStore } from '../../../store/uiStore';
 import { useAuthStore } from '../../../store/authStore';
 import { MemberExpenseSummary } from '../../../shared/types';
-import { formatCurrency, formatCurrencyShort } from '../../../shared/utils/currency';
-import { useBudgetProgress } from '../../budget/hooks/useBudget';
+import { formatCurrency } from '../../../shared/utils/currency';
 import { useInsights } from '../hooks/useInsights';
 import { InsightCard } from '../components/InsightCard';
 import { YearlyStatsView } from '../components/YearlyStatsView';
@@ -39,7 +38,6 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
   const { family } = useAuthStore();
   const { summary, transactions } = useTransactions(currentMonth);
   const rangeQuery = useOverviewRange(6);
-  const budgetProgress = useBudgetProgress(currentMonth);
   const insights = useInsights(currentMonth);
   const [activeTab, setActiveTab] = useState<'monthly' | 'yearly'>('monthly');
   const [selectedYear, setSelectedYear] = useState(dayjs().year());
@@ -192,16 +190,7 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         {/* Ranking list */}
-        {categoryRanking.map(item => {
-          const bp = budgetProgress.find(b => b.categoryKey === item.key);
-          const budgetColor =
-            bp?.status === 'over'
-              ? '#EF4444'
-              : bp?.status === 'warning'
-              ? '#F59E0B'
-              : item.category?.color || colors.textTertiary;
-
-          return (
+        {categoryRanking.map(item => (
             <TouchableOpacity
               key={item.key}
               style={styles.rankingRow}
@@ -223,7 +212,6 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
               </View>
               <View style={styles.rankingRight}>
                 <View style={styles.rankBarsColumn}>
-                  {/* 지출 비율 바 */}
                   <View style={styles.rankBarContainer}>
                     <View
                       style={[
@@ -236,39 +224,18 @@ export const StatsScreen: React.FC<Props> = ({ navigation }) => {
                       ]}
                     />
                   </View>
-                  {/* 예산 달성률 바 */}
-                  {bp && bp.budgeted > 0 && (
-                    <View style={styles.rankBarContainer}>
-                      <View
-                        style={[
-                          styles.rankBar,
-                          {
-                            width: `${Math.min(bp.rate, 100)}%`,
-                            backgroundColor: budgetColor,
-                            opacity: 0.7,
-                          },
-                        ]}
-                      />
-                    </View>
-                  )}
                 </View>
                 <View style={styles.rankAmountColumn}>
                   <Text style={styles.rankAmount}>
                     {formatCurrency(item.amount)}
                   </Text>
-                  {bp && bp.budgeted > 0 && (
-                    <Text style={[styles.rankBudgetText, { color: budgetColor }]}>
-                      예산 {formatCurrencyShort(bp.budgeted)} 중 {bp.rate.toFixed(0)}%
-                    </Text>
-                  )}
                 </View>
                 <Text style={styles.rankPercent}>
                   {(item.percentage || 0).toFixed(1)}%
                 </Text>
               </View>
             </TouchableOpacity>
-          );
-        })}
+        ))}
       </Card>
 
       {/* 멤버별 지출 breakdown */}

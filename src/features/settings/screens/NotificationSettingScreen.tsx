@@ -21,11 +21,7 @@ interface Props {
   navigation: any;
 }
 
-const DEFAULT_SETTINGS: NotificationSettings = {
-  budgetAlert: true,
-  recurringAlert: true,
-  monthlySetup: true,
-};
+const DEFAULT_SETTINGS: NotificationSettings = {};
 
 export const NotificationSettingScreen: React.FC<Props> = ({ navigation }) => {
   const { colors } = useTheme();
@@ -71,23 +67,7 @@ export const NotificationSettingScreen: React.FC<Props> = ({ navigation }) => {
     Linking.openSettings();
   };
 
-  const ITEMS: { key: keyof NotificationSettings; label: string; subtitle: string }[] = [
-    {
-      key: 'budgetAlert',
-      label: '예산 초과 알림',
-      subtitle: '카테고리 예산 80% 초과 시',
-    },
-    {
-      key: 'recurringAlert',
-      label: '고정비 납부일 알림',
-      subtitle: '납부일 당일 오전 9시',
-    },
-    {
-      key: 'monthlySetup',
-      label: '월 초 예산 설정 안내',
-      subtitle: '매월 1일, 예산 미설정 시',
-    },
-  ];
+  const ITEMS: { key: keyof NotificationSettings; label: string; subtitle: string }[] = [];
 
   return (
     <View style={styles.container}>

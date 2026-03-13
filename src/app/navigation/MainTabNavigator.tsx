@@ -24,9 +24,6 @@ import { AssetScreen } from '../../features/assets/screens/AssetScreen';
 import { AssetEditScreen } from '../../features/assets/screens/AssetEditScreen';
 import { AssetAddScreen } from '../../features/assets/screens/AssetAddScreen';
 import { AssetTrendScreen } from '../../features/assets/screens/AssetTrendScreen';
-import { BudgetSettingScreen } from '../../features/budget/screens/BudgetSettingScreen';
-import { RecurringListScreen } from '../../features/recurring/screens/RecurringListScreen';
-import { RecurringFormScreen } from '../../features/recurring/screens/RecurringFormScreen';
 import { SavingRateGoalScreen } from '../../features/settings/screens/SavingRateGoalScreen';
 import { GoalSettingScreen } from '../../features/goals/screens/GoalSettingScreen';
 import { NotificationSettingScreen } from '../../features/settings/screens/NotificationSettingScreen';
@@ -77,13 +74,10 @@ const StatsStackScreen = () => (
 const MoreStackScreen = () => (
   <MoreStack.Navigator screenOptions={{ headerShown: false }}>
     <MoreStack.Screen name="MoreMenu" component={MoreMenuScreen} />
-    <MoreStack.Screen name="BudgetSetting" component={BudgetSettingScreen} />
     <MoreStack.Screen name="Assets" component={AssetScreen} />
     <MoreStack.Screen name="AssetEdit" component={AssetEditScreen} />
     <MoreStack.Screen name="AssetAdd" component={AssetAddScreen} />
     <MoreStack.Screen name="AssetTrend" component={AssetTrendScreen} />
-    <MoreStack.Screen name="RecurringList" component={RecurringListScreen} />
-    <MoreStack.Screen name="RecurringForm" component={RecurringFormScreen} />
     <MoreStack.Screen name="SavingRateGoal" component={SavingRateGoalScreen} />
     <MoreStack.Screen name="GoalSetting" component={GoalSettingScreen} />
     <MoreStack.Screen name="NotificationSetting" component={NotificationSettingScreen} />
