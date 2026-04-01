@@ -1,0 +1,73 @@
+name: Android Firebase Distribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: '릴리즈 노트 (비워두면 기본값 사용)'
+        required: false
+        type: string
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      # Gradle 파일의 하드코딩된 nvm 경로 대응 — 심링크 생성
+      - name: Create nvm node symlink for Gradle
+        run: |
+          mkdir -p "$HOME/.nvm/versions/node/v22.22.0/bin"
+          ln -s "$(which node)" "$HOME/.nvm/versions/node/v22.22.0/bin/node"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Write google-services.json
+        run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
+
+      - name: Setup Firebase credentials
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > /tmp/firebase-sa.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties', 'android/**/*.gradle') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Build & Distribute
+        working-directory: android
+        run: |
+          EXTRA_ARGS=""
+          if [ -n "${{ github.event.inputs.release_notes }}" ]; then
+            EXTRA_ARGS="-PfirebaseAppDistributionReleaseNotes=${{ github.event.inputs.release_notes }}"
+          fi
+          ./gradlew assembleRelease appDistributionUploadRelease --no-daemon $EXTRA_ARGS
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: app-release
+          path: android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 14
