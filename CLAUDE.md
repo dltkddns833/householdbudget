@@ -114,9 +114,19 @@ RN Gradle Plugin이 AGP 8.12.0을 번들함. Android Studio 호환성을 위해 
 ```bash
 cd android && ./gradlew assembleDebug     # Debug APK
 cd android && ./gradlew assembleRelease   # Release APK
-pnpm run distribute:android               # Firebase App Distribution 배포
+pnpm run distribute:android               # Firebase App Distribution 배포 (로컬)
 
 # APK 위치
 # Debug:   android/app/build/outputs/apk/debug/app-debug.apk
 # Release: android/app/build/outputs/apk/release/app-release.apk
 ```
+
+### CI/CD 배포 (GitHub Actions)
+
+`.github/workflows/distribute-android.yml`로 자동 배포 구성됨.
+
+- **수동 실행**: GitHub Actions 탭 → "Android Firebase Distribution" → Run workflow
+- **자동 실행**: `v*` 태그 push 시 트리거 (예: `git tag v1.6.0 && git push origin v1.6.0`)
+- **빌드 시간**: 약 15~25분 (Gradle 캐시 여부에 따라 다름)
+- **GitHub Secrets 필요**: `GOOGLE_SERVICES_JSON`, `FIREBASE_SERVICE_ACCOUNT_JSON`
+- 서비스 계정은 Firebase 앱이 속한 GCP 프로젝트(`household-d3445`)에서 생성해야 함
