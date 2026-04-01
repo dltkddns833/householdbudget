@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../theme';
 import { ThemeColors } from '../constants/colors';
@@ -8,9 +8,11 @@ interface Props {
   icon: string;
   title: string;
   subtitle?: string;
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
-export const EmptyState: React.FC<Props> = ({ icon, title, subtitle }) => {
+export const EmptyState: React.FC<Props> = ({ icon, title, subtitle, actionLabel, onAction }) => {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -19,6 +21,11 @@ export const EmptyState: React.FC<Props> = ({ icon, title, subtitle }) => {
       <Icon name={icon} size={64} color={colors.textTertiary} />
       <Text style={styles.title}>{title}</Text>
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+      {actionLabel && onAction && (
+        <TouchableOpacity style={styles.actionBtn} onPress={onAction}>
+          <Text style={styles.actionText}>{actionLabel}</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -44,5 +51,17 @@ const createStyles = (colors: ThemeColors) =>
       color: colors.textTertiary,
       marginTop: 8,
       textAlign: 'center',
+    },
+    actionBtn: {
+      marginTop: 20,
+      paddingVertical: 10,
+      paddingHorizontal: 24,
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+    },
+    actionText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: '#fff',
     },
   });

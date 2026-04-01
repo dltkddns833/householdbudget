@@ -28,7 +28,7 @@ export const AssetScreen: React.FC<Props> = ({ navigation }) => {
 
   const statusQuery = useFinancialStatus(yearMonth);
   const accountsQuery = useAccounts(yearMonth);
-  useAutoInitMonth(yearMonth);
+  const { retryInit, isRetrying } = useAutoInitMonth(yearMonth);
 
   const status = statusQuery.data;
   const accounts = accountsQuery.data || [];
@@ -144,7 +144,9 @@ export const AssetScreen: React.FC<Props> = ({ navigation }) => {
           <EmptyState
             icon="account-balance"
             title="계좌 정보가 없습니다"
-            subtitle="데이터를 추가해주세요"
+            subtitle="이전 달 데이터를 불러오거나 새로 추가해주세요"
+            actionLabel={isRetrying ? '불러오는 중...' : '이전 달에서 불러오기'}
+            onAction={isRetrying ? undefined : retryInit}
           />
         }
       />

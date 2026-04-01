@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
+import { Alert } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { assetService } from '../services/assetService';
 import { useAuthStore } from '../../../store/authStore';
@@ -95,12 +96,36 @@ export const useAutoInitMonth = (yearMonth: string) => {
       !copyMutation.isPending
     ) {
       triedMonths.current.add(yearMonth);
-      copyMutation.mutate({
-        sourceYearMonth: getPrevMonth(yearMonth),
-        targetYearMonth: yearMonth,
-      });
+      copyMutation.mutate(
+        {
+          sourceYearMonth: getPrevMonth(yearMonth),
+          targetYearMonth: yearMonth,
+        },
+        {
+          onError: () => {
+            triedMonths.current.delete(yearMonth);
+          },
+        },
+      );
     }
   }, [yearMonth, statusQuery.isFetched, statusQuery.data, copyMutation]);
+
+  const retryInit = useCallback(() => {
+    triedMonths.current.delete(yearMonth);
+    copyMutation.mutate(
+      {
+        sourceYearMonth: getPrevMonth(yearMonth),
+        targetYearMonth: yearMonth,
+      },
+      {
+        onError: () => {
+          Alert.alert('오류', '이전 달 데이터를 불러오지 못했습니다.');
+        },
+      },
+    );
+  }, [yearMonth, copyMutation]);
+
+  return { retryInit, isRetrying: copyMutation.isPending };
 };
 
 export const useCopyFromPreviousMonth = () => {
