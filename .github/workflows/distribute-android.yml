@@ -32,11 +32,15 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
 
-      # Gradle 파일의 하드코딩된 nvm 경로 대응 — 심링크 생성
+      # Gradle 파일 및 RN 라이브러리의 하드코딩된 nvm 경로 대응 — 심링크 생성
       - name: Create nvm node symlink for Gradle
         run: |
+          NODE_VERSION=$(node -v)
+          mkdir -p "$HOME/.nvm/versions/node/${NODE_VERSION}/bin"
+          ln -s "$(which node)" "$HOME/.nvm/versions/node/${NODE_VERSION}/bin/node"
+          # settings.gradle/app/build.gradle에 하드코딩된 버전도 심링크
           mkdir -p "$HOME/.nvm/versions/node/v22.22.0/bin"
-          ln -s "$(which node)" "$HOME/.nvm/versions/node/v22.22.0/bin/node"
+          ln -sf "$(which node)" "$HOME/.nvm/versions/node/v22.22.0/bin/node"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
