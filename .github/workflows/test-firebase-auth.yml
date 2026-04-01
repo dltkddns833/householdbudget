@@ -14,40 +14,24 @@ jobs:
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > /tmp/firebase-sa.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json" >> $GITHUB_ENV
 
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Validate SA JSON format
+      - name: Test App Distribution API
         run: |
-          echo "=== JSON key check ==="
-          cat /tmp/firebase-sa.json | python3 -c "import sys,json; d=json.load(sys.stdin); print('type:', d.get('type')); print('project_id:', d.get('project_id')); print('client_email:', d.get('client_email'))"
+          pip install google-auth requests > /dev/null 2>&1
+          python3 << 'PYEOF'
+          import json, google.auth, google.auth.transport.requests
 
-      - name: Test Firebase access
-        run: firebase projects:list --debug 2>&1 | tail -30
-
-      - name: Test App Distribution API access
-        run: |
-          # 서비스 계정으로 access token 발급
-          TOKEN=$(python3 -c "
-          import json, urllib.request, time, hashlib, hmac, base64
-          import subprocess
-          result = subprocess.run(['gcloud', 'auth', 'print-access-token'], capture_output=True, text=True)
-          print(result.stdout.strip())
-          " 2>/dev/null || echo "gcloud not available")
-
-          # google-auth로 토큰 발급
-          pip install google-auth > /dev/null 2>&1
-          TOKEN=$(python3 -c "
-          import google.auth
-          import google.auth.transport.requests
-          credentials, project = google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform'])
+          credentials, project = google.auth.default(
+              scopes=["https://www.googleapis.com/auth/cloud-platform"]
+          )
           credentials.refresh(google.auth.transport.requests.Request())
-          print(credentials.token)
-          ")
 
-          # App Distribution API 호출 테스트
-          PROJECT_ID=\$(python3 -c "import json; print(json.load(open('/tmp/firebase-sa.json'))['project_id'])")
-          echo "Testing App Distribution API for project: $PROJECT_ID"
-          curl -s -o /dev/null -w "HTTP Status: %{http_code}" \
-            -H "Authorization: Bearer $TOKEN" \
-            "https://firebaseappdistribution.googleapis.com/v1/projects/${PROJECT_ID}/apps"
+          with open("/tmp/firebase-sa.json") as f:
+              project_id = json.load(f)["project_id"]
+
+          import requests as req
+          # Firebase App Distribution API 호출
+          url = f"https://firebaseappdistribution.googleapis.com/v1/projects/{project_id}/apps"
+          r = req.get(url, headers={"Authorization": f"Bearer {credentials.token}"})
+          print(f"App Distribution API: HTTP {r.status_code}")
+          print(r.text[:500])
+          PYEOF
