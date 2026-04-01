@@ -28,7 +28,7 @@ react {
     /* Bundling */
     //   A list containing the node command and its flags. Default is just 'node'.
     //   Full path required: Gradle 9 native launcher doesn't search PATH.
-    nodeExecutableAndArgs = ["${System.getProperty('user.home')}/.nvm/versions/node/v22.22.0/bin/node"]
+    nodeExecutableAndArgs = ["${System.getProperty('user.home')}/.nvm/versions/node/v22.22.1/bin/node"]
     //
     //   The command to run when bundling. By default is 'bundle'
     // bundleCommand = "ram-bundle"
@@ -47,7 +47,8 @@ react {
     // extraPackagerArgs = []
 
     /* Hermes Commands */
-    //   hermesEnabled=true일 때 RN Gradle Plugin이 자동으로 hermesc를 찾음 → 명시 불필요
+    //   pnpm은 hermes-compiler를 .pnpm 하위에 설치하므로 명시적 경로 필요
+    hermesCommand = "${rootDir}/../node_modules/.pnpm/hermes-compiler@250829098.0.9/node_modules/hermes-compiler/hermesc/%OS-BIN%/hermesc"
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]
 
