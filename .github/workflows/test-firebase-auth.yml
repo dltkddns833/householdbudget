@@ -17,5 +17,10 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
+      - name: Validate SA JSON format
+        run: |
+          echo "=== JSON key check ==="
+          cat /tmp/firebase-sa.json | python3 -c "import sys,json; d=json.load(sys.stdin); print('type:', d.get('type')); print('project_id:', d.get('project_id')); print('client_email:', d.get('client_email'))"
+
       - name: Test Firebase access
-        run: firebase projects:list
+        run: firebase projects:list --debug 2>&1 | tail -30
