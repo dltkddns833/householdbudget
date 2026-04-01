@@ -68,7 +68,7 @@ jobs:
           if [ -n "${{ github.event.inputs.release_notes }}" ]; then
             EXTRA_ARGS="-PfirebaseAppDistributionReleaseNotes=${{ github.event.inputs.release_notes }}"
           fi
-          ./gradlew assembleRelease appDistributionUploadRelease --no-daemon $EXTRA_ARGS
+          ./gradlew assembleRelease appDistributionUploadRelease --no-daemon -PfirebaseServiceCredentialsFile=/tmp/firebase-sa.json $EXTRA_ARGS
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

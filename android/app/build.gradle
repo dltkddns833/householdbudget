@@ -112,6 +112,9 @@ android {
 
             firebaseAppDistribution {
                 releaseNotes = "v${defaultConfig.versionName} (${defaultConfig.versionCode})"
+                if (project.hasProperty('firebaseServiceCredentialsFile')) {
+                    serviceCredentialsFile = project.property('firebaseServiceCredentialsFile')
+                }
                 // testers = "email1@example.com, email2@example.com"
                 // groups = "family-testers"
             }
