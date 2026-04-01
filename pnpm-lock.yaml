@@ -80,8 +80,8 @@ importers:
         specifier: ^4.24.0
         version: 4.24.0(react-native@0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
       react-native-share:
-        specifier: ^11.0.0
-        version: 11.1.0
+        specifier: ^12.2.5
+        version: 12.2.6
       react-native-svg:
         specifier: ^15.15.3
         version: 15.15.3(react-native@0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
@@ -89,8 +89,8 @@ importers:
         specifier: ^10.3.0
         version: 10.3.0
       react-native-view-shot:
-        specifier: ^4.0.0
-        version: 4.0.3(react-native@0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
+        specifier: 5.0.0-alpha.2
+        version: 5.0.0-alpha.2(react-native@0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
       react-native-worklets:
         specifier: ^0.7.4
         version: 0.7.4(@babel/core@7.29.0)(react-native@0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3)
@@ -4880,8 +4880,8 @@ packages:
       react: '*'
       react-native: '*'
 
-  react-native-share@11.1.0:
-    resolution: {integrity: sha512-kcpBR90d5//xc8H84HnX6YFeOk4A34mtHz4UEpb7Twbu049KafJwsp4KVVr/SrJwy8W0/Rbe880En9Hq0REamw==}
+  react-native-share@12.2.6:
+    resolution: {integrity: sha512-K9jZCQaTIqSNG37kMVygU1rflVMJm2g0ikslnbbmQ7EgsckYpw7ipePyp01E64hG+HrWNl+z9ZnFWLCC6H+Tiw==}
     engines: {node: '>=16'}
 
   react-native-svg@15.15.3:
@@ -4900,11 +4900,12 @@ packages:
     deprecated: react-native-vector-icons package has moved to a new model of per-icon-family packages. See the https://github.com/oblador/react-native-vector-icons/blob/master/MIGRATION.md on how to migrate
     hasBin: true
 
-  react-native-view-shot@4.0.3:
-    resolution: {integrity: sha512-USNjYmED7C0me02c1DxKA0074Hw+y/nxo+xJKlffMvfUWWzL5ELh/TJA/pTnVqFurIrzthZDPtDM7aBFJuhrHQ==}
+  react-native-view-shot@5.0.0-alpha.2:
+    resolution: {integrity: sha512-DSMSzLSLZ3WfazGANBttgSr7LXXZr9ZnZ285gjsj9tk2Vt7F4DZszibFnJhq9Ac1DxECnGB1Y9eliFTi/cs5cg==}
+    engines: {node: '>=20', npm: '>=10'}
     peerDependencies:
-      react: '*'
-      react-native: '*'
+      react: '>=18.0.0'
+      react-native: '>=0.76.0'
 
   react-native-web@0.21.2:
     resolution: {integrity: sha512-SO2t9/17zM4iEnFvlu2DA9jqNbzNhoUP+AItkoCOyFmDMOhUnBBznBDCYN92fGdfAkfQlWzPoez6+zLxFNsZEg==}
@@ -11598,7 +11599,7 @@ snapshots:
       react-native: 0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3)
       warn-once: 0.1.1
 
-  react-native-share@11.1.0: {}
+  react-native-share@12.2.6: {}
 
   react-native-svg@15.15.3(react-native@0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
     dependencies:
@@ -11618,7 +11619,7 @@ snapshots:
       prop-types: 15.8.1
       yargs: 16.2.0
 
-  react-native-view-shot@4.0.3(react-native@0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
+  react-native-view-shot@5.0.0-alpha.2(react-native@0.84.1(@babel/core@7.29.0)(@react-native-community/cli@20.1.0(typescript@5.9.3))(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.3))(react@19.2.3):
     dependencies:
       html2canvas: 1.4.1
       react: 19.2.3
