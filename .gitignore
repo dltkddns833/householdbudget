@@ -85,9 +85,6 @@ serviceAccountKey.json
 !.yarn/sdks
 !.yarn/versions
 
-# pnpm
-pnpm-lock.yaml
-
 # Temporary
 *.log
 .cache
