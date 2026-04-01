@@ -16,6 +16,7 @@ import { useUIStore } from '../../../store/uiStore';
 import { getCategoryByKey } from '../../../shared/constants/categories';
 import { formatCurrency } from '../../../shared/utils/currency';
 import { Transaction } from '../../../shared/types';
+import { getLocalDateString } from '../../../shared/utils/date';
 import dayjs from 'dayjs';
 
 interface Props {
@@ -34,7 +35,7 @@ export const CalendarScreen: React.FC<Props> = ({ navigation }) => {
   const selectedTransactions = useMemo(() => {
     if (!selectedDay) return [];
     return transactions.filter(tx => {
-      const txDate = tx.date.toDate().toISOString().split('T')[0];
+      const txDate = getLocalDateString(tx.date.toDate());
       return txDate === selectedDay;
     });
   }, [transactions, selectedDay]);

@@ -19,7 +19,7 @@ import {
 } from '../../../shared/components';
 import { getCategoryByKey } from '../../../shared/constants/categories';
 import { formatCurrency } from '../../../shared/utils/currency';
-import { formatDateWithDay } from '../../../shared/utils/date';
+import { formatDateWithDay, getLocalDateString } from '../../../shared/utils/date';
 import {
   useTransactions,
   useDeleteTransaction,
@@ -58,7 +58,7 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
   const sections = useMemo(() => {
     const grouped: Record<string, Transaction[]> = {};
     filteredTransactions.forEach(tx => {
-      const dateKey = tx.date.toDate().toISOString().split('T')[0];
+      const dateKey = getLocalDateString(tx.date.toDate());
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(tx);
     });

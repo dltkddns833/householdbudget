@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Transaction, TransactionFilter } from '../../../shared/types';
+import { getLocalDateString } from '../../../shared/utils/date';
 
 const DEFAULT_FILTER: TransactionFilter = {};
 
@@ -45,7 +46,7 @@ export const useTransactionFilter = () => {
 
         if (filter.dateFrom || filter.dateTo) {
           const txDate = tx.date.toDate();
-          const txDateStr = txDate.toISOString().split('T')[0];
+          const txDateStr = getLocalDateString(txDate);
           if (filter.dateFrom && txDateStr < filter.dateFrom) return false;
           if (filter.dateTo && txDateStr > filter.dateTo) return false;
         }

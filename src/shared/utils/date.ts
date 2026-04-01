@@ -41,3 +41,7 @@ export const parseCSVDate = (dateStr: string): Date => {
 
 export const getDayOfMonth = (date: Date): string =>
   dayjs(date).format('DD');
+
+/** 로컬 시간 기준 YYYY-MM-DD (toISOString은 UTC 기준이므로 사용 금지) */
+export const getLocalDateString = (date: Date): string =>
+  dayjs(date).format('YYYY-MM-DD');
