@@ -24,3 +24,30 @@ jobs:
 
       - name: Test Firebase access
         run: firebase projects:list --debug 2>&1 | tail -30
+
+      - name: Test App Distribution API access
+        run: |
+          # 서비스 계정으로 access token 발급
+          TOKEN=$(python3 -c "
+          import json, urllib.request, time, hashlib, hmac, base64
+          import subprocess
+          result = subprocess.run(['gcloud', 'auth', 'print-access-token'], capture_output=True, text=True)
+          print(result.stdout.strip())
+          " 2>/dev/null || echo "gcloud not available")
+
+          # google-auth로 토큰 발급
+          pip install google-auth > /dev/null 2>&1
+          TOKEN=$(python3 -c "
+          import google.auth
+          import google.auth.transport.requests
+          credentials, project = google.auth.default(scopes=['https://www.googleapis.com/auth/cloud-platform'])
+          credentials.refresh(google.auth.transport.requests.Request())
+          print(credentials.token)
+          ")
+
+          # App Distribution API 호출 테스트
+          PROJECT_ID=\$(python3 -c "import json; print(json.load(open('/tmp/firebase-sa.json'))['project_id'])")
+          echo "Testing App Distribution API for project: $PROJECT_ID"
+          curl -s -o /dev/null -w "HTTP Status: %{http_code}" \
+            -H "Authorization: Bearer $TOKEN" \
+            "https://firebaseappdistribution.googleapis.com/v1/projects/${PROJECT_ID}/apps"
