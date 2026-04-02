@@ -1,5 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 import { Account, FinancialStatus } from '../../../shared/types';
+import { overviewService } from '../../home/services/overviewService';
 
 const statusCollection = (familyId: string) =>
   firestore().collection('families').doc(familyId).collection('financialStatus');
@@ -62,6 +63,9 @@ export const assetService = {
       },
       { merge: true },
     );
+
+    // overview도 함께 갱신
+    await overviewService.generateAndSaveOverview(familyId, yearMonth);
   },
 
   async copyFromPreviousMonth(

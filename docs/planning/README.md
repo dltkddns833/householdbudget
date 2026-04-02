@@ -60,7 +60,7 @@ docs/planning/issues/
 
 | 탭 | 화면 | 주요 내용 |
 |----|------|-----------|
-| 홈 | `HomeScreen` | 실자산 히어로 카드, 이번달 소비, 은퇴자금, 실자산 추이 차트 (7개월), 월별 현황 리스트 |
+| 홈 | `HomeScreen` | 실자산 히어로 카드 (없으면 자산 업데이트 유도 버튼), 이번달 소비, 은퇴자금, 실자산 추이 차트 (7개월), 월별 현황 리스트 |
 | 거래 | `TransactionListScreen` | 월별 거래 목록, 수입/지출 탭 전환 |
 | 추가 | FAB 모달 | `TransactionAddModal` — 전역 모달로 App.tsx에서 관리 |
 | 통계 | `StatsScreen` | 총 지출, 카테고리별 비율 (누적 바 + 랭킹 리스트), 월별 소비 추이 막대차트, 일별 지출 막대차트 |
@@ -100,6 +100,16 @@ families/{familyId}
   │    ├─ remaining: number
   │    ├─ categoryBreakdown: Record<category, number>
   │    └─ dailyTotals: Record<"01"~"31", number>
+  │
+  ├─ overview/{yearMonth}
+  │    ├─ realAsset: number           // financialStatus.realAssetTotal
+  │    ├─ realAssetWithLease: number
+  │    ├─ retirementFund: number
+  │    ├─ realAssetChange: number | null    // 전월 대비 변동액
+  │    ├─ realAssetChangeRate: number | null // 전월 대비 변동률 (%)
+  │    ├─ totalExpense: number        // monthlySummaries.totalExpense
+  │    └─ expenseChange: number | null      // 전월 대비 소비 변동률 (%)
+  │    ※ 자동 생성: financialStatus + monthlySummaries 기반 (useAutoGenerateOverview)
   │
   └─ financialStatus/{yearMonth}
        ├─ realAssetTotal: number

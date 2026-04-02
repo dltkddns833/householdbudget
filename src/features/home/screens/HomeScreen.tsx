@@ -116,37 +116,52 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
       {/* Hero Card - Real Asset */}
       <Card style={styles.heroCard}>
         <Text style={styles.heroLabel}>실자산</Text>
-        <CurrencyText
-          amount={overview?.realAsset ?? 0}
-          short
-          style={styles.heroAmount}
-        />
-        {overview?.realAssetChange != null && (
-          <View style={styles.changeRow}>
+        {overview?.realAsset != null ? (
+          <>
             <CurrencyText
-              amount={overview.realAssetChange}
+              amount={overview.realAsset}
               short
-              showSign
-              colorize
-              style={styles.changeAmount}
+              style={styles.heroAmount}
             />
-            {overview.realAssetChangeRate != null && (
-              <Text
-                style={[
-                  styles.changeRate,
-                  {
-                    color:
-                      overview.realAssetChangeRate >= 0
-                        ? colors.income
-                        : colors.expense,
-                  },
-                ]}
-              >
-                {(overview.realAssetChangeRate || 0) >= 0 ? '+' : ''}
-                {(overview.realAssetChangeRate || 0).toFixed(2)}%
-              </Text>
+            {overview.realAssetChange != null && (
+              <View style={styles.changeRow}>
+                <CurrencyText
+                  amount={overview.realAssetChange}
+                  short
+                  showSign
+                  colorize
+                  style={styles.changeAmount}
+                />
+                {overview.realAssetChangeRate != null && (
+                  <Text
+                    style={[
+                      styles.changeRate,
+                      {
+                        color:
+                          overview.realAssetChangeRate >= 0
+                            ? colors.income
+                            : colors.expense,
+                      },
+                    ]}
+                  >
+                    {(overview.realAssetChangeRate || 0) >= 0 ? '+' : ''}
+                    {(overview.realAssetChangeRate || 0).toFixed(2)}%
+                  </Text>
+                )}
+              </View>
             )}
-          </View>
+          </>
+        ) : (
+          <TouchableOpacity
+            style={styles.assetPrompt}
+            onPress={() => navigation.navigate('More', { screen: 'Assets' })}
+          >
+            <Icon name="account-balance" size={20} color={colors.primary} />
+            <Text style={styles.assetPromptText}>
+              이번 달 자산을 업데이트해주세요
+            </Text>
+            <Icon name="chevron-right" size={20} color={colors.textTertiary} />
+          </TouchableOpacity>
         )}
       </Card>
 
@@ -308,6 +323,22 @@ const createStyles = (colors: ThemeColors, isDark: boolean) =>
       fontSize: 14,
       fontWeight: '600',
       color: colors.textTertiary,
+    },
+    assetPrompt: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 10,
+    },
+    assetPromptText: {
+      flex: 1,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
     },
     heroAmount: {
       fontSize: 28,

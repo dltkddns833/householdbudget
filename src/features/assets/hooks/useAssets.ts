@@ -41,6 +41,8 @@ export const useUpdateAccountAmount = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financialStatus'] });
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['overview'] });
+      queryClient.invalidateQueries({ queryKey: ['overviewRange'] });
     },
   });
 };
@@ -60,6 +62,8 @@ export const useAddAccount = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financialStatus'] });
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['overview'] });
+      queryClient.invalidateQueries({ queryKey: ['overviewRange'] });
     },
   });
 };
@@ -79,6 +83,8 @@ export const useDeleteAccount = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financialStatus'] });
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['overview'] });
+      queryClient.invalidateQueries({ queryKey: ['overviewRange'] });
     },
   });
 };
@@ -143,6 +149,8 @@ export const useCopyFromPreviousMonth = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financialStatus'] });
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['overview'] });
+      queryClient.invalidateQueries({ queryKey: ['overviewRange'] });
     },
   });
 };

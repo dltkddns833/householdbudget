@@ -44,6 +44,7 @@ All data is scoped under `families/{familyId}/`:
 - `families/{familyId}` root document: `members: string[]`, `memberNames: Record<uid, string>`, `inviteCode: string`
 - `transactions` — individual income/expense records, partitioned by `yearMonth` field ("YYYY-MM")
 - `monthlySummaries/{yearMonth}` — pre-aggregated monthly totals (`totalExpense`, `totalIncome`, `remaining`, `categoryBreakdown`, `dailyTotals`), recalculated on every transaction write
+- `overview/{yearMonth}` — derived dashboard data (realAsset, retirementFund, expense/asset changes). Auto-generated from `financialStatus` + `monthlySummaries` by `useAutoGenerateOverview` when missing
 - `financialStatus/{yearMonth}` — monthly financial snapshots; has `accounts/{accountId}` subcollection for per-account asset data
 
 ### Navigation Structure
