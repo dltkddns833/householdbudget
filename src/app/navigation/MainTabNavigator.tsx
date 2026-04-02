@@ -168,6 +168,11 @@ export const MainTabNavigator: React.FC = () => {
             <Icon name="more-horiz" size={size} color={color} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            navigation.navigate('More', { screen: 'MoreMenu' });
+          },
+        })}
       />
     </Tab.Navigator>
   );

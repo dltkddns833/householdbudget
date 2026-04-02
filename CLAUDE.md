@@ -70,6 +70,7 @@ TypeScript path alias `@/*` maps to `src/*` (configured in `tsconfig.json`).
 - Forms use `react-hook-form` + `zod` for validation
 - Charts use `react-native-chart-kit` + `react-native-svg`
 - Date picker uses `react-native-date-picker`
+- Reusable `OptionPicker` component (`shared/components/OptionPicker.tsx`) — bottom-sheet style modal picker with "직접 입력" support
 
 ### Planning Docs
 

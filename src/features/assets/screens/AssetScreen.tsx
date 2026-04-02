@@ -56,7 +56,7 @@ export const AssetScreen: React.FC<Props> = ({ navigation }) => {
   const renderItem = ({ item: acc }: { item: Account }) => (
     <TouchableOpacity
       style={styles.accountRow}
-      onPress={() => navigation.navigate('AssetEdit', { account: acc, yearMonth })}
+      onPress={() => navigation.navigate('AssetEdit', { account: acc, yearMonth, accounts })}
     >
       <View style={styles.accountInfo}>
         <Text style={styles.accountName}>{acc.accountName}</Text>
@@ -88,7 +88,7 @@ export const AssetScreen: React.FC<Props> = ({ navigation }) => {
             <Icon name="show-chart" size={22} color={colors.text} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => navigation.navigate('AssetAdd', { yearMonth })}
+            onPress={() => navigation.navigate('AssetAdd', { yearMonth, accounts })}
             style={styles.addBtn}
           >
             <Icon name="add" size={26} color={colors.text} />

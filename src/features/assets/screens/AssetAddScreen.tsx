@@ -13,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../../shared/theme';
 import { ThemeColors } from '../../../shared/constants/colors';
+import { OptionPicker } from '../../../shared/components';
 import { formatInputNumber, parseInputNumber } from '../../../shared/utils/currency';
 import { useAddAccount } from '../hooks/useAssets';
 import { useAuthStore } from '../../../store/authStore';
@@ -23,13 +24,28 @@ interface Props {
 }
 
 export const AssetAddScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { yearMonth } = route.params;
+  const { yearMonth, accounts = [] } = route.params;
   const { family } = useAuthStore();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const mutation = useAddAccount();
 
-  const memberNames = Object.values(family?.memberNames || {});
+  const memberNames = useMemo(
+    () => Object.values(family?.memberNames || {}) as string[],
+    [family],
+  );
+  const existingAccountTypes = useMemo(
+    () => Array.from(new Set<string>(accounts.map((a: any) => a.accountType).filter(Boolean))),
+    [accounts],
+  );
+  const existingSubTypes = useMemo(
+    () => Array.from(new Set<string>(accounts.map((a: any) => a.subType).filter(Boolean))),
+    [accounts],
+  );
+  const existingInstitutions = useMemo(
+    () => Array.from(new Set<string>(accounts.map((a: any) => a.institution).filter(Boolean))),
+    [accounts],
+  );
 
   const [owner, setOwner] = useState(memberNames[0] || '');
   const [section, setSection] = useState<'realAsset' | 'retirement'>('realAsset');
@@ -39,16 +55,16 @@ export const AssetAddScreen: React.FC<Props> = ({ navigation, route }) => {
   const [accountName, setAccountName] = useState('');
   const [amountText, setAmountText] = useState('0');
 
-  const handleOwnerSelect = () => {
-    if (memberNames.length <= 1) return;
-    Alert.alert('소유자', '선택해주세요', [
-      ...memberNames.map(name => ({
-        text: name === owner ? `${name} ✓` : name,
-        onPress: () => setOwner(name),
-      })),
-      { text: '취소', style: 'cancel' as const },
-    ]);
+  const [pickerTarget, setPickerTarget] = useState<'owner' | 'accountType' | 'subType' | 'institution' | null>(null);
+
+  const pickerConfig = {
+    owner: { title: '소유자', options: memberNames, selected: owner, onSelect: setOwner },
+    accountType: { title: '계좌 유형', options: existingAccountTypes, selected: accountType, onSelect: setAccountType },
+    subType: { title: '상세 유형', options: existingSubTypes, selected: subType, onSelect: setSubType },
+    institution: { title: '금융기관', options: existingInstitutions, selected: institution, onSelect: setInstitution },
   };
+
+  const activePicker = pickerTarget ? pickerConfig[pickerTarget] : null;
 
   const handleSave = async () => {
     if (!accountName.trim()) {
@@ -112,12 +128,28 @@ export const AssetAddScreen: React.FC<Props> = ({ navigation, route }) => {
         {memberNames.length > 1 && (
           <>
             <Text style={styles.label}>소유자</Text>
-            <TouchableOpacity style={styles.selectButton} onPress={handleOwnerSelect}>
+            <TouchableOpacity style={styles.selectButton} onPress={() => setPickerTarget('owner')}>
               <Text style={styles.selectButtonText}>{owner}</Text>
               <Icon name="expand-more" size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           </>
         )}
+
+        <Text style={styles.label}>계좌 유형</Text>
+        <TouchableOpacity style={styles.selectButton} onPress={() => setPickerTarget('accountType')}>
+          <Text style={[styles.selectButtonText, !accountType && { color: colors.textTertiary }]}>
+            {accountType || '선택'}
+          </Text>
+          <Icon name="expand-more" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+
+        <Text style={styles.label}>상세 유형</Text>
+        <TouchableOpacity style={styles.selectButton} onPress={() => setPickerTarget('subType')}>
+          <Text style={[styles.selectButtonText, !subType && { color: colors.textTertiary }]}>
+            {subType || '선택'}
+          </Text>
+          <Icon name="expand-more" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
 
         <Text style={styles.label}>계좌명 *</Text>
         <TextInput
@@ -129,31 +161,12 @@ export const AssetAddScreen: React.FC<Props> = ({ navigation, route }) => {
         />
 
         <Text style={styles.label}>금융기관</Text>
-        <TextInput
-          style={styles.input}
-          value={institution}
-          onChangeText={setInstitution}
-          placeholder="예: 신한은행"
-          placeholderTextColor={colors.textTertiary}
-        />
-
-        <Text style={styles.label}>계좌 유형</Text>
-        <TextInput
-          style={styles.input}
-          value={accountType}
-          onChangeText={setAccountType}
-          placeholder="예: 입출금, 투자자산"
-          placeholderTextColor={colors.textTertiary}
-        />
-
-        <Text style={styles.label}>상세 유형</Text>
-        <TextInput
-          style={styles.input}
-          value={subType}
-          onChangeText={setSubType}
-          placeholder="예: 자유입출식, ISA"
-          placeholderTextColor={colors.textTertiary}
-        />
+        <TouchableOpacity style={styles.selectButton} onPress={() => setPickerTarget('institution')}>
+          <Text style={[styles.selectButtonText, !institution && { color: colors.textTertiary }]}>
+            {institution || '선택'}
+          </Text>
+          <Icon name="expand-more" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
 
         <Text style={styles.label}>금액</Text>
         <View style={styles.amountContainer}>
@@ -176,6 +189,18 @@ export const AssetAddScreen: React.FC<Props> = ({ navigation, route }) => {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {activePicker && (
+        <OptionPicker
+          visible
+          title={activePicker.title}
+          options={activePicker.options}
+          selected={activePicker.selected}
+          onSelect={activePicker.onSelect}
+          onClose={() => setPickerTarget(null)}
+          allowCustomInput={pickerTarget !== 'owner' && pickerTarget !== null}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };

@@ -24,6 +24,29 @@ export const useAccounts = (yearMonth: string) => {
   });
 };
 
+export const useUpdateAccount = () => {
+  const { family } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      yearMonth,
+      accountId,
+      data,
+    }: {
+      yearMonth: string;
+      accountId: string;
+      data: Omit<Account, 'id'>;
+    }) => assetService.updateAccount(family!.id, yearMonth, accountId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['financialStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['overview'] });
+      queryClient.invalidateQueries({ queryKey: ['overviewRange'] });
+    },
+  });
+};
+
 export const useUpdateAccountAmount = () => {
   const { family } = useAuthStore();
   const queryClient = useQueryClient();

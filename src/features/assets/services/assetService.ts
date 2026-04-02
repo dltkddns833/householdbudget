@@ -94,6 +94,16 @@ export const assetService = {
     await batch.commit();
   },
 
+  async updateAccount(
+    familyId: string,
+    yearMonth: string,
+    accountId: string,
+    data: Omit<Account, 'id'>,
+  ): Promise<void> {
+    await accountsCollection(familyId, yearMonth).doc(accountId).set(data);
+    await this.recalculateStatus(familyId, yearMonth);
+  },
+
   async addAccount(
     familyId: string,
     yearMonth: string,

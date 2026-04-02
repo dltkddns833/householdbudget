@@ -114,56 +114,58 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <MonthSelector yearMonth={currentMonth} onChangeMonth={setCurrentMonth} />
 
       {/* Hero Card - Real Asset */}
-      <Card style={styles.heroCard}>
-        <Text style={styles.heroLabel}>실자산</Text>
-        {overview?.realAsset != null ? (
-          <>
-            <CurrencyText
-              amount={overview.realAsset}
-              short
-              style={styles.heroAmount}
-            />
-            {overview.realAssetChange != null && (
-              <View style={styles.changeRow}>
-                <CurrencyText
-                  amount={overview.realAssetChange}
-                  short
-                  showSign
-                  colorize
-                  style={styles.changeAmount}
-                />
-                {overview.realAssetChangeRate != null && (
-                  <Text
-                    style={[
-                      styles.changeRate,
-                      {
-                        color:
-                          overview.realAssetChangeRate >= 0
-                            ? colors.income
-                            : colors.expense,
-                      },
-                    ]}
-                  >
-                    {(overview.realAssetChangeRate || 0) >= 0 ? '+' : ''}
-                    {(overview.realAssetChangeRate || 0).toFixed(2)}%
-                  </Text>
-                )}
-              </View>
-            )}
-          </>
-        ) : (
-          <TouchableOpacity
-            style={styles.assetPrompt}
-            onPress={() => navigation.navigate('More', { screen: 'Assets' })}
-          >
-            <Icon name="account-balance" size={20} color={colors.primary} />
-            <Text style={styles.assetPromptText}>
-              이번 달 자산을 업데이트해주세요
-            </Text>
-            <Icon name="chevron-right" size={20} color={colors.textTertiary} />
-          </TouchableOpacity>
-        )}
-      </Card>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('More', { screen: 'Assets' })}
+      >
+        <Card style={styles.heroCard}>
+          <Text style={styles.heroLabel}>실자산</Text>
+          {overview?.realAsset != null ? (
+            <>
+              <CurrencyText
+                amount={overview.realAsset}
+                short
+                style={styles.heroAmount}
+              />
+              {overview.realAssetChange != null && (
+                <View style={styles.changeRow}>
+                  <CurrencyText
+                    amount={overview.realAssetChange}
+                    short
+                    showSign
+                    colorize
+                    style={styles.changeAmount}
+                  />
+                  {overview.realAssetChangeRate != null && (
+                    <Text
+                      style={[
+                        styles.changeRate,
+                        {
+                          color:
+                            overview.realAssetChangeRate >= 0
+                              ? colors.income
+                              : colors.expense,
+                        },
+                      ]}
+                    >
+                      {(overview.realAssetChangeRate || 0) >= 0 ? '+' : ''}
+                      {(overview.realAssetChangeRate || 0).toFixed(2)}%
+                    </Text>
+                  )}
+                </View>
+              )}
+            </>
+          ) : (
+            <View style={styles.assetPrompt}>
+              <Icon name="account-balance" size={20} color={colors.primary} />
+              <Text style={styles.assetPromptText}>
+                이번 달 자산을 업데이트해주세요
+              </Text>
+              <Icon name="chevron-right" size={20} color={colors.textTertiary} />
+            </View>
+          )}
+        </Card>
+      </TouchableOpacity>
 
       {/* Sub Metrics */}
       <View style={styles.metricsRow}>
