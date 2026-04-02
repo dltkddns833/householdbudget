@@ -50,7 +50,7 @@ docs/planning/issues/
 **성격**: 부부/가족 단위 공유 가계부 + 자산 관리
 **플랫폼**: React Native (iOS / Android)
 **백엔드**: Firebase (Firestore + Auth + Google Sign-In)
-**현재 버전**: v1.5.3
+**현재 버전**: v1.6.0
 
 ---
 

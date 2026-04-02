@@ -28,4 +28,5 @@
 - **v1.5.1 배포 (2026-03-11)**: #35 DatePicker 버그 수정. 상세 내용은 `docs/release/v1.5.1/release-note.md` 참고.
 - **v1.5.2 배포 (2026-03-13)**: 월간 요약 실시간 반영, 예산/정기지출 기능 제거. 상세 내용은 `docs/release/v1.5.2/release-note.md` 참고.
 - **v1.5.3 배포 (2026-04-01)**: UTC 버그 수정, 재무상태 에러 처리, #36 GitHub Actions CI/CD 자동화. 상세 내용은 `docs/release/v1.5.3/release-note.md` 참고.
+- **v1.6.0 배포 (2026-04-02)**: overview 자동 생성, 계좌 전체 필드 수정, OptionPicker, 홈→재무상태 바로가기, 더보기 탭 리셋. 상세 내용은 `docs/release/v1.6.0/release-note.md` 참고.
 - **드롭된 이슈**: 없음.
